@@ -5,7 +5,7 @@
 //  Created by Thijs Janzen on 13/11/2019.
 //  Copyright © 2019 Thijs Janzen. All rights reserved.
 //
-
+#include <assert.h> 
 #include "node.hpp"
 
 node::node() {
