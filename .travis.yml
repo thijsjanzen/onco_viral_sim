@@ -1,0 +1,7 @@
+language: cpp
+dist: bionic
+compiler: gcc
+  
+script:
+ # - g++ main.cpp simulation.cpp Individual.cpp -O3 -Wall -I -std=c++17 -fno-strict-aliasing -ffast-math -march=native 
+  - make
