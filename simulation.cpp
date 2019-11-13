@@ -95,7 +95,7 @@ void Simulation::update_rates(std::array< float, 6>& rates) {
 
 int Simulation::pick_event(const std::array< float, 6>& rates, float sum) {
   float r = rndgen.uniform() * sum;
-  for(int i = 0; i < rates.size(); ++i) {
+  for(size_t i = 0; i < rates.size(); ++i) {
     r -= rates[i];
     if(r <= 0) {
       return i;

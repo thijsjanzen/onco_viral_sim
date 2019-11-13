@@ -5,7 +5,7 @@
 //  Created by Thijs Janzen on 13/11/2019.
 //  Copyright © 2019 Thijs Janzen. All rights reserved.
 //
-#include <assert.h> 
+#include <assert.h>
 #include "node.hpp"
 
 node::node() {
@@ -30,7 +30,9 @@ void node::update_neigbors(const std::vector<std::vector< node >>& world) {
       }
     }
   }
-  assert(neighbors.size() == 4);
+  if(neighbors.size() != 4) {
+    std::cout << "the number of neighbors is incorrect\n";
+  }
 }
 
 void node::update_neighbor_types() {
