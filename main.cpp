@@ -10,6 +10,10 @@
 #include "simulation.hpp"
 
 int main(int argc, const char* argv[]) {
+
+  std::cout << "Welcome to this Oncolytic Virus Simulator\n";
+  std::cout << "You are using v0.1\n";
+
   try {
     Param Params;
     Params.readFromIni("config.ini");
