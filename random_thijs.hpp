@@ -96,16 +96,21 @@ struct rnd_t {
 
 
 
-  int draw_from_dist(const std::vector< float >& v, int max) {
-      int max_index = static_cast<int>(v.size());
-      while (true) {
-          int index = random_number(max_index);
-          if (max == 0.f) return index;
 
-          if (uniform() < (1.f * v[index] / max)) {
-              return index;
-          }
+
+  template< typename it>
+  int draw_from_dist(it begin, it end, float max) {
+    size_t max_index = end - begin;
+    float mult = 1.0 / max;
+    while (true) {
+      int index = random_number(static_cast<int>(max_index));
+      if (max == 0.f) return index;
+      float prob = *(begin + index) * mult;
+
+      if (uniform() < prob) {
+          return index;
       }
+    }
   }
 
   int draw_from_dist(const std::vector< float >& v, float min, float max) {

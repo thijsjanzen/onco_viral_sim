@@ -15,13 +15,14 @@ int main(int argc, const char* argv[]) {
   std::cout << "You are using v0.1\n";
 
   try {
-    Param Params;
-    Params.readFromIni("config.ini");
-    model::Simulation Simulation(Params);
+    Param all_parameters;
+    all_parameters.readFromIni("config.ini");
+    simulation Simulation(all_parameters);
 
     Simulation.initialize_network();
 
     Simulation.run();
+    
   } catch (const std::exception& err) {
     std::cerr << err.what() << '\n';
   } catch (const char* err) {
