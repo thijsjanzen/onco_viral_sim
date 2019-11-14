@@ -7,6 +7,7 @@
 //
 #include <assert.h>
 #include "node.hpp"
+#include <iostream>
 
 node::node() {
   node_type = empty;
