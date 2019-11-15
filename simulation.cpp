@@ -233,26 +233,26 @@ void simulation::implement_death(const cell_type& parent) {
 }
 
 void simulation::implement_growth(const cell_type& parent) {
-  int pos;
+  int position_of_grown_cell = -1;
   switch(parent) {
     case normal:
-      pos = rndgen.draw_from_dist(growth_probs[normal].begin(), growth_probs[normal].end(), max_growth_prob[normal]);
+      position_of_grown_cell = rndgen.draw_from_dist(growth_probs[normal].begin(), growth_probs[normal].end(), max_growth_prob[normal]);
       break;
     case cancer:
-      pos = rndgen.draw_from_dist(growth_probs[cancer].begin(), growth_probs[cancer].end(), max_growth_prob[cancer]);
+      position_of_grown_cell = rndgen.draw_from_dist(growth_probs[cancer].begin(), growth_probs[cancer].end(), max_growth_prob[cancer]);
       break;
     case infected:
-      pos = rndgen.draw_from_dist(growth_probs[infected].begin(), growth_probs[infected].end(), max_growth_prob[infected]);
+      position_of_grown_cell = rndgen.draw_from_dist(growth_probs[infected].begin(), growth_probs[infected].end(), max_growth_prob[infected]);
       break;
     case empty:
       std::cout << "ERROR! empty node is growing\n";
-      pos = -1;
+      position_of_grown_cell = -1;
       break;
   }
 
-  world[pos].node_type = parent;
-  update_growth_prob(pos);
-  for(auto i : world[pos].neighbors) {
+  world[position_of_grown_cell].node_type = parent;
+  update_growth_prob(position_of_grown_cell);
+  for(auto i : world[position_of_grown_cell].neighbors) {
     update_growth_prob(i->pos);
   }
 }

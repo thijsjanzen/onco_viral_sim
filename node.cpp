@@ -32,7 +32,7 @@ void node::update_neighbors(std::vector< node >& world,
         int other_x = x + i;
         int other_y = y + j;
         int pos = other_x * world_size + other_y;
-        if(pos >= 0 && pos < world.size()) {
+        if(pos >= 0 && pos < static_cast<int>(world.size())) {
           node* neighbor = &world[pos];
           neighbors.push_back(neighbor);
         }
