@@ -12,17 +12,17 @@
 int main(int argc, const char* argv[]) {
 
   std::cout << "Welcome to this Oncolytic Virus Simulator\n";
-  std::cout << "You are using v0.1\n";
+  std::cout << "You are using v0.2\n";
 
   try {
     Param all_parameters;
-    all_parameters.readFromIni("config.ini");
+ //   all_parameters.readFromIni("config.ini");
     simulation Simulation(all_parameters);
 
     Simulation.initialize_network();
 
     Simulation.run();
-    
+
   } catch (const std::exception& err) {
     std::cerr << err.what() << '\n';
   } catch (const char* err) {

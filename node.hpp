@@ -19,14 +19,16 @@ typedef struct node node;
 
 struct node {
   node();
+  node(int p);
 
   cell_type node_type;
+  int pos;
 
-  std::vector< std::shared_ptr< node > > neighbors;
+  std::vector< node* > neighbors;
   std::vector< cell_type > neighbor_types;
 
   void set_coordinates(int x_, int y_);
-  void update_neighbors(const std::vector< node >& world,
+  void update_neighbors(std::vector< node >& world,
                        int i,
                        int world_size);
   std::vector< cell_type > return_neighbor_types();

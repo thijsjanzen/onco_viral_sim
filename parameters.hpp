@@ -22,6 +22,9 @@ struct Param {
 
   int infection_routine;
   float time_adding_virus;
+  float time_adding_cancer;
+
+  int initial_number_cancer_cells;
 
   int num_cells;
 
@@ -40,18 +43,23 @@ struct Param {
 
   Param() {
 	  // default values, these don't necessarily make sense!
-    maximum_time = 75; // default from Berg et al 2019
+    maximum_time = 500; // default from Berg et al 2019
     time_adding_virus = 7; // default from Berg et al 2019
-    num_cells = 100;
+    time_adding_cancer = 10000; // normally the population is first allowed to stabilize
 
-    float birth_normal = 0.5f;
-    float birth_cancer = 1.0f;
-    float birth_infected = 1.2f;
-    float death_normal = 0.2f;
-    float death_cancer = 0.1f;
-    float death_infected = 0.1f;
+    num_cells = 100*100;
+    initial_number_cancer_cells = 10;
 
-    int infection_routine = 0;
+    birth_normal = 0.5f;
+    birth_cancer = 1.0f;
+    birth_infected = 1.2f;
+    death_normal = 0.2f;
+    death_cancer = 0.1f;
+    death_infected = 0.1f;
+
+    infection_routine = 0;
+
+
 
 
   }

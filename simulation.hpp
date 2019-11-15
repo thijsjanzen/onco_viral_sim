@@ -31,21 +31,13 @@ private:
   rnd_t rndgen;
 
   std::vector< node > world;
-  std::vector< float > growth_prob_normal;
-  std::vector< float > growth_prob_cancer;
-  std::vector< float > growth_prob_infected;
+  std::vector< std::vector< float >> growth_probs;
+  std::vector< std::vector< float >> death_probs;
 
-  std::vector< float > death_prob_normal;
-  std::vector< float > death_prob_cancer;
-  std::vector< float > death_prob_infected;
+  std::array<float, 3> max_growth_prob;
+  std::array<float, 3> num_cell_types;
 
-  float max_growth_prob_normal;
-  float max_growth_prob_cancer;
-  float max_growth_prob_infected;
-
-  std::array<float, 4> num_cell_types;
-
-  void update_cell_types(); // this is very heavy, should not be ran often
+  void count_cell_types(); // this is very heavy, should not be ran often
   void update_rates(std::array< float, 6>& rates);
   void update_total_growth_prob();
 
@@ -55,6 +47,11 @@ private:
   void update_growth_probabilities();
   void implement_death(const cell_type& parent);
   void implement_growth(const cell_type& parent);
+  void update_growth_prob(int pos);
+
+  void add_cells(cell_type focal_cell_type);
+
+  void print_to_file(float t);
 };
 
 

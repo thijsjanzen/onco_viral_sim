@@ -14,34 +14,42 @@ node::node() {
   node_type = empty;
 }
 
+node::node(int p) : pos(p) {
+  node_type = empty;
+}
 
-void node::update_neighbors(const std::vector< node >& world,
+
+void node::update_neighbors(std::vector< node >& world,
                            int pos,
                            int world_size) {
 
   int x = pos / world_size;
   int y = pos % world_size;
 
-  for(int i = -1; i <= 1; i+=2) {
-    for(int j = -1; j <= 1; j+=2) {
-      int other_x = x + i;
-      int other_y = y + j;
-      int pos = other_x * world_size + other_y;
-      std::shared_ptr<node> neighbor = std::make_shared<node>(world[pos]);
-      neighbors.push_back(neighbor);
+  for(int i = -1; i <= 1; i++) {
+    for(int j = -1; j <= 1; j++) {
+      if(abs(i - j) == 1) {
+        int other_x = x + i;
+        int other_y = y + j;
+        int pos = other_x * world_size + other_y;
+        if(pos >= 0 && pos < world.size()) {
+          node* neighbor = &world[pos];
+          neighbors.push_back(neighbor);
+        }
+      }
     }
-  }
-
-  if(neighbors.size() != 4) {
-    std::cout << "the number of neighbors is incorrect\n";
   }
 }
 
 void node::update_neighbor_types() {
   neighbor_types = std::vector< cell_type>(neighbors.size());
   int j = 0;
-  for(auto i : neighbors) {
-    neighbor_types[j] = i->node_type;
+  for(auto it = neighbors.begin(); it != neighbors.end(); ++it) {
+    cell_type other = (*it)->node_type;
+    neighbor_types[j] = other;
+    if(other != empty) {
+      int a =5;
+    }
     j++;
   }
 }
@@ -70,14 +78,6 @@ float node::freq_type_neighbours(const cell_type& ref_type) {
   }
   return 1.f * count / neighbor_types.size();
 }
-
-void node::die() {
-  node_type = empty;
-  for(auto i : neighbors) {
-    (*i).update_neighbor_types();
-  }
-}
-
 
 std::vector<cell_type> node::return_neighbor_types() {
   return neighbor_types;
