@@ -52,7 +52,7 @@ void simulation::initialize_network() {
   // we first make a regular network
   // we will do voronoi later...
 
-  for(int i = 0; i < world.size(); ++i) {
+  for(size_t i = 0; i < world.size(); ++i) {
     world[i].update_neighbors(world, i, sq_size);
   }
 
@@ -208,26 +208,26 @@ void simulation::update_cell_counts(int event) {
 
 
 void simulation::implement_death(const cell_type& parent) {
-  int pos;
+  int position_of_dying_cell = -1;
   switch(parent) {
     case normal:
-      pos = rndgen.draw_from_dist(death_probs[normal].begin(), death_probs[normal].end(), 1.f);
+      position_of_dying_cell = rndgen.draw_from_dist(death_probs[normal].begin(), death_probs[normal].end(), 1.f);
       break;
     case cancer:
-      pos = rndgen.draw_from_dist(death_probs[cancer].begin(), death_probs[cancer].end(), 1.f);
+      position_of_dying_cell = rndgen.draw_from_dist(death_probs[cancer].begin(), death_probs[cancer].end(), 1.f);
       break;
     case infected:
-      pos = rndgen.draw_from_dist(death_probs[infected].begin(), death_probs[infected].end(), 1.f);
+      position_of_dying_cell = rndgen.draw_from_dist(death_probs[infected].begin(), death_probs[infected].end(), 1.f);
       break;
     case empty:
       std::cout << "ERROR! empty node is dying\n";
-      pos = -1;
+      position_of_dying_cell = -1;
       break;
   }
 
-  world[pos].node_type = empty;
-  update_growth_prob(pos);
-  for(auto i : world[pos].neighbors) {
+  world[position_of_dying_cell].node_type = empty;
+  update_growth_prob(position_of_dying_cell);
+  for(auto i : world[position_of_dying_cell].neighbors) {
     update_growth_prob(i->pos);
   }
 }
@@ -249,6 +249,12 @@ void simulation::implement_growth(const cell_type& parent) {
       pos = -1;
       break;
   }
+
+  world[pos].node_type = parent;
+  update_growth_prob(pos);
+  for(auto i : world[pos].neighbors) {
+    update_growth_prob(i->pos);
+  }
 }
 
 void simulation::add_cells(cell_type focal_cell_type) {
@@ -264,7 +270,7 @@ void simulation::add_cells(cell_type focal_cell_type) {
   if(focal_cell_type == normal) max_number_of_cells = parameters.num_cells * 0.1;
   while(total_new_cells < max_number_of_cells) {
     focal_pos = cells_turned[counter];
-    for(int i = 0; i < world[focal_pos].neighbors.size(); ++i) {
+    for(size_t i = 0; i < world[focal_pos].neighbors.size(); ++i) {
       int other_pos = world[focal_pos].neighbors[i]->pos;
       if(world[other_pos].node_type != focal_cell_type) {
         total_new_cells++;
@@ -305,7 +311,7 @@ simulation::simulation(const Param& param) {
   sq_size = sqrt(parameters.num_cells);
 
   world.resize(parameters.num_cells);
-  for(int i = 0; i < world.size(); ++i) {
+  for(size_t i = 0; i < world.size(); ++i) {
     world[i].pos = i;
   }
   std::vector< float > temp(parameters.num_cells, 0.f);
@@ -319,9 +325,9 @@ simulation::simulation(const Param& param) {
 void simulation::print_to_file(float t) {
   std::string file_name = "world_file_" + std::to_string((int)t) + ".txt";
   std::ofstream outfile(file_name);
-  for(int i = 0; i < world.size(); ++i) {
+  for(size_t i = 0; i < world.size(); ++i) {
     if(i % sq_size == 0) outfile << "\n";
-    char output;
+    char output = '0';
     switch(world[i].node_type)  {
       case normal:
         output = 'N'; break;
@@ -337,7 +343,3 @@ void simulation::print_to_file(float t) {
   }
   outfile.close();
 }
-
-
-
-

@@ -12,7 +12,7 @@
 int main(int argc, const char* argv[]) {
 
   std::cout << "Welcome to this Oncolytic Virus Simulator\n";
-  std::cout << "You are using v0.2\n";
+  std::cout << "You are using v0.21\n";
 
   try {
     Param all_parameters;

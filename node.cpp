@@ -47,9 +47,6 @@ void node::update_neighbor_types() {
   for(auto it = neighbors.begin(); it != neighbors.end(); ++it) {
     cell_type other = (*it)->node_type;
     neighbor_types[j] = other;
-    if(other != empty) {
-      int a =5;
-    }
     j++;
   }
 }
