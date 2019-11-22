@@ -21,12 +21,12 @@ struct Param {
   float death_infected;
 
   int infection_routine;
-  float time_adding_virus;
-  float time_adding_cancer;
+  int time_adding_virus;
+  int time_adding_cancer;
 
   int initial_number_cancer_cells;
 
-  int num_cells;
+  size_t num_cells;
 
 
   void readFromIni(const std::string& file_name) {
@@ -44,24 +44,20 @@ struct Param {
   Param() {
 	  // default values, these don't necessarily make sense!
     maximum_time = 500; // default from Berg et al 2019
-    time_adding_virus = 7; // default from Berg et al 2019
-    time_adding_cancer = 10000; // normally the population is first allowed to stabilize
+    time_adding_virus = 3000; // default from Berg et al 2019
+    time_adding_cancer = 1000; // normally the population is first allowed to stabilize
 
     num_cells = 100*100;
-    initial_number_cancer_cells = 10;
+    initial_number_cancer_cells = 5;
 
     birth_normal = 0.5f;
     birth_cancer = 1.0f;
     birth_infected = 1.2f;
-    death_normal = 0.2f;
+    death_normal = 0.01f;
     death_cancer = 0.1f;
     death_infected = 0.1f;
 
     infection_routine = 0;
-
-
-
-
   }
 
 

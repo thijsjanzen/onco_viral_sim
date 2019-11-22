@@ -19,18 +19,19 @@ typedef struct node node;
 
 struct node {
   node();
-  node(int p);
+  node(size_t p);
 
   cell_type node_type;
-  int pos;
+  size_t pos;
+  size_t x_;
+  size_t y_;
 
   std::vector< node* > neighbors;
   std::vector< cell_type > neighbor_types;
 
-  void set_coordinates(int x_, int y_);
+  void set_coordinates(size_t row_size);
   void update_neighbors(std::vector< node >& world,
-                       int i,
-                       int world_size);
+                        size_t world_size);
   std::vector< cell_type > return_neighbor_types();
   void update_neighbor_types();
 
