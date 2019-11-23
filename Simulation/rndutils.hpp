@@ -1348,7 +1348,7 @@ private:
 
 }
 
-/*
+
 
 //
 // specialize std::generate_canonical<> for the generators provided in this library
@@ -1371,7 +1371,7 @@ private:
   RNDUTILS_FAST_GENERATE_CANONICAL_REAL_BITS(double, size_t(-1), URNG) \
   RNDUTILS_FAST_GENERATE_CANONICAL_REAL_BITS(long double, size_t(-1), URNG)
 
-
+/*
 #if defined(RNDUTILS_ENABLE_FAST_STD_GENERATE_CANONICAL)
 namespace std {
   RNDUTILS_FAST_GENERATE_CANONICAL(rndutils::xorshift128)

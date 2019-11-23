@@ -8,14 +8,14 @@
 #include <vector>
 #include <array>
 #include <algorithm>
+#include "rndutils.hpp"
 
 struct rnd_t {
-    std::mt19937 rndgen;
+    rndutils::xorshift128 rndgen_;
 
     rnd_t() {
         std::random_device rd;
-        std::mt19937 rndgen_t(rd());
-        rndgen = rndgen_t;
+        rndgen_ = rndutils::make_random_engine(rd());
     }
 
     std::cauchy_distribution<float> cauch_dist =
@@ -23,38 +23,33 @@ struct rnd_t {
     std::bernoulli_distribution bern_dist =
                                 std::bernoulli_distribution(0.01);
 
-    std::uniform_real_distribution<float> unif_dist =
-                                std::uniform_real_distribution<float>(0, 1.0);
+    rndutils::uniform01_distribution<float> rndutil_norm;
+
 
     int random_number(size_t n)    {
         if(n <= 1) return 0;
-        return std::uniform_int_distribution<> (0, static_cast<int>(n - 1))(rndgen);
+        return std::uniform_int_distribution<> (0, static_cast<int>(n - 1))(rndgen_);
     }
 
     float uniform()    {
-        return unif_dist(rndgen);
+        return rndutil_norm(rndgen_);
     }
 
     float Expon(float lambda) {
         if (lambda == 0.f) return 1e20f;
-        return std::exponential_distribution<float>(lambda)(rndgen);
+        return std::exponential_distribution<float>(lambda)(rndgen_);
     }
 
     float normal(float m, float s) {
-        return std::normal_distribution<float>(m, s)(rndgen);
-    }
-
-    void set_seed(unsigned seed)    {
-        std::mt19937 new_randomizer(seed);
-        rndgen = new_randomizer;
+        return std::normal_distribution<float>(m, s)(rndgen_);
     }
 
     bool bernouilli() {
-        return bern_dist(rndgen);
+        return bern_dist(rndgen_);
     }
 
     float cauchy() {
-        return cauch_dist(rndgen);
+        return cauch_dist(rndgen_);
     }
 
     void set_cauchy(float m, float s) {

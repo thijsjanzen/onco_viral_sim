@@ -66,22 +66,6 @@ void simulation::run() {
       add_cells(cancer);
     }
 
-    if(static_cast<int>(t) < static_cast<int>(t+dt)) {
-    //  print_to_file(t);
-      auto end = std::chrono::system_clock::now();
-      std::chrono::duration<double> elapsed_seconds = end - start;
-
-      std::cout << static_cast<int>(t) << "\t";
-      for(size_t i = 0; i < 3; ++i) {
-        std::cout << sum_death_prob[i] << "\t"; // these are the numbers of cells of each type
-      }
-
-
-      std::cout << elapsed_seconds.count() << "\n";
-
-      start = std::chrono::system_clock::now();
-    }
-
     t += dt;
 
     if(num_cell_types[0] < 1 ) {
@@ -109,8 +93,13 @@ void simulation::initialize_network() {
   update_growth_probabilities();
 
   for(size_t i = 0; i < 3; ++i) {
-    sum_growth_prob[i] = std::accumulate(growth_probs[i].begin(), growth_probs[i].end(), 0.f);
-    sum_death_prob[i] = std::accumulate(death_probs[i].begin(), death_probs[i].end(), 0.f);
+    auto local_birth_dist = rndutils::mutable_discrete_distribution<int, rndutils::all_zero_policy_throw>{};
+    local_birth_dist.mutate(growth_probs[i].begin(), growth_probs[i].end());
+    growth_prob_rnd.push_back(local_birth_dist);
+
+    auto local_death_dist = rndutils::mutable_discrete_distribution<int, rndutils::all_zero_policy_throw>{};
+    local_death_dist.mutate(death_probs[i].begin(), death_probs[i].end());
+    death_prob_rnd.push_back(local_death_dist);
   }
 }
 
@@ -160,16 +149,16 @@ void simulation::do_event(size_t event) {
 }
 
 void simulation::update_rates(std::array< float, 6>& rates) {
-  rates[0] = parameters.birth_normal   * sum_growth_prob[normal]; //std::accumulate(growth_probs[normal].begin(), growth_probs[normal].end(), 0.0);
-  rates[1] = parameters.death_normal   * sum_death_prob[normal];
+  rates[0] = parameters.birth_normal   * growth_prob_rnd[normal].cdf().back(); //sum_growth_prob[normal]; //std::accumulate(growth_probs[normal].begin(), growth_probs[normal].end(), 0.0);
+  rates[1] = parameters.death_normal   * death_prob_rnd[normal].cdf().back(); //sum_death_prob[normal];
 
-  rates[2] = parameters.birth_cancer   * sum_growth_prob[cancer]; //std::accumulate(growth_probs[cancer].begin(), growth_probs[cancer].end(), 0.0);
-  rates[3] = parameters.death_cancer   * sum_death_prob[cancer];
+  rates[2] = parameters.birth_cancer   * growth_prob_rnd[cancer].cdf().back(); //sum_growth_prob[cancer]; //std::accumulate(growth_probs[cancer].begin(), growth_probs[cancer].end(), 0.0);
+  rates[3] = parameters.death_cancer   * death_prob_rnd[cancer].cdf().back(); //sum_death_prob[cancer];
 
-  rates[4] = parameters.birth_infected * sum_growth_prob[infected]; //std::accumulate(growth_probs[infected].begin(), growth_probs[infected].end(), 0.0);
-  rates[5] = parameters.death_infected * sum_death_prob[infected];
+  rates[4] = parameters.birth_infected * growth_prob_rnd[infected].cdf().back();  //std::accumulate(growth_probs[infected].begin(), growth_probs[infected].end(), 0.0);
+  rates[5] = parameters.death_infected * death_prob_rnd[infected].cdf().back();
 
-  bool check_sum = false;
+  /*bool check_sum = false;
   if(check_sum) {
     for(size_t i = 0; i < 3; ++i) {
       float sum_growth_prob_exact = std::accumulate(growth_probs[i].begin(), growth_probs[i].end(), 0.f);
@@ -181,16 +170,17 @@ void simulation::update_rates(std::array< float, 6>& rates) {
         std::cout << sum_growth_prob_exact - sum_growth_prob_indirect << "\n";
       }
 
-      /*float sum_death_prob_exact = std::accumulate(death_probs[i].begin(), death_probs[i].end(), 0.0);
+      float sum_death_prob_exact = std::accumulate(death_probs[i].begin(), death_probs[i].end(), 0.0);
       float sum_death_prob_indirect = sum_death_prob[i];
       float num_cell_types_counted = num_cell_types[i];
       if(sum_death_prob_exact != sum_death_prob_indirect) {
         std::cout << "death prob incorrect! " << i << "\t";
         std::cout << sum_death_prob_exact << "\t" << sum_death_prob_indirect << "\t" << num_cell_types_counted << "\t";
         std::cout << sum_death_prob_exact - sum_death_prob_indirect << "\n";
-      }*/
+      }
     }
   }
+  */
 }
 
 size_t simulation::pick_event(const std::array< float, 6>& rates, float sum) {
@@ -208,13 +198,13 @@ void simulation::implement_death(const cell_type& parent) {
   size_t position_of_dying_cell = 0;
   switch(parent) {
     case normal:
-      position_of_dying_cell = rndgen.draw_from_dist(death_probs[normal].begin(), death_probs[normal].end(), 1.f);
+      position_of_dying_cell = death_prob_rnd[normal](rndgen.rndgen_);        //rndgen.draw_from_dist(death_probs[normal].begin(), death_probs[normal].end(), 1.f);
       break;
     case cancer:
-      position_of_dying_cell = rndgen.draw_from_dist(death_probs[cancer].begin(), death_probs[cancer].end(), 1.f);
+      position_of_dying_cell = death_prob_rnd[cancer](rndgen.rndgen_); //rndgen.draw_from_dist(death_probs[cancer].begin(), death_probs[cancer].end(), 1.f);
       break;
     case infected:
-      position_of_dying_cell = rndgen.draw_from_dist(death_probs[infected].begin(), death_probs[infected].end(), 1.f);
+      position_of_dying_cell = death_prob_rnd[infected](rndgen.rndgen_); //rndgen.draw_from_dist(death_probs[infected].begin(), death_probs[infected].end(), 1.f);
       break;
     case empty:
       std::cout << "ERROR! empty node is dying\n";
@@ -224,31 +214,39 @@ void simulation::implement_death(const cell_type& parent) {
 
   world[position_of_dying_cell].node_type = empty;
   death_probs[parent][position_of_dying_cell] = 0.f;
-  sum_death_prob[parent]--; // update death probabilities
+  update_death_prob_vectors(parent, position_of_dying_cell);
+  //sum_death_prob[parent]--; // update death probabilities
 
+  size_t min_pos = world.size();
   update_growth_prob(position_of_dying_cell);
   for(auto i : world[position_of_dying_cell].neighbors) {
     update_growth_prob(i->pos);
+    if(i->pos < min_pos) min_pos = i->pos;
   }
+  update_growth_prob_vectors(min_pos);
 }
+
+
 
 void simulation::implement_growth(const cell_type& parent) {
   size_t position_of_grown_cell = 0;
   switch(parent) {
     case normal:
-      position_of_grown_cell = rndgen.draw_from_dist(growth_probs[normal].begin(), growth_probs[normal].end(), max_growth_prob[normal]);
+      position_of_grown_cell = growth_prob_rnd[normal](rndgen.rndgen_); //rndgen.draw_from_dist(growth_probs[normal].begin(), growth_probs[normal].end(), max_growth_prob[normal]);
       break;
     case cancer:
-      position_of_grown_cell = rndgen.draw_from_dist(growth_probs[cancer].begin(), growth_probs[cancer].end(), max_growth_prob[cancer]);
+      position_of_grown_cell = growth_prob_rnd[cancer](rndgen.rndgen_);  // rndgen.draw_from_dist(growth_probs[cancer].begin(), growth_probs[cancer].end(), max_growth_prob[cancer]);
       break;
     case infected:
-      position_of_grown_cell = rndgen.draw_from_dist(growth_probs[infected].begin(), growth_probs[infected].end(), max_growth_prob[infected]);
+      position_of_grown_cell = growth_prob_rnd[infected](rndgen.rndgen_);  // rndgen.draw_from_dist(growth_probs[infected].begin(), growth_probs[infected].end(), max_growth_prob[infected]);
       break;
     case empty:
       std::cout << "ERROR! empty node is growing\n";
       position_of_grown_cell = 0;
       break;
   }
+
+  size_t min_pos = position_of_grown_cell;
 
   world[position_of_grown_cell].node_type = parent;
 
@@ -258,12 +256,31 @@ void simulation::implement_growth(const cell_type& parent) {
   // update growth probabilities of the neighbors:
   for(auto i : world[position_of_grown_cell].neighbors) {
     update_growth_prob(i->pos);
+    if(i->pos < min_pos) min_pos = i->pos;
   }
+
+  update_growth_prob_vectors(min_pos);
 
   // update death probability of new cell:
   death_probs[parent][position_of_grown_cell] = 1.f;
-  sum_death_prob[parent]++;
+
+  //sum_death_prob[parent]++;
 }
+
+void simulation::update_death_prob_vectors(const cell_type& parent, int pos) {
+    death_prob_rnd[parent].mutate(death_probs.begin() + pos, death_probs.end());
+}
+
+void simulation::update_growth_prob_vectors(int pos) {
+
+    for(int i = 0; i < 3; ++i) {
+        growth_prob_rnd[i].mutate(growth_probs.begin() + pos, growth_probs.end());
+    }
+}
+
+
+
+
 
 void simulation::add_cells(cell_type focal_cell_type) {
     // pick center node:
@@ -298,13 +315,14 @@ void simulation::add_cells(cell_type focal_cell_type) {
     }
   }
 
+  /*
   for(int i = 0; i < 3; ++i) {
-      sum_death_prob[i] = std::accumulate(death_probs[i].begin(), death_probs[i].end(), 0.f);
-      sum_growth_prob[i] = std::accumulate(growth_probs[i].begin(), growth_probs[i].end(), 0.f);
+       sum_death_prob[i] = std::accumulate(death_probs[i].begin(), death_probs[i].end(), 0.f);
+       sum_growth_prob[i] = std::accumulate(growth_probs[i].begin(), growth_probs[i].end(), 0.f);
       auto m = std::max_element(growth_probs[i].begin(), growth_probs[i].end());
       max_growth_prob[i] = *m;
   }
-
+*/
 
 }
 
@@ -312,6 +330,10 @@ void simulation::update_growth_prob(size_t pos) {
   std::array<float, 3> probs = world[pos].calc_prob_of_growth();
 
   for(size_t i = 0; i < 3; ++i) {
+      growth_probs[i][pos] = probs[i];
+  }
+
+ /* for(size_t i = 0; i < 3; ++i) {
 
     float new_prob =  probs[i] ;
     float old_prob =  growth_probs[i][pos];
@@ -326,11 +348,10 @@ void simulation::update_growth_prob(size_t pos) {
       auto max_val = std::max_element(growth_probs[i].begin(), growth_probs[i].end());
       max_growth_prob[i] = *max_val;
     }
-  }
+  }*/
 }
 
 simulation::simulation(const Param& param) {
-  rns = rndutils::make_random_engine<>();
   parameters = param;
 
   sq_size = static_cast<size_t>(sqrt(parameters.num_cells));
@@ -345,7 +366,7 @@ simulation::simulation(const Param& param) {
   growth_probs.resize(3, std::vector< float >(parameters.num_cells, 0.f));
   death_probs.resize(3, std::vector< float >(parameters.num_cells, 0.f));
 
-  max_growth_prob = {0.f, 0.f, 0.f};
+  //max_growth_prob = {0.f, 0.f, 0.f};
 }
 
 void simulation::print_to_file(float t) {
@@ -373,7 +394,7 @@ void simulation::print_to_file(float t) {
 // initialization routines:
 void simulation::update_growth_probabilities() {
 
-  max_growth_prob = {-1.f, -1.f, -1.f};
+ // max_growth_prob = {-1.f, -1.f, -1.f};
 
   for(auto i : world) {
     std::array<float, 3> probs = i.calc_prob_of_growth();
@@ -384,9 +405,9 @@ void simulation::update_growth_probabilities() {
     growth_probs[cancer][pos] = probs[cancer];
     growth_probs[infected][pos] = probs[infected];
 
-    if(probs[normal] > max_growth_prob[normal])   max_growth_prob[normal]   = probs[normal];
-    if(probs[cancer] > max_growth_prob[cancer])   max_growth_prob[cancer]   = probs[cancer];
-    if(probs[infected] > max_growth_prob[infected]) max_growth_prob[infected] = probs[infected];
+//    if(probs[normal] > max_growth_prob[normal])   max_growth_prob[normal]   = probs[normal];
+//    if(probs[cancer] > max_growth_prob[cancer])   max_growth_prob[cancer]   = probs[cancer];
+ //   if(probs[infected] > max_growth_prob[infected]) max_growth_prob[infected] = probs[infected];
 
     switch(i.node_type) {
       case normal:
@@ -407,9 +428,9 @@ void simulation::update_growth_probabilities() {
 
 std::vector<int> simulation::get_cell_numbers() {
     std::vector<int> output(3,0);
-    output[0] = static_cast<int>(sum_death_prob[0]);
-    output[1] = static_cast<int>(sum_death_prob[1]);
-    output[2] = static_cast<int>(sum_death_prob[2]);
+    output[0] = static_cast<int>(death_prob_rnd[0].cdf().back());
+    output[1] = static_cast<int>(death_prob_rnd[1].cdf().back());
+    output[2] = static_cast<int>(death_prob_rnd[2].cdf().back());
     return output;
 }
 

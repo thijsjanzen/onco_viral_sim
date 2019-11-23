@@ -12,11 +12,11 @@
 #include <stdio.h>
 #include <vector>
 #include "parameters.hpp"
-#include "random_thijs.hpp"
 #include <array>
 #include <cmath>
 #include "node.hpp"
 #include "rndutils.hpp"
+#include "random_thijs.hpp"
 
 class simulation {
 public:
@@ -31,7 +31,7 @@ public:
   std::vector< node > world;
   std::vector<int> get_cell_numbers();
 
-  rndutils::xorshift128 rns;
+  rnd_t rndgen;
 
 
 private:
@@ -39,16 +39,14 @@ private:
   int num_nodes;
 
   Param parameters;
-  rnd_t rndgen;
 
+  std::vector< rndutils::mutable_discrete_distribution<int, rndutils::all_zero_policy_throw > > growth_prob_rnd;
+  std::vector< rndutils::mutable_discrete_distribution<int, rndutils::all_zero_policy_throw > > death_prob_rnd;
 
   std::vector< std::vector< float >> growth_probs;
   std::vector< std::vector< float >> death_probs;
 
-  std::array<float, 3> sum_growth_prob;
-  std::array<float, 3> sum_death_prob;
 
-  std::array<float, 3> max_growth_prob;
   std::array<float, 3> num_cell_types;
 
   std::array< float, 6> rates;
@@ -67,6 +65,9 @@ private:
   void add_cells(cell_type focal_cell_type);
 
   void print_to_file(float t);
+
+  void update_death_prob_vectors(const cell_type& parent, int pos);
+  void update_growth_prob_vectors(int pos);
 };
 
 

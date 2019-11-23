@@ -166,7 +166,7 @@ void MainWindow::on_btn_start_clicked()
     y_c.clear();
     y_i.clear();
 
-    auto reng = rndutils::make_random_engine<>();
+  //  auto reng = rndutils::make_random_engine<>();
 
 
     Param all_parameters;
