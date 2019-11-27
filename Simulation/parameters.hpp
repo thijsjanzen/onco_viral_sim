@@ -7,7 +7,10 @@
 #ifndef parameters_h
 #define parameters_h
 
-#include "./config_parser.h"
+#include <cstdio>
+
+enum infection_routine {random_infection, center_infection, multinode, perimeter};
+
 
 struct Param {
 
@@ -20,21 +23,15 @@ struct Param {
   float death_cancer;
   float death_infected;
 
-  int infection_routine;
   int time_adding_virus;
   int time_adding_cancer;
 
   int initial_number_cancer_cells;
 
+  float percent_infected;
+  infection_routine infection_type;
+
   size_t num_cells;
-
-
-  void readFromIni(const std::string& file_name) {
-        ConfigFile from_config(file_name);
-
-        maximum_time                = from_config.getValueOfKey<int>("maximum_time");
-
-    }
 
     Param(const Param& other) {
         maximum_time = other.maximum_time;
@@ -53,11 +50,12 @@ struct Param {
     birth_normal = 0.5f;
     birth_cancer = 1.0f;
     birth_infected = 1.2f;
-    death_normal = 0.01f;
+    death_normal = 0.2f;
     death_cancer = 0.1f;
     death_infected = 0.1f;
 
-    infection_routine = 0;
+    infection_type = random_infection;
+    percent_infected = 0.1;
   }
 
 

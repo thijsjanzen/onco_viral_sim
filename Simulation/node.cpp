@@ -5,9 +5,11 @@
 //  Created by Thijs Janzen on 13/11/2019.
 //  Copyright © 2019 Thijs Janzen. All rights reserved.
 //
-#include <assert.h>
+#include <cassert>
 #include "node.hpp"
 #include <iostream>
+#include <array>
+#include <cmath>
 #include <array>
 
 node::node() {
@@ -21,7 +23,34 @@ node::node(size_t p) : pos(p) {
 void node::update_neighbors(std::vector< node >& world,
                             size_t world_size) {
 
-  for(int i = -1; i <= 1; i++) {
+
+    static int relative_points[4][2] = { {-1, 0},
+                                        {1, 0},
+                                        {0, 1},
+                                        {0, -1} };
+
+    for(int i = 0; i < 4; ++i) {
+        int other_x = static_cast<int>(x_) + relative_points[i][0];
+        int other_y = static_cast<int>(y_) + relative_points[i][1];
+        if(other_x >= 0 &&
+           other_y >= 0 &&
+           other_x < static_cast<int>(world_size) &&
+           other_y < static_cast<int>(world_size)) {
+            int other_pos = other_y + other_x * static_cast<int>(world_size);
+            if(other_pos >= 0 && other_pos < static_cast<int>(world.size())) {
+                node* neighbor = &world[static_cast<size_t>(other_pos)];
+
+                assert(static_cast<int>(neighbor->x_) == other_x);
+                assert(static_cast<int>(neighbor->y_) == other_y);
+                neighbors.push_back(neighbor);
+            }
+        }
+    }
+
+
+
+
+  /*for(int i = -1; i <= 1; i++) {
     for(int j = -1; j <= 1; j++) {
       if(abs(i - j) == 1) {
         int other_x = static_cast<int>(x_) + i;
@@ -29,11 +58,17 @@ void node::update_neighbors(std::vector< node >& world,
         int other_pos = other_x * static_cast<int>(world_size) + other_y;
         if(other_pos >= 0 && other_pos < static_cast<int>(world.size())) {
           node* neighbor = &world[static_cast<size_t>(other_pos)];
+
+          if( abs(static_cast<int>(neighbor->x_ - this->x_)) > 1 ||
+              abs(static_cast<int>(neighbor->y_ - this->y_)) > 1) {
+              int a = 5;
+          }
+
           neighbors.push_back(neighbor);
         }
       }
     }
-  }
+  }*/
 }
 
 void node::update_neighbor_types() {

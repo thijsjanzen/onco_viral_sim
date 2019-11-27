@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1160</width>
-    <height>805</height>
+    <height>841</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -73,7 +73,7 @@
       <x>20</x>
       <y>700</y>
       <width>341</width>
-      <height>61</height>
+      <height>101</height>
      </rect>
     </property>
    </widget>
@@ -90,30 +90,11 @@
      <string>initial cancer cells</string>
     </property>
    </widget>
-   <widget class="QSpinBox" name="box_cancer_cells">
-    <property name="geometry">
-     <rect>
-      <x>310</x>
-      <y>110</y>
-      <width>52</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="minimum">
-     <number>1</number>
-    </property>
-    <property name="maximum">
-     <number>5000</number>
-    </property>
-    <property name="value">
-     <number>4</number>
-    </property>
-   </widget>
    <widget class="QCustomPlot" name="line_plot" native="true">
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>370</y>
+      <y>410</y>
       <width>341</width>
       <height>271</height>
      </rect>
@@ -145,121 +126,12 @@
      <number>0</number>
     </property>
    </widget>
-   <widget class="QPushButton" name="btn_pause">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>130</y>
-      <width>113</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Pause</string>
-    </property>
-   </widget>
-   <widget class="QWidget" name="">
-    <property name="geometry">
-     <rect>
-      <x>180</x>
-      <y>140</y>
-      <width>181</width>
-      <height>178</height>
-     </rect>
-    </property>
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="5" column="1">
-      <widget class="QDoubleSpinBox" name="box_death_infected">
-       <property name="value">
-        <double>0.100000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_7">
-       <property name="text">
-        <string>death_cancer</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
-      <widget class="QDoubleSpinBox" name="box_birth_infected">
-       <property name="value">
-        <double>1.200000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>death_normal</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="label_8">
-       <property name="text">
-        <string>birth_infected</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QDoubleSpinBox" name="box_birth_normal">
-       <property name="value">
-        <double>0.500000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>birth_normal</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QDoubleSpinBox" name="box_death_normal">
-       <property name="value">
-        <double>0.010000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QDoubleSpinBox" name="box_death_cancer">
-       <property name="value">
-        <double>0.100000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="0">
-      <widget class="QLabel" name="label_9">
-       <property name="text">
-        <string>death_infected</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QDoubleSpinBox" name="box_birth_cancer">
-       <property name="value">
-        <double>1.000000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label_6">
-       <property name="text">
-        <string>birth_cancer</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>180</x>
       <y>20</y>
-      <width>182</width>
+      <width>190</width>
       <height>85</height>
      </rect>
     </property>
@@ -273,14 +145,17 @@
      </item>
      <item row="0" column="1">
       <widget class="QSpinBox" name="box_maxtime">
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
        <property name="minimum">
         <number>1</number>
        </property>
        <property name="maximum">
-        <number>5000</number>
+        <number>50000</number>
        </property>
        <property name="value">
-        <number>70</number>
+        <number>100</number>
        </property>
       </widget>
      </item>
@@ -293,6 +168,9 @@
      </item>
      <item row="1" column="1">
       <widget class="QSpinBox" name="box_cancer_time">
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
        <property name="minimum">
         <number>1</number>
        </property>
@@ -300,7 +178,7 @@
         <number>5000</number>
        </property>
        <property name="value">
-        <number>20</number>
+        <number>15</number>
        </property>
       </widget>
      </item>
@@ -313,6 +191,9 @@
      </item>
      <item row="2" column="1">
       <widget class="QSpinBox" name="box_virus_time">
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
        <property name="minimum">
         <number>1</number>
        </property>
@@ -320,39 +201,272 @@
         <number>5000</number>
        </property>
        <property name="value">
-        <number>20</number>
+        <number>30</number>
        </property>
       </widget>
      </item>
     </layout>
    </widget>
+   <widget class="QSlider" name="speed_slider">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>340</y>
+      <width>160</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <number>1</number>
+    </property>
+    <property name="maximum">
+     <number>10000</number>
+    </property>
+    <property name="value">
+     <number>100</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_11">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>340</y>
+      <width>90</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>speed</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_12">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>150</y>
+      <width>61</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Infection routine</string>
+    </property>
+    <property name="scaledContents">
+     <bool>false</bool>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="box_infection_routine">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>150</y>
+      <width>91</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="currentText">
+     <string notr="true"/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_13">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>190</y>
+      <width>61</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>fraction infected</string>
+    </property>
+    <property name="scaledContents">
+     <bool>false</bool>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QDoubleSpinBox" name="box_percent_infected">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>200</y>
+      <width>55</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="value">
+     <double>0.100000000000000</double>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_8">
+    <property name="geometry">
+     <rect>
+      <x>181</x>
+      <y>265</y>
+      <width>84</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>birth_infected</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_7">
+    <property name="geometry">
+     <rect>
+      <x>181</x>
+      <y>234</y>
+      <width>82</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>death_cancer</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>181</x>
+      <y>141</y>
+      <width>76</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>birth_normal</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>181</x>
+      <y>172</y>
+      <width>82</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>death_normal</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_9">
+    <property name="geometry">
+     <rect>
+      <x>181</x>
+      <y>296</y>
+      <width>90</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>death_infected</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_6">
+    <property name="geometry">
+     <rect>
+      <x>181</x>
+      <y>203</y>
+      <width>76</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>birth_cancer</string>
+    </property>
+   </widget>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>110</y>
+      <width>57</width>
+      <height>209</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QSpinBox" name="box_cancer_cells">
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>5000</number>
+       </property>
+       <property name="value">
+        <number>4</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDoubleSpinBox" name="box_birth_normal">
+       <property name="value">
+        <double>0.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDoubleSpinBox" name="box_death_normal">
+       <property name="value">
+        <double>0.200000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDoubleSpinBox" name="box_birth_cancer">
+       <property name="value">
+        <double>1.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDoubleSpinBox" name="box_death_cancer">
+       <property name="value">
+        <double>0.100000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDoubleSpinBox" name="box_birth_infected">
+       <property name="value">
+        <double>1.200000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDoubleSpinBox" name="box_death_infected">
+       <property name="value">
+        <double>0.100000000000000</double>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <zorder>layoutWidget</zorder>
+   <zorder>layoutWidget</zorder>
    <zorder>q_label</zorder>
    <zorder>btn_start</zorder>
    <zorder>text</zorder>
-   <zorder>label</zorder>
-   <zorder>box_maxtime</zorder>
-   <zorder>box_cancer_time</zorder>
-   <zorder>label_2</zorder>
-   <zorder>label_3</zorder>
-   <zorder>box_virus_time</zorder>
-   <zorder>label_4</zorder>
-   <zorder>box_birth_normal</zorder>
-   <zorder>label_5</zorder>
-   <zorder>box_death_normal</zorder>
-   <zorder>label_6</zorder>
-   <zorder>box_birth_cancer</zorder>
-   <zorder>label_7</zorder>
-   <zorder>box_death_cancer</zorder>
-   <zorder>label_8</zorder>
-   <zorder>box_birth_infected</zorder>
-   <zorder>label_9</zorder>
-   <zorder>box_death_infected</zorder>
    <zorder>label_10</zorder>
    <zorder>box_cancer_cells</zorder>
    <zorder>line_plot</zorder>
    <zorder>btn_stop</zorder>
    <zorder>progressBar</zorder>
-   <zorder>btn_pause</zorder>
+   <zorder>speed_slider</zorder>
+   <zorder>label_11</zorder>
+   <zorder>label_12</zorder>
+   <zorder>box_infection_routine</zorder>
+   <zorder>label_13</zorder>
+   <zorder>box_percent_infected</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>

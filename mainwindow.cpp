@@ -6,10 +6,10 @@
 #include <string>
 #include <sstream>
 #include <chrono>
+#include <iostream>
 
 #include "Simulation/parameters.hpp"
 #include "Simulation/simulation.hpp"
-
 #include "Simulation/rndutils.hpp"
 
 
@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->line_plot->addGraph(); // infected
     ui->line_plot->graph(0)->setPen(QPen(Qt::blue));
     ui->line_plot->graph(1)->setPen(QPen(Qt::red));
-    ui->line_plot->graph(2)->setPen(QPen(Qt::yellow));
+    ui->line_plot->graph(2)->setPen(QPen(Qt::green));
 
     ui->line_plot->graph(0)->setName("Normal");
     ui->line_plot->graph(1)->setName("Cancer");
@@ -44,6 +44,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->progressBar->setValue(0);
 
+    update_speed = ui->speed_slider->value();
+
+    ui->box_infection_routine->addItem("Random");
+    ui->box_infection_routine->addItem("Center");
 }
 
 MainWindow::~MainWindow()
@@ -66,7 +70,7 @@ void MainWindow::update_image(const std::vector< node >& world) {
     std::vector< QColor > colorz = {
         {0, 0, 255}, // blue, normal
         {255, 0, 0}, // red,  cancer
-        {255, 255, 0}, // yellow, infected
+        {0, 255, 0}, // green, infected
         {0, 0, 0} // black, empty
     };
 
@@ -87,31 +91,6 @@ void MainWindow::update_image(const std::vector< node >& world) {
      QApplication::processEvents();
 }
 
-/*
-void MainWindow::update_image(const std::vector< node >& world) {
-    std::vector< QColor > colorz = {
-        {0, 0, 255}, // blue, normal
-        {255, 0, 0}, // red,  cancer
-        {255, 255, 0}, // yellow, infected
-        {0, 0, 0} // black, empty
-    };
-
-     for(auto i : world) {
-         set_pixel(i.x_, i.y_, colorz[i.node_type]);
-     }
-
-   QPainter painter(&image_);
-   painter.drawPixmap(
-     QPixmap::fromImage(image_)
-   );
-   ui->q_label->setPixmap((QPixmap::fromImage(image)).scaled(w,h, Qt::KeepAspectRatio));
-   ui->q_label->repaint();
-   ui->q_label->update();
-   ui->q_label->show();
-   QApplication::processEvents();
-}
-*/
-
 std::string get_string(std::string s, float v) {
     std::string output = s + " " + std::to_string(v) + "\n";
     return output;
@@ -130,6 +109,8 @@ void MainWindow::print_params(const Param& p) {
     s << get_string("Death Rate Cancer", p.death_cancer);
     s << get_string("Birth Rate Infected", p.birth_infected);
     s << get_string("Death Rate Infected", p.death_infected);
+    s << get_string("Infection routine", p.infection_type);
+    s << get_string("Infection %", p.percent_infected);
 
     ui->text->appendPlainText(QString::fromStdString(s.str()));
     return;
@@ -153,6 +134,14 @@ void MainWindow::update_parameters(Param& p) {
    p.birth_infected = static_cast<float>(ui->box_birth_infected->value());
    p.death_infected = static_cast<float>(ui->box_death_infected->value());
 
+   p.percent_infected = static_cast<float>(ui->box_percent_infected->value());
+   p.infection_type = random_infection;
+   auto infection_string = ui->box_infection_routine->currentText();
+   if(infection_string == "random")
+       p.infection_type = random_infection;
+   if(infection_string == "center")
+       p.infection_type = center_infection;
+
    print_params(p);
 
    return;
@@ -161,6 +150,8 @@ void MainWindow::update_parameters(Param& p) {
 
 void MainWindow::on_btn_start_clicked()
 {
+    auto start_time = std::chrono::high_resolution_clock::now();
+
     x_t.clear();
     y_n.clear();
     y_c.clear();
@@ -168,20 +159,18 @@ void MainWindow::on_btn_start_clicked()
 
   //  auto reng = rndutils::make_random_engine<>();
 
-
     Param all_parameters;
     update_parameters(all_parameters);
     simulation Simulation(all_parameters);
 
     Simulation.initialize_network();
 
-    set_resolution(Simulation.sq_size,
-                   Simulation.sq_size);
+    set_resolution(static_cast<int>(Simulation.sq_size),
+                   static_cast<int>(Simulation.sq_size));
 
     Simulation.t = 0.0;
     int counter = 0;
     is_running = true;
-    is_paused = false;
     while(Simulation.t < all_parameters.maximum_time) {
         Simulation.update_one_step();
         counter++;
@@ -190,24 +179,30 @@ void MainWindow::on_btn_start_clicked()
         int progress = static_cast<int>(100.f * Simulation.t / all_parameters.maximum_time);
         ui->progressBar->setValue(progress);
 
-        while(is_paused == true) {
-
-        }
-
-        if(counter % 3 == 0) {
-           // std::stringstream s;
-           // s << Simulation.t << "\n";
-           // ui->text->appendPlainText(QString::fromStdString(s.str()));
-
+        if(counter % update_speed == 0) {
             update_image(Simulation.world);
 
-            update_plot(Simulation.t, Simulation.get_cell_numbers());
+            update_plot(static_cast<double>(Simulation.t),
+                        Simulation.get_cell_numbers());
         }
         if(!is_running) break;
     }
+
+
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( end_time - start_time ).count();
+    std::stringstream st;
+    st << "This took ";
+    st << duration;
+    st << " microseconds\n";
+    ui->text->appendPlainText(QString::fromStdString(st.str()));
+    std::cout << duration << "\n";
+    //std::stringstream s;
+    //s << "Done\n";
+    //ui->text->appendPlainText(QString::fromStdString(s.str()));
 }
 
-void MainWindow::update_plot(int t, const std::vector<int> &cell_numbers) {
+void MainWindow::update_plot(double t, const std::vector<int> &cell_numbers) {
     x_t.append(t);
     y_n.append(cell_numbers[0]);
     y_c.append(cell_numbers[1]);
@@ -229,12 +224,10 @@ void MainWindow::update_plot(int t, const std::vector<int> &cell_numbers) {
 
 
 
-void MainWindow::on_btn_stop_clicked()
-{
+void MainWindow::on_btn_stop_clicked() {
     is_running = false;
 }
 
-void MainWindow::on_btn_pause_clicked()
-{
-    is_paused = !is_paused;
+void MainWindow::on_speed_slider_actionTriggered(int action) {
+   update_speed = ui->speed_slider->value();
 }

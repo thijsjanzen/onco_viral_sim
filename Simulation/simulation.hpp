@@ -9,7 +9,7 @@
 #ifndef simulation_hpp
 #define simulation_hpp
 
-#include <stdio.h>
+#include <cstdio>
 #include <vector>
 #include "parameters.hpp"
 #include <array>
@@ -40,8 +40,8 @@ private:
 
   Param parameters;
 
-  std::vector< rndutils::mutable_discrete_distribution<int, rndutils::all_zero_policy_throw > > growth_prob_rnd;
-  std::vector< rndutils::mutable_discrete_distribution<int, rndutils::all_zero_policy_throw > > death_prob_rnd;
+  std::vector< rndutils::mutable_discrete_distribution<int, rndutils::all_zero_policy_nothing > > growth_prob_rnd;
+  std::vector< rndutils::mutable_discrete_distribution<int, rndutils::all_zero_policy_nothing > > death_prob_rnd;
 
   std::vector< std::vector< float >> growth_probs;
   std::vector< std::vector< float >> death_probs;
@@ -66,8 +66,17 @@ private:
 
   void print_to_file(float t);
 
-  void update_death_prob_vectors(const cell_type& parent, int pos);
-  void update_growth_prob_vectors(int pos);
+  void update_death_prob_vectors(const cell_type& parent, long pos);
+  void update_growth_prob_vectors(long pos);
+
+  //void verify_growth_probs();
+  //void verify_death_probs();
+  //void verify_bounds();
+
+  void add_infected();
+  void infect_random();
+  void infect_center();
+
 };
 
 

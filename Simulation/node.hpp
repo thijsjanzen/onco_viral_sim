@@ -9,7 +9,7 @@
 #ifndef node_hpp
 #define node_hpp
 
-#include <stdio.h>
+#include <cstdio>
 #include <vector>
 #include <memory>
 

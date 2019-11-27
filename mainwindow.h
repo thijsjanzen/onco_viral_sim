@@ -27,14 +27,14 @@ public:
     void set_resolution(int width, int height);
     void set_pixel(int x, int y, const QColor& col);
 
-    void update_plot(int t, const std::vector<int>& cell_numbers);
+    void update_plot(double t, const std::vector<int>& cell_numbers);
 
 private slots:
     void on_btn_start_clicked();
 
     void on_btn_stop_clicked();
 
-    void on_btn_pause_clicked();
+    void on_speed_slider_actionTriggered(int action);
 
 private:
     Ui::MainWindow *ui;
@@ -46,7 +46,6 @@ private:
     QVector<double> y_i;
 
     bool is_running;
-    bool is_paused;
-
+    int update_speed;
 };
 #endif // MAINWINDOW_H

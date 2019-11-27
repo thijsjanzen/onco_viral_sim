@@ -111,7 +111,6 @@ namespace rndutils {
 
 namespace detail {
 
-
   // De Bruijn multiplication
   struct debruijn_bitscanreverse
   {
@@ -994,6 +993,10 @@ struct all_zero_policy_assert {};
 // revert to uniform distribution if all zero
 struct all_zero_policy_uni {};
 
+// do nothing
+struct all_zero_policy_nothing {};
+
+
 
 // Replacement for std::discrete_distribution.
 // Use it if your distribution is non-const and you want
@@ -1205,6 +1208,11 @@ private:
   void apply_all_zero_policy(weight_type sum, all_zero_policy_assert)
   { // assert
     assert(sum > weight_type(0) && "Invalid weight-vector for mutable_discrete_distribution");
+  }
+
+  void apply_all_zero_policy(weight_type sum, all_zero_policy_nothing)
+  {
+      // do nothing special
   }
 
   void apply_all_zero_policy(weight_type sum, all_zero_policy_uni)
