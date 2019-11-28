@@ -8,6 +8,7 @@
 #define parameters_h
 
 #include <cstdio>
+#include <cmath>
 
 enum infection_routine {random_infection, center_infection, multinode, perimeter};
 enum start_type {full, grow};
@@ -34,7 +35,6 @@ struct Param {
 
   start_type start_setup;
 
-  size_t num_cells;
 
     Param(const Param& other) {
         maximum_time = other.maximum_time;
@@ -47,7 +47,6 @@ struct Param {
     time_adding_virus = 3000; // default from Berg et al 2019
     time_adding_cancer = 1000; // normally the population is first allowed to stabilize
 
-    num_cells = 100*100;
     initial_number_cancer_cells = 5;
 
     birth_normal = 0.5f;

@@ -18,6 +18,7 @@
 #include "rndutils.hpp"
 #include "random_thijs.hpp"
 
+
 class simulation {
 public:
   simulation(const Param& param);
@@ -25,7 +26,6 @@ public:
   void initialize_network();
 
   float t;
-  size_t sq_size; // size of one side of the rectangle of the world
   void update_one_step();
 
   std::vector< node > world;
@@ -33,6 +33,9 @@ public:
 
   rnd_t rndgen;
 
+  const static size_t sq_size = 100;
+
+  const static size_t num_cells = sq_size * sq_size;
 
 private:
 
@@ -40,8 +43,10 @@ private:
 
   Param parameters;
 
-  std::vector< rndutils::mutable_discrete_distribution<int, rndutils::all_zero_policy_nothing > > growth_prob_rnd;
-  std::vector< rndutils::mutable_discrete_distribution<int, rndutils::all_zero_policy_nothing > > death_prob_rnd;
+
+
+  std::array< binned_distribution<sq_size>, 3 > growth_prob_rnd;
+  std::array< binned_distribution<sq_size>, 3 > death_prob_rnd;
 
   std::vector< std::vector< float >> growth_probs;
   std::vector< std::vector< float >> death_probs;

@@ -64,22 +64,16 @@ void simulation::initialize_network() {
     update_growth_probabilities();
 
     for(size_t i = 0; i < 3; ++i) {
-        auto local_birth_dist = rndutils::mutable_discrete_distribution<int, rndutils::all_zero_policy_nothing>{};
-        local_birth_dist.mutate(growth_probs[i].begin(), growth_probs[i].end());
-        growth_prob_rnd.push_back(local_birth_dist);
+        growth_prob_rnd[i] = binned_distribution<sq_size>(growth_probs[i].begin(), growth_probs[i].end());
 
-        auto local_death_dist = rndutils::mutable_discrete_distribution<int, rndutils::all_zero_policy_nothing>{};
-        local_death_dist.mutate(death_probs[i].begin(), death_probs[i].end());
-        death_prob_rnd.push_back(local_death_dist);
+        death_prob_rnd[i] = binned_distribution<sq_size>(death_probs[i].begin(), death_probs[i].end());
     }
   }
 
   if(parameters.start_setup == full) {
     for(size_t i = 0; i < 3; ++i) {
-         auto local_birth_dist = rndutils::mutable_discrete_distribution<int, rndutils::all_zero_policy_nothing>{};
-         growth_prob_rnd.push_back(local_birth_dist);
-         auto local_death_dist = rndutils::mutable_discrete_distribution<int, rndutils::all_zero_policy_nothing>{};
-         death_prob_rnd.push_back(local_death_dist);
+         growth_prob_rnd[i] = binned_distribution<sq_size>();
+         death_prob_rnd[i] = binned_distribution<sq_size>();
     }
     initialize_full();
   }
@@ -130,14 +124,14 @@ void simulation::do_event(size_t event) {
 }
 
 void simulation::update_rates(std::array< float, 6>& rates) {
-  rates[0] = parameters.birth_normal   * static_cast<float>(growth_prob_rnd[normal].cdf().back()); //sum_growth_prob[normal]; //std::accumulate(growth_probs[normal].begin(), growth_probs[normal].end(), 0.0);
-  rates[1] = parameters.death_normal   * static_cast<float>(death_prob_rnd[normal].cdf().back()); //sum_death_prob[normal];
+  rates[0] = parameters.birth_normal   * growth_prob_rnd[normal].get_total_sum();  //static_cast<float>(growth_prob_rnd[normal].cdf().back()); //sum_growth_prob[normal]; //std::accumulate(growth_probs[normal].begin(), growth_probs[normal].end(), 0.0);
+  rates[1] = parameters.death_normal   * death_prob_rnd[normal].get_total_sum(); //static_cast<float>(death_prob_rnd[normal].cdf().back()); //sum_death_prob[normal];
 
-  rates[2] = parameters.birth_cancer   * static_cast<float>(growth_prob_rnd[cancer].cdf().back()); //sum_growth_prob[cancer]; //std::accumulate(growth_probs[cancer].begin(), growth_probs[cancer].end(), 0.0);
-  rates[3] = parameters.death_cancer   * static_cast<float>(death_prob_rnd[cancer].cdf().back()); //sum_death_prob[cancer];
+  rates[2] = parameters.birth_cancer   * growth_prob_rnd[cancer].get_total_sum();//static_cast<float>(growth_prob_rnd[cancer].cdf().back()); //sum_growth_prob[cancer]; //std::accumulate(growth_probs[cancer].begin(), growth_probs[cancer].end(), 0.0);
+  rates[3] = parameters.death_cancer   * death_prob_rnd[cancer].get_total_sum(); //static_cast<float>(death_prob_rnd[cancer].cdf().back()); //sum_death_prob[cancer];
 
-  rates[4] = parameters.birth_infected * static_cast<float>(growth_prob_rnd[infected].cdf().back());  //std::accumulate(growth_probs[infected].begin(), growth_probs[infected].end(), 0.0);
-  rates[5] = parameters.death_infected * static_cast<float>(death_prob_rnd[infected].cdf().back());
+  rates[4] = parameters.birth_infected * growth_prob_rnd[infected].get_total_sum(); //static_cast<float>(growth_prob_rnd[infected].cdf().back());  //std::accumulate(growth_probs[infected].begin(), growth_probs[infected].end(), 0.0);
+  rates[5] = parameters.death_infected * death_prob_rnd[infected].get_total_sum(); //static_cast<float>(death_prob_rnd[infected].cdf().back());
 }
 
 size_t simulation::pick_event(const std::array< float, 6>& rates, float sum) {
@@ -164,7 +158,6 @@ void simulation::implement_death(const cell_type& parent) {
       position_of_dying_cell = static_cast<size_t>(death_prob_rnd[infected](rndgen.rndgen_));
       break;
     case empty:
-      //  std::cout << "ERROR! empty node is dying\n";
       position_of_dying_cell = 0;
       break;
   }
@@ -202,7 +195,6 @@ void simulation::implement_growth(const cell_type& parent) {
       position_of_grown_cell = static_cast<size_t>(growth_prob_rnd[infected](rndgen.rndgen_));
       break;
     case empty:
-      // std::cout << "ERROR! empty node is growing\n";
       position_of_grown_cell = 0;
       break;
   }
@@ -229,14 +221,20 @@ void simulation::implement_growth(const cell_type& parent) {
 
 
 void simulation::update_death_cdf(const cell_type& parent, long pos) {
+  //  death_prob_rnd[parent].mutate(death_probs[parent].begin(),
+   //                               death_probs[parent].end());
+
     death_prob_rnd[parent].mutate(death_probs[parent].begin(),
-                                  death_probs[parent].end());
+                                  death_probs[parent].end(),
+                                  pos);
 }
 
 void simulation::update_death_cdf_all() {
     for(size_t i = 0; i < 3; ++i) {
-        death_prob_rnd[i].mutate(death_probs[i].begin(),
-                                 death_probs[i].end());
+     //   death_prob_rnd[i].mutate(death_probs[i].begin(),
+         //                        0);
+        death_prob_rnd[i].mutate_all(death_probs[i].begin(),
+                                     death_probs[i].end());
     }
 }
 
@@ -244,7 +242,8 @@ void simulation::update_growth_cdf(long pos) {
 
     for(size_t i = 0; i < 3; ++i) {
         growth_prob_rnd[i].mutate(growth_probs[i].begin(),
-                                  growth_probs[i].end());
+                                  growth_probs[i].end(),
+                                  pos);
     }
 }
 
@@ -301,19 +300,15 @@ void simulation::update_death_prob(size_t pos) {
 simulation::simulation(const Param& param) {
   parameters = param;
 
-  sq_size = static_cast<size_t>(sqrt(parameters.num_cells));
-
-  world.resize(parameters.num_cells);
+  world.resize(num_cells);
 
   for(size_t i = 0; i < world.size(); ++i) {
     world[i].pos = i;
     world[i].set_coordinates(sq_size);
   }
 
-  growth_probs.resize(3, std::vector< float >(parameters.num_cells, 0.f));
-  death_probs.resize(3, std::vector< float >(parameters.num_cells, 0.f));
-
-  //max_growth_prob = {0.f, 0.f, 0.f};
+  growth_probs.resize(3, std::vector< float >(num_cells, 0.f));
+  death_probs.resize(3, std::vector< float >(num_cells, 0.f));
 }
 
 void simulation::print_to_file(float t) {
@@ -399,14 +394,6 @@ void simulation::infect_random() {
         num_cancer_cells--; // easy count for now.
         infected_cells++;
     }
-
-    // superfluous check
-    std::array<int, 3> num_cells = {0, 0, 0};
-    for(auto i : world) {
-        num_cells[i.node_type]++;
-    }
-    assert(num_cells[2] == infected_cells);
-
 
     update_growth_cdf(0); // update all vectors from the start.
     update_death_cdf_all();
