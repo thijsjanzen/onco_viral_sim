@@ -46,8 +46,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     update_speed = ui->speed_slider->value();
 
-    ui->box_infection_routine->addItem("Random");
     ui->box_infection_routine->addItem("Center");
+    ui->box_infection_routine->addItem("Random");
+
+    ui->box_start_setup->addItem("Full");
+    ui->box_start_setup->addItem("Grow");
 }
 
 MainWindow::~MainWindow()
@@ -103,6 +106,7 @@ void MainWindow::print_params(const Param& p) {
     s << get_string("Cancer time", p.time_adding_cancer);
     s << get_string("Virus time", p.time_adding_cancer);
     s << get_string("Initial # cancer cells", p.initial_number_cancer_cells);
+    s << get_string("Initial # of normal cells", p.initial_number_normal_cells);
     s << get_string("Birth Rate Normal", p.birth_normal);
     s << get_string("Death Rate Normal", p.death_normal);
     s << get_string("Birth Rate Cancer", p.birth_cancer);
@@ -111,6 +115,7 @@ void MainWindow::print_params(const Param& p) {
     s << get_string("Death Rate Infected", p.death_infected);
     s << get_string("Infection routine", p.infection_type);
     s << get_string("Infection %", p.percent_infected);
+    s << get_string("Start type", p.start_setup);
 
     ui->text->appendPlainText(QString::fromStdString(s.str()));
     return;
@@ -124,6 +129,7 @@ void MainWindow::update_parameters(Param& p) {
    p.time_adding_virus = static_cast<int>(ui->box_virus_time->value());
 
    p.initial_number_cancer_cells = static_cast<int>(ui->box_cancer_cells->value());
+   p.initial_number_normal_cells = static_cast<int>(ui->box_normal_cells->value());
 
    p.birth_normal = static_cast<float>(ui->box_birth_normal->value());
    p.death_normal = static_cast<float>(ui->box_death_normal->value());
@@ -137,13 +143,19 @@ void MainWindow::update_parameters(Param& p) {
    p.percent_infected = static_cast<float>(ui->box_percent_infected->value());
    p.infection_type = random_infection;
    auto infection_string = ui->box_infection_routine->currentText();
-   if(infection_string == "random")
+   if(infection_string == "Random")
        p.infection_type = random_infection;
-   if(infection_string == "center")
+   if(infection_string == "Center")
        p.infection_type = center_infection;
 
-   print_params(p);
 
+   auto start_string = ui->box_start_setup->currentText();
+    if(start_string == "Grow")
+        p.start_setup = grow;
+    if(start_string == "Full")
+        p.start_setup = full;
+
+   print_params(p);
    return;
 }
 

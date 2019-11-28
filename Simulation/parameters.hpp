@@ -10,7 +10,7 @@
 #include <cstdio>
 
 enum infection_routine {random_infection, center_infection, multinode, perimeter};
-
+enum start_type {full, grow};
 
 struct Param {
 
@@ -27,9 +27,12 @@ struct Param {
   int time_adding_cancer;
 
   int initial_number_cancer_cells;
+  int initial_number_normal_cells;
 
   float percent_infected;
   infection_routine infection_type;
+
+  start_type start_setup;
 
   size_t num_cells;
 

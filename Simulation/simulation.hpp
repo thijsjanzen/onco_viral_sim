@@ -61,21 +61,21 @@ private:
   void implement_death(const cell_type& parent);
   void implement_growth(const cell_type& parent);
   void update_growth_prob(size_t pos);
+  void update_death_prob(size_t pos);
 
   void add_cells(cell_type focal_cell_type);
 
   void print_to_file(float t);
 
-  void update_death_prob_vectors(const cell_type& parent, long pos);
-  void update_growth_prob_vectors(long pos);
-
-  //void verify_growth_probs();
-  //void verify_death_probs();
-  //void verify_bounds();
+  void update_death_cdf(const cell_type& parent, long pos);
+  void update_growth_cdf(long pos);
+  void update_death_cdf_all();
 
   void add_infected();
   void infect_random();
   void infect_center();
+
+  void initialize_full();
 
 };
 
