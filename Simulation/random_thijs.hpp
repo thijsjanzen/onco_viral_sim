@@ -10,6 +10,59 @@
 #include <algorithm>
 #include "rndutils.hpp"
 
+template <int num_bins>
+struct binned_distribution {
+public:
+    rndutils::xorshift128 rndgen_;
+
+    binned_distribution() {
+        std::random_device rd;
+        rndgen_ = rndutils::make_random_engine(rd());
+    }
+
+   template< typename It>
+   binned_distribution(It start, It end) {
+     std::random_device rd;
+     rndgen_ = rndutils::make_random_engine(rd());
+     int N = std::distance(start, end);
+     int bin_size = N / num_bins;
+     for(int i = 0; i < num_bins; ++i) {
+       auto start_it = start + i * bin_size;
+       auto end_it = start + (i + 1) * bin_size - 1;
+       dist[i] = rndutils::mutable_discrete_distribution< int, rndutils::all_zero_policy_nothing >(start_it, end_it);
+       row_weights[i] = dist[i].cdf_().back();
+     }
+     rows = rndutils::mutable_discrete_distribution< int, rndutils::all_zero_policy_nothing >(row_weights.begin(), row_weights.end());
+   }
+
+   size_t operator()(void) noexcept
+   {
+    // draw a row
+    size_t row = rows(rndgen_);
+    size_t col = dist[row](rndgen_);
+    return row * bin_size + col;
+   }
+
+   template< typename It>
+   void update(It start, size_t pos) {
+       size_t row = static_cast<size_t>(pos / bin_size);
+       auto start_it = start + row * bin_size;
+       auto end_it = start + (row + 1) * bin_size - 1;
+       dist[row].mutate(start_it, end_it);
+       row_weights[row] = dist[row].cdf_().back();
+       rows.mutate(row_weights.begin(), row_weights.end());
+   }
+
+ private:
+    int bin_size;
+    std::array<float, num_bins> row_weights;
+    std::array< rndutils::mutable_discrete_distribution< int, rndutils::all_zero_policy_nothing >, num_bins > dist;
+    rndutils::mutable_discrete_distribution< int, rndutils::all_zero_policy_nothing > rows;
+};
+
+
+
+
 struct rnd_t {
     rndutils::xorshift128 rndgen_;
 
@@ -76,5 +129,9 @@ struct rnd_t {
     }
   }
 };
+
+
+
+
 
 #endif  // RANDOM_THIJS_H
