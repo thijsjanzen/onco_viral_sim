@@ -72,8 +72,8 @@ private:
 
   void print_to_file(float t);
 
-  void update_death_cdf(const cell_type& parent, long pos);
-  void update_growth_cdf(long pos);
+  void update_death_cdf(const cell_type& parent, size_t pos);
+  void update_growth_cdf(size_t pos);
   void update_death_cdf_all();
 
   void add_infected();

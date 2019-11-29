@@ -46,43 +46,9 @@ void node::update_neighbors(std::vector< node >& world,
             }
         }
     }
-
-
-
-
-  /*for(int i = -1; i <= 1; i++) {
-    for(int j = -1; j <= 1; j++) {
-      if(abs(i - j) == 1) {
-        int other_x = static_cast<int>(x_) + i;
-        int other_y = static_cast<int>(y_) + j;
-        int other_pos = other_x * static_cast<int>(world_size) + other_y;
-        if(other_pos >= 0 && other_pos < static_cast<int>(world.size())) {
-          node* neighbor = &world[static_cast<size_t>(other_pos)];
-
-          if( abs(static_cast<int>(neighbor->x_ - this->x_)) > 1 ||
-              abs(static_cast<int>(neighbor->y_ - this->y_)) > 1) {
-              int a = 5;
-          }
-
-          neighbors.push_back(neighbor);
-        }
-      }
-    }
-  }*/
-}
-
-void node::update_neighbor_types() {
-  neighbor_types = std::vector< cell_type>(neighbors.size());
-  size_t j = 0;
-  for(auto it = neighbors.begin(); it != neighbors.end(); ++it) {
-    cell_type other = (*it)->node_type;
-    neighbor_types[j] = other;
-    j++;
-  }
 }
 
 std::array<float, 3> node::calc_prob_of_growth() {
-  update_neighbor_types(); // this may be removed later perhaps
   std::array<float, 3> prob_of_growth = {0.f, 0.f, 0.f};
 
   if(node_type == normal) {
@@ -111,6 +77,3 @@ void node::set_coordinates(size_t row_size) {
     x_ = pos / row_size;
     y_ = pos % row_size;
 }
-
-
-

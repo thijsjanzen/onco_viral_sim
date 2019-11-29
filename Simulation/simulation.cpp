@@ -37,8 +37,6 @@ void simulation::update_one_step() {
 
 
 void simulation::run() {
-  // do stuff
-
   t = 0.f;
   while(t < parameters.maximum_time) {
      update_one_step();
@@ -51,17 +49,14 @@ void simulation::initialize_network() {
 
   for(auto& i : world) {
     i.update_neighbors(world, sq_size);
+    i.node_type = empty;
   }
 
   if(parameters.start_setup == grow) {
 
     add_cells(normal);
-    for(auto& i : world) {
-        i.update_neighbor_types();
-    }
 
-    count_cell_types();
-    update_growth_probabilities();
+ //   update_growth_probabilities();
 
     for(size_t i = 0; i < 3; ++i) {
         growth_prob_rnd[i] = binned_distribution<sq_size>(growth_probs[i].begin(), growth_probs[i].end());
@@ -124,14 +119,14 @@ void simulation::do_event(size_t event) {
 }
 
 void simulation::update_rates(std::array< float, 6>& rates) {
-  rates[0] = parameters.birth_normal   * growth_prob_rnd[normal].get_total_sum();  //static_cast<float>(growth_prob_rnd[normal].cdf().back()); //sum_growth_prob[normal]; //std::accumulate(growth_probs[normal].begin(), growth_probs[normal].end(), 0.0);
-  rates[1] = parameters.death_normal   * death_prob_rnd[normal].get_total_sum(); //static_cast<float>(death_prob_rnd[normal].cdf().back()); //sum_death_prob[normal];
+  rates[0] = parameters.birth_normal   * growth_prob_rnd[normal].get_total_sum();
+  rates[1] = parameters.death_normal   * death_prob_rnd[normal].get_total_sum();
 
-  rates[2] = parameters.birth_cancer   * growth_prob_rnd[cancer].get_total_sum();//static_cast<float>(growth_prob_rnd[cancer].cdf().back()); //sum_growth_prob[cancer]; //std::accumulate(growth_probs[cancer].begin(), growth_probs[cancer].end(), 0.0);
-  rates[3] = parameters.death_cancer   * death_prob_rnd[cancer].get_total_sum(); //static_cast<float>(death_prob_rnd[cancer].cdf().back()); //sum_death_prob[cancer];
+  rates[2] = parameters.birth_cancer   * growth_prob_rnd[cancer].get_total_sum();
+  rates[3] = parameters.death_cancer   * death_prob_rnd[cancer].get_total_sum();
 
-  rates[4] = parameters.birth_infected * growth_prob_rnd[infected].get_total_sum(); //static_cast<float>(growth_prob_rnd[infected].cdf().back());  //std::accumulate(growth_probs[infected].begin(), growth_probs[infected].end(), 0.0);
-  rates[5] = parameters.death_infected * death_prob_rnd[infected].get_total_sum(); //static_cast<float>(death_prob_rnd[infected].cdf().back());
+  rates[4] = parameters.birth_infected * growth_prob_rnd[infected].get_total_sum();
+  rates[5] = parameters.death_infected * death_prob_rnd[infected].get_total_sum();
 }
 
 size_t simulation::pick_event(const std::array< float, 6>& rates, float sum) {
@@ -164,8 +159,7 @@ void simulation::implement_death(const cell_type& parent) {
 
   world[position_of_dying_cell].node_type = empty;
   update_death_prob(position_of_dying_cell);
-  update_death_cdf(parent, static_cast<long>(position_of_dying_cell));
-  //sum_death_prob[parent]--; // update death probabilities
+  update_death_cdf(parent, position_of_dying_cell);
 
   size_t min_pos = world.size();
   update_growth_prob(position_of_dying_cell);
@@ -175,7 +169,7 @@ void simulation::implement_death(const cell_type& parent) {
   }
 
   // the next line takes most time here:
-  update_growth_cdf(static_cast<long>(min_pos));
+  update_growth_cdf(min_pos);
 }
 
 
@@ -213,17 +207,14 @@ void simulation::implement_growth(const cell_type& parent) {
     if(i->pos < min_pos) min_pos = i->pos;
   }
 
-  update_growth_cdf(static_cast<long>(min_pos));
+  update_growth_cdf(min_pos);
   update_death_cdf(parent, position_of_grown_cell);
 }
 
 
 
 
-void simulation::update_death_cdf(const cell_type& parent, long pos) {
-  //  death_prob_rnd[parent].mutate(death_probs[parent].begin(),
-   //                               death_probs[parent].end());
-
+void simulation::update_death_cdf(const cell_type& parent, size_t pos) {
     death_prob_rnd[parent].mutate(death_probs[parent].begin(),
                                   death_probs[parent].end(),
                                   pos);
@@ -231,15 +222,12 @@ void simulation::update_death_cdf(const cell_type& parent, long pos) {
 
 void simulation::update_death_cdf_all() {
     for(size_t i = 0; i < 3; ++i) {
-     //   death_prob_rnd[i].mutate(death_probs[i].begin(),
-         //                        0);
         death_prob_rnd[i].mutate_all(death_probs[i].begin(),
                                      death_probs[i].end());
     }
 }
 
-void simulation::update_growth_cdf(long pos) {
-
+void simulation::update_growth_cdf(size_t pos) {
     for(size_t i = 0; i < 3; ++i) {
         growth_prob_rnd[i].mutate(growth_probs[i].begin(),
                                   growth_probs[i].end(),
@@ -308,7 +296,7 @@ simulation::simulation(const Param& param) {
   }
 
   growth_probs.resize(3, std::vector< float >(num_cells, 0.f));
-  death_probs.resize(3, std::vector< float >(num_cells, 0.f));
+  death_probs.resize( 3, std::vector< float >(num_cells, 0.f));
 }
 
 void simulation::print_to_file(float t) {
@@ -404,8 +392,6 @@ void simulation::infect_center() {
 
     size_t to_be_infected = static_cast<size_t>(parameters.percent_infected * num_cancer_cells);
 
-
-    // TODO: calculate the center of the cancer!
     float avg_x = 0;
     float avg_y = 0;
     for(auto i : world) {
@@ -419,7 +405,6 @@ void simulation::infect_center() {
     size_t start_y = static_cast<size_t>(avg_y / num_cancer_cells);
 
     //now find starting cell to infect
-
     size_t starting_pos = start_x * sq_size + start_y;
     while(world[starting_pos].node_type != cancer) {
         for(size_t i = 0; i < world[starting_pos].neighbors.size(); ++i) {
@@ -476,9 +461,6 @@ void simulation::add_infected() {
             // do something
             break;
     }
-
-    int num_infected = static_cast<int>(std::accumulate(death_probs[infected].begin(), death_probs[infected].end(), 0));
-    assert(num_infected > 0);
 }
 
 void simulation::initialize_full() {
@@ -496,7 +478,7 @@ void simulation::initialize_full() {
         update_death_prob(i.pos);
     }
 
-    parameters.percent_infected = 0.1;
+    parameters.percent_infected = 0.1f;
     infect_center();
 
     // and update again, just for added safety:
