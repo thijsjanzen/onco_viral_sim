@@ -144,13 +144,19 @@ void simulation::implement_death(const cell_type& parent) {
   size_t position_of_dying_cell = 0;
   switch(parent) {
     case normal:
-      position_of_dying_cell = static_cast<size_t>(death_prob_rnd[normal](rndgen.rndgen_));
+      position_of_dying_cell = static_cast<size_t>(death_prob_rnd[normal].draw_explicit(death_probs[normal].begin(),
+                                                                                        death_probs[normal].end(),
+                                                                                        rndgen)); //static_cast<size_t>(death_prob_rnd[normal](rndgen.rndgen_));
       break;
     case cancer:
-      position_of_dying_cell = static_cast<size_t>(death_prob_rnd[cancer](rndgen.rndgen_));
+      position_of_dying_cell = static_cast<size_t>(death_prob_rnd[cancer].draw_explicit(death_probs[cancer].begin(),
+                                                                                        death_probs[cancer].end(),
+                                                                                        rndgen));//static_cast<size_t>(death_prob_rnd[cancer](rndgen.rndgen_));
       break;
     case infected:
-      position_of_dying_cell = static_cast<size_t>(death_prob_rnd[infected](rndgen.rndgen_));
+      position_of_dying_cell = static_cast<size_t>(death_prob_rnd[infected].draw_explicit(death_probs[infected].begin(),
+                                                                                          death_probs[infected].end(),
+                                                                                            rndgen));
       break;
     case empty:
       position_of_dying_cell = 0;
@@ -159,7 +165,6 @@ void simulation::implement_death(const cell_type& parent) {
 
   world[position_of_dying_cell].node_type = empty;
   update_death_prob(position_of_dying_cell);
-  update_death_cdf(parent, position_of_dying_cell);
 
   size_t min_pos = world.size();
   update_growth_prob(position_of_dying_cell);
@@ -169,7 +174,7 @@ void simulation::implement_death(const cell_type& parent) {
   }
 
   // the next line takes most time here:
-  update_growth_cdf(min_pos);
+  //update_growth_cdf(min_pos);
 }
 
 
@@ -180,13 +185,19 @@ void simulation::implement_growth(const cell_type& parent) {
   size_t position_of_grown_cell = 0;
   switch(parent) {
     case normal:
-      position_of_grown_cell = static_cast<size_t>(growth_prob_rnd[normal](rndgen.rndgen_));
+      position_of_grown_cell = static_cast<size_t>(growth_prob_rnd[normal].draw_explicit(growth_probs[normal].begin(),
+                                                                     growth_probs[normal].end(),
+                                                                     rndgen));
       break;
     case cancer:
-      position_of_grown_cell = static_cast<size_t>(growth_prob_rnd[cancer](rndgen.rndgen_));
+      position_of_grown_cell = static_cast<size_t>(growth_prob_rnd[cancer].draw_explicit(growth_probs[cancer].begin(),
+                                                                     growth_probs[cancer].end(),
+                                                                     rndgen));
       break;
     case infected:
-      position_of_grown_cell = static_cast<size_t>(growth_prob_rnd[infected](rndgen.rndgen_));
+      position_of_grown_cell = static_cast<size_t>(growth_prob_rnd[infected].draw_explicit(growth_probs[infected].begin(),
+                                                                        growth_probs[infected].end(),
+                                                                        rndgen));
       break;
     case empty:
       position_of_grown_cell = 0;
@@ -206,9 +217,6 @@ void simulation::implement_growth(const cell_type& parent) {
     update_growth_prob(i->pos);
     if(i->pos < min_pos) min_pos = i->pos;
   }
-
-  update_growth_cdf(min_pos);
-  update_death_cdf(parent, position_of_grown_cell);
 }
 
 
@@ -273,14 +281,22 @@ void simulation::add_cells(cell_type focal_cell_type) {
 void simulation::update_growth_prob(size_t pos) {
   std::array<float, 3> probs = world[pos].calc_prob_of_growth();
   for(size_t i = 0; i < 3; ++i) {
+      growth_prob_rnd[i].update_entry(growth_probs[i].begin(), growth_probs[i].end(),
+                                      pos, probs[i]);
       growth_probs[i][pos] = probs[i];
   }
 }
 
 void simulation::update_death_prob(size_t pos) {
     for(size_t i = 0; i < 3; ++i) {
-        death_probs[i][pos] = 0.f;
-        if(i == world[pos].node_type) death_probs[i][pos] = 1.f;
+        float new_val = 0.f;
+        if(i == world[pos].node_type) new_val = 1.f;
+
+        death_prob_rnd[i].update_entry(death_probs[i].begin(),
+                                       death_probs[i].end(),
+                                       pos,
+                                       new_val);
+        death_probs[i][pos] = new_val;
     }
 }
 
@@ -441,8 +457,8 @@ void simulation::infect_center() {
         update_death_prob(i.pos);
     }
 
-    update_growth_cdf(0); // update all vectors from the start.
-    update_death_cdf_all();
+   // update_growth_cdf(0); // update all vectors from the start.
+   // update_death_cdf_all();
 }
 
 
@@ -487,11 +503,10 @@ void simulation::initialize_full() {
         update_death_prob(i.pos);
     }
 
-    // now update the
-    update_growth_cdf(0);
-    update_death_cdf(normal, 0);
-    update_death_cdf(cancer, 0);
-    update_death_cdf(infected, 0);
+    for(size_t i = 0; i < 3; ++i) {
+        growth_prob_rnd[i].update_row_cdf(growth_probs[i].begin());
+        death_prob_rnd[i].update_row_cdf(death_probs[i].begin());
+    }
 }
 
 

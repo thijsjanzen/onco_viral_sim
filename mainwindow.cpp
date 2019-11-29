@@ -17,7 +17,6 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-    QApplication::processEvents();
     ui->setupUi(this);
     ui->line_plot->addGraph(); // normal
     ui->line_plot->addGraph(); // cancer
@@ -142,6 +141,7 @@ void MainWindow::update_parameters(Param& p) {
 
    p.percent_infected = static_cast<float>(ui->box_percent_infected->value());
    p.infection_type = random_infection;
+
    auto infection_string = ui->box_infection_routine->currentText();
    if(infection_string == "Random")
        p.infection_type = random_infection;
@@ -169,10 +169,9 @@ void MainWindow::on_btn_start_clicked()
     y_c.clear();
     y_i.clear();
 
-  //  auto reng = rndutils::make_random_engine<>();
-
     Param all_parameters;
     update_parameters(all_parameters);
+
     simulation Simulation(all_parameters);
 
     Simulation.initialize_network();
@@ -183,10 +182,11 @@ void MainWindow::on_btn_start_clicked()
     Simulation.t = 0.0;
     int counter = 0;
     is_running = true;
+
     while(Simulation.t < all_parameters.maximum_time) {
         Simulation.update_one_step();
         counter++;
-        QApplication::processEvents();
+
 
         int progress = static_cast<int>(100.f * Simulation.t / all_parameters.maximum_time);
         ui->progressBar->setValue(progress);
@@ -202,16 +202,17 @@ void MainWindow::on_btn_start_clicked()
 
 
     auto end_time = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( end_time - start_time ).count();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>( end_time - start_time ).count();
+
+    float time_taken = 1.f * duration / 1000;
+
     std::stringstream st;
     st << "This took ";
-    st << duration;
-    st << " microseconds\n";
+    st << time_taken;
+    st << " seconds\n";
     ui->text->appendPlainText(QString::fromStdString(st.str()));
-    std::cout << duration << "\n";
-    //std::stringstream s;
-    //s << "Done\n";
-    //ui->text->appendPlainText(QString::fromStdString(s.str()));
+    std::cout << time_taken<< "\n";
+
 }
 
 void MainWindow::update_plot(double t, const std::vector<int> &cell_numbers) {
@@ -232,6 +233,7 @@ void MainWindow::update_plot(double t, const std::vector<int> &cell_numbers) {
     ui->line_plot->rescaleAxes();
     ui->line_plot->replot();
     ui->line_plot->update();
+    QApplication::processEvents();
 }
 
 
