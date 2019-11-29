@@ -99,6 +99,7 @@ public:
        row_sum[i] = dist[i].cdf().back();
      }
      rows = rndutils::mutable_discrete_distribution< int, rndutils::all_zero_policy_nothing >(row_sum.begin(), row_sum.end());
+     total_sum = rows.cdf().back();
    }
 
    template <typename It>
@@ -184,12 +185,10 @@ public:
        if(old_val == new_val) return;
        size_t row = static_cast<size_t>(pos / bin_size);
        float adjust = new_val - old_val;
-       if(adjust < 0) {
-           int a = 5;
-       }
        row_sum[row] += adjust;
+       if(row_sum[row] < 0) row_sum[row] = 0;
        total_sum += adjust;
-       assert(row_sum[row] >= 0);
+ //      assert(row_sum[row] >= 0);
    }
 
    template< typename It>

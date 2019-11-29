@@ -56,7 +56,10 @@ void simulation::initialize_network() {
 
     add_cells(normal);
 
- //   update_growth_probabilities();
+    for(auto i : world) {
+        update_growth_prob(i.pos);
+        update_death_prob(i.pos);
+    }
 
     for(size_t i = 0; i < 3; ++i) {
         growth_prob_rnd[i] = binned_distribution<sq_size>(growth_probs[i].begin(), growth_probs[i].end());

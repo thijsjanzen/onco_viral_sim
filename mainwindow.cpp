@@ -183,15 +183,16 @@ void MainWindow::on_btn_start_clicked()
     int counter = 0;
     is_running = true;
 
+
+
     while(Simulation.t < all_parameters.maximum_time) {
         Simulation.update_one_step();
         counter++;
 
-
         int progress = static_cast<int>(100.f * Simulation.t / all_parameters.maximum_time);
         ui->progressBar->setValue(progress);
-
-        if(counter % update_speed == 0) {
+        int update_step = static_cast<int>((1.0f * update_speed / 100) * Simulation.world.size());
+        if(counter % update_step == 0) {
             update_image(Simulation.world);
 
             update_plot(static_cast<double>(Simulation.t),

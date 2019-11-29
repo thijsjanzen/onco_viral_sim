@@ -138,13 +138,13 @@
      <number>1</number>
     </property>
     <property name="maximum">
-     <number>300000</number>
+     <number>100</number>
     </property>
     <property name="singleStep">
      <number>1</number>
     </property>
     <property name="value">
-     <number>100</number>
+     <number>1</number>
     </property>
     <property name="orientation">
      <enum>Qt::Horizontal</enum>
@@ -153,7 +153,7 @@
      <enum>QSlider::TicksBelow</enum>
     </property>
     <property name="tickInterval">
-     <number>10000</number>
+     <number>10</number>
     </property>
    </widget>
    <widget class="QLabel" name="label_11">
@@ -265,7 +265,7 @@
      <string notr="true"/>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>180</x>
@@ -478,18 +478,10 @@
      </item>
     </layout>
    </widget>
-   <zorder>label_8</zorder>
-   <zorder>label_7</zorder>
-   <zorder>label_4</zorder>
-   <zorder>label_5</zorder>
-   <zorder>label_9</zorder>
-   <zorder>label_6</zorder>
-   <zorder>layoutWidget</zorder>
    <zorder>layoutWidget</zorder>
    <zorder>q_label</zorder>
    <zorder>btn_start</zorder>
    <zorder>text</zorder>
-   <zorder>label_10</zorder>
    <zorder>line_plot</zorder>
    <zorder>btn_stop</zorder>
    <zorder>progressBar</zorder>
@@ -499,8 +491,6 @@
    <zorder>box_infection_routine</zorder>
    <zorder>label_13</zorder>
    <zorder>box_percent_infected</zorder>
-   <zorder>label_14</zorder>
-   <zorder>box_normal_cells</zorder>
    <zorder>label_15</zorder>
    <zorder>box_start_setup</zorder>
   </widget>
