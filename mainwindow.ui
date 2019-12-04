@@ -359,7 +359,7 @@
             <number>5000</number>
            </property>
            <property name="value">
-            <number>4</number>
+            <number>400</number>
            </property>
           </widget>
          </item>
@@ -528,6 +528,96 @@
      <double>0.010000000000000</double>
     </property>
    </widget>
+   <widget class="QDoubleSpinBox" name="box_birth_cancer_resistant">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>240</y>
+      <width>64</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="singleStep">
+     <double>0.010000000000000</double>
+    </property>
+    <property name="value">
+     <double>0.900000000000000</double>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_17">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>270</y>
+      <width>141</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>death_cancer_resistant</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_18">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>239</y>
+      <width>141</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>birth_cancer_resistant</string>
+    </property>
+   </widget>
+   <widget class="QDoubleSpinBox" name="box_death_cancer_resistant">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>270</y>
+      <width>64</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="singleStep">
+     <double>0.010000000000000</double>
+    </property>
+    <property name="value">
+     <double>0.100000000000000</double>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_19">
+    <property name="geometry">
+     <rect>
+      <x>390</x>
+      <y>40</y>
+      <width>101</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Frequency resistant cancer</string>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QDoubleSpinBox" name="box_freq_resistant_cancer">
+    <property name="geometry">
+     <rect>
+      <x>510</x>
+      <y>50</y>
+      <width>64</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="singleStep">
+     <double>0.005000000000000</double>
+    </property>
+    <property name="value">
+     <double>0.010000000000000</double>
+    </property>
+   </widget>
    <zorder>layoutWidget</zorder>
    <zorder>q_label</zorder>
    <zorder>btn_start</zorder>
@@ -545,6 +635,12 @@
    <zorder>box_start_setup</zorder>
    <zorder>label_16</zorder>
    <zorder>box_prob_normal_infection</zorder>
+   <zorder>box_birth_cancer_resistant</zorder>
+   <zorder>label_17</zorder>
+   <zorder>label_18</zorder>
+   <zorder>box_death_cancer_resistant</zorder>
+   <zorder>label_19</zorder>
+   <zorder>box_freq_resistant_cancer</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>

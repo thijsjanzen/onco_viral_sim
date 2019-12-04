@@ -33,7 +33,7 @@ public:
 
   rnd_t rndgen;
 
-  const static size_t sq_size = 250;
+  const static size_t sq_size = 100;
 
   const static size_t num_cells = sq_size * sq_size;
 
@@ -43,24 +43,21 @@ private:
 
   Param parameters;
 
-
-
-  std::array< binned_distribution<sq_size>, 3 > growth_prob_rnd;
-  std::array< binned_distribution<sq_size>, 3 > death_prob_rnd;
+  std::array< binned_distribution<sq_size>, 4 > growth_prob_rnd;
+  std::array< binned_distribution<sq_size>, 4 > death_prob_rnd;
 
   std::vector< std::vector< float >> growth_probs;
   std::vector< std::vector< float >> death_probs;
 
+  std::array<float, 4> num_cell_types;
 
-  std::array<float, 3> num_cell_types;
-
-  std::array< float, 6> rates;
+  std::array< float, 8> rates;
 
   void count_cell_types(); // this is very heavy, should not be ran often
-  void update_rates(std::array< float, 6>& rates);
+  void update_rates();
   void update_total_growth_prob();
 
-  size_t pick_event(const std::array< float, 6>& rates, float sum);
+  size_t pick_event(const std::array< float, 8>& rates, float sum);
   void do_event(size_t event);
   void update_growth_probabilities();
   void implement_death(const cell_type& parent);
@@ -68,7 +65,7 @@ private:
   void update_growth_prob(size_t pos);
   void update_death_prob(size_t pos);
 
-  void add_cells(cell_type focal_cell_type);
+  void add_cells(const cell_type& focal_cell_type);
 
   void print_to_file(float t);
 
@@ -83,6 +80,8 @@ private:
 
   void initialize_full();
 
+
+  void change_cell_type(const size_t& pos, const cell_type& focal_cell_type);
 };
 
 

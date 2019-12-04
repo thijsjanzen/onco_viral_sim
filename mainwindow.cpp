@@ -21,13 +21,16 @@ MainWindow::MainWindow(QWidget *parent)
     ui->line_plot->addGraph(); // normal
     ui->line_plot->addGraph(); // cancer
     ui->line_plot->addGraph(); // infected
+    ui->line_plot->addGraph(); // resistant
     ui->line_plot->graph(0)->setPen(QPen(Qt::blue));
     ui->line_plot->graph(1)->setPen(QPen(Qt::red));
     ui->line_plot->graph(2)->setPen(QPen(Qt::green));
+    ui->line_plot->graph(3)->setPen(QPen(Qt::magenta));
 
     ui->line_plot->graph(0)->setName("Normal");
     ui->line_plot->graph(1)->setName("Cancer");
     ui->line_plot->graph(2)->setName("Infected");
+    ui->line_plot->graph(3)->setName("Resistant");
 
     QCPPlotTitle *fst_title = new QCPPlotTitle(ui->line_plot, "Number of cells");
     ui->line_plot->plotLayout()->insertRow(0);
@@ -37,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->line_plot->legend->setVisible(true);
     QFont legendFont = font();
-    legendFont.setPointSize(7);
+   // legendFont.setPointSize(7);
     ui->line_plot->legend->setFont(legendFont);
     ui->line_plot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignTop|Qt::AlignLeft);
 
@@ -70,10 +73,12 @@ void MainWindow::update_image(const std::vector< node >& world) {
     QPainter p(&image_);
 
     std::vector< QColor > colorz = {
-        {0, 0, 255}, // blue, normal
-        {255, 0, 0}, // red,  cancer
-        {0, 255, 0}, // green, infected
-        {0, 0, 0} // black, empty
+        {0, 0, 255},    // blue, normal
+        {255, 0, 0},    // red,  cancer
+        {0, 255, 0},    // green, infected
+        {128, 0, 128},   // purple, resistant
+        {0, 0, 0}      // black, empty
+
     };
 
     for(auto i : world) {
@@ -112,10 +117,14 @@ void MainWindow::print_params(const Param& p) {
     s << get_string("Death Rate Cancer", p.death_cancer);
     s << get_string("Birth Rate Infected", p.birth_infected);
     s << get_string("Death Rate Infected", p.death_infected);
+    s << get_string("Birth Rate Resistant", p.birth_cancer_resistant);
+    s << get_string("Death Rate Resistant", p.death_cancer_resistant);
+
     s << get_string("Infection routine", p.infection_type);
     s << get_string("Infection %", p.percent_infected);
     s << get_string("Start type", p.start_setup);
     s << get_string("Prob normal infection", p.prob_normal_infection);
+    s << get_string("Frequency resistant", p.freq_resistant);
 
     ui->text->appendPlainText(QString::fromStdString(s.str()));
     return;
@@ -140,8 +149,13 @@ void MainWindow::update_parameters(Param& p) {
    p.birth_infected = static_cast<float>(ui->box_birth_infected->value());
    p.death_infected = static_cast<float>(ui->box_death_infected->value());
 
+   p.birth_cancer_resistant = static_cast<float>(ui->box_birth_cancer_resistant->value());
+   p.death_cancer_resistant = static_cast<float>(ui->box_death_cancer_resistant->value());
+
    p.percent_infected = static_cast<float>(ui->box_percent_infected->value());
    p.prob_normal_infection = static_cast<float>(ui->box_prob_normal_infection->value());
+   p.freq_resistant = static_cast<float>(ui->box_freq_resistant_cancer->value());
+
 
    p.infection_type = random_infection;
 

@@ -19,7 +19,7 @@ node::node() {
 node::node(size_t p, float norm_infected) :
     pos(p),
     prob_normal_infected(norm_infected) {
-  node_type = empty;
+    node_type = empty;
 }
 
 void node::update_neighbors(std::vector< node >& world,
@@ -50,21 +50,24 @@ void node::update_neighbors(std::vector< node >& world,
     }
 }
 
-std::array<float, 3> node::calc_prob_of_growth() {
-  std::array<float, 3> prob_of_growth = {0.f, 0.f, 0.f};
+std::array<float, 4> node::calc_prob_of_growth() {
+  std::array<float, 4> prob_of_growth = {0.f, 0.f, 0.f, 0.f};
 
   if(node_type == normal) {
     // infected can grow into this, but at lower frequency:
-    prob_of_growth[infected] =  prob_normal_infected * freq_type_neighbours(infected);
+    prob_of_growth[infected]  =  prob_normal_infected * freq_type_neighbours(infected);
   }
   if(node_type == cancer) {
     // infected nodes can grow into this
-    prob_of_growth[infected] = freq_type_neighbours(infected);
+    prob_of_growth[infected]  = freq_type_neighbours(infected);
   }
   if(node_type == empty) {
-    prob_of_growth[normal] = freq_type_neighbours(normal);
-    prob_of_growth[cancer] = freq_type_neighbours(cancer);
+    prob_of_growth[normal]    = freq_type_neighbours(normal);
+    prob_of_growth[cancer]    = freq_type_neighbours(cancer);
+    prob_of_growth[resistant] = freq_type_neighbours(resistant);
   }
+
+
   return prob_of_growth;
 }
 
