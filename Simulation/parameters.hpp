@@ -33,6 +33,8 @@ struct Param {
   float percent_infected;
   infection_routine infection_type;
 
+  float prob_normal_infection;
+
   start_type start_setup;
 
 
@@ -58,6 +60,8 @@ struct Param {
 
     infection_type = random_infection;
     percent_infected = 0.1;
+
+    prob_normal_infection = 0.01;
   }
 
 

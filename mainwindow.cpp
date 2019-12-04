@@ -115,6 +115,7 @@ void MainWindow::print_params(const Param& p) {
     s << get_string("Infection routine", p.infection_type);
     s << get_string("Infection %", p.percent_infected);
     s << get_string("Start type", p.start_setup);
+    s << get_string("Prob normal infection", p.prob_normal_infection);
 
     ui->text->appendPlainText(QString::fromStdString(s.str()));
     return;
@@ -140,6 +141,8 @@ void MainWindow::update_parameters(Param& p) {
    p.death_infected = static_cast<float>(ui->box_death_infected->value());
 
    p.percent_infected = static_cast<float>(ui->box_percent_infected->value());
+   p.prob_normal_infection = static_cast<float>(ui->box_prob_normal_infection->value());
+
    p.infection_type = random_infection;
 
    auto infection_string = ui->box_infection_routine->currentText();

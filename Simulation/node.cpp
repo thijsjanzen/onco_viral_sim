@@ -16,7 +16,9 @@ node::node() {
   node_type = empty;
 }
 
-node::node(size_t p) : pos(p) {
+node::node(size_t p, float norm_infected) :
+    pos(p),
+    prob_normal_infected(norm_infected) {
   node_type = empty;
 }
 
@@ -52,7 +54,8 @@ std::array<float, 3> node::calc_prob_of_growth() {
   std::array<float, 3> prob_of_growth = {0.f, 0.f, 0.f};
 
   if(node_type == normal) {
-    // no other type can grow into this
+    // infected can grow into this, but at lower frequency:
+    prob_of_growth[infected] =  prob_normal_infected * freq_type_neighbours(infected);
   }
   if(node_type == cancer) {
     // infected nodes can grow into this

@@ -222,9 +222,6 @@ void simulation::implement_growth(const cell_type& parent) {
   }
 }
 
-
-
-
 void simulation::update_death_cdf(const cell_type& parent, size_t pos) {
     death_prob_rnd[parent].mutate(death_probs[parent].begin(),
                                   death_probs[parent].end(),
@@ -247,7 +244,6 @@ void simulation::update_growth_cdf(size_t pos) {
 }
 
 
-
 void simulation::add_cells(cell_type focal_cell_type) {
     // pick center node:
   size_t x = sq_size / 2;
@@ -256,26 +252,26 @@ void simulation::add_cells(cell_type focal_cell_type) {
   std::vector<size_t> cells_turned(1, focal_pos);
   world[focal_pos].node_type = focal_cell_type;
   auto max_number_of_cells = static_cast<size_t>(parameters.initial_number_cancer_cells);
-  if(focal_cell_type == normal) max_number_of_cells = parameters.initial_number_normal_cells;
-  if(max_number_of_cells > world.size()) max_number_of_cells = world.size();
+  if (focal_cell_type == normal) max_number_of_cells = parameters.initial_number_normal_cells;
+  if (max_number_of_cells > world.size()) max_number_of_cells = world.size();
   size_t counter = 0;
-  while(cells_turned.size() < max_number_of_cells) {
+  while (cells_turned.size() < max_number_of_cells) {
     focal_pos = cells_turned[counter];
-    for(size_t i = 0; i < world[focal_pos].neighbors.size(); ++i) {
+    for (size_t i = 0; i < world[focal_pos].neighbors.size(); ++i) {
       size_t other_pos = world[focal_pos].neighbors[i]->pos;
-      if(world[other_pos].node_type != focal_cell_type) {
+      if (world[other_pos].node_type != focal_cell_type) {
          world[other_pos].node_type = focal_cell_type;
         cells_turned.push_back(other_pos);
-        if(cells_turned.size() >= max_number_of_cells) break;
+        if (cells_turned.size() >= max_number_of_cells) break;
       }
     }
     counter++;
   }
 
-  for(auto& i : cells_turned) {
+  for (auto& i : cells_turned) {
     update_growth_prob(i);
     update_death_prob(i);
-    for(auto& j : world[i].neighbors) {
+    for (auto& j : world[i].neighbors) {
       update_growth_prob(j->pos);
     }
   }
@@ -283,7 +279,7 @@ void simulation::add_cells(cell_type focal_cell_type) {
 
 void simulation::update_growth_prob(size_t pos) {
   std::array<float, 3> probs = world[pos].calc_prob_of_growth();
-  for(size_t i = 0; i < 3; ++i) {
+  for (size_t i = 0; i < 3; ++i) {
       growth_prob_rnd[i].update_entry(growth_probs[i].begin(), growth_probs[i].end(),
                                       pos, probs[i]);
       growth_probs[i][pos] = probs[i];
@@ -291,9 +287,9 @@ void simulation::update_growth_prob(size_t pos) {
 }
 
 void simulation::update_death_prob(size_t pos) {
-    for(size_t i = 0; i < 3; ++i) {
+    for (size_t i = 0; i < 3; ++i) {
         float new_val = 0.f;
-        if(i == world[pos].node_type) new_val = 1.f;
+        if (i == world[pos].node_type) new_val = 1.f;
 
         death_prob_rnd[i].update_entry(death_probs[i].begin(),
                                        death_probs[i].end(),
@@ -309,9 +305,10 @@ simulation::simulation(const Param& param) {
 
   world.resize(num_cells);
 
-  for(size_t i = 0; i < world.size(); ++i) {
+  for (size_t i = 0; i < world.size(); ++i) {
     world[i].pos = i;
     world[i].set_coordinates(sq_size);
+    world[i].prob_normal_infected = parameters.prob_normal_infection;
   }
 
   growth_probs.resize(3, std::vector< float >(num_cells, 0.f));
@@ -453,6 +450,7 @@ void simulation::infect_center() {
         }
       }
       counter++;
+      if(counter > cells_turned.size()) break;
     }
 
     for(auto i : world) {
@@ -464,8 +462,28 @@ void simulation::infect_center() {
    // update_death_cdf_all();
 }
 
+void simulation::infect_all_cancer() {
+    for(auto& i : world) {
+        if(i.node_type == cancer) {
+               i.node_type = infected;
+        }
+    }
+
+    for(auto i : world) {
+        update_growth_prob(i.pos);
+        update_death_prob(i.pos);
+    }
+}
+
 
 void simulation::add_infected() {
+
+    if(parameters.percent_infected == 1.0f) {
+        infect_all_cancer();
+        return;
+    }
+
+
     switch(parameters.infection_type) {
         case random_infection:
             infect_random();

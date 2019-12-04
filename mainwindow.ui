@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1160</width>
-    <height>841</height>
+    <width>1394</width>
+    <height>836</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -42,7 +42,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>50</y>
+      <y>20</y>
       <width>113</width>
       <height>32</height>
      </rect>
@@ -54,7 +54,7 @@
    <widget class="QLabel" name="q_label">
     <property name="geometry">
      <rect>
-      <x>380</x>
+      <x>630</x>
       <y>10</y>
       <width>750</width>
       <height>750</height>
@@ -103,7 +103,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>90</y>
+      <y>60</y>
       <width>113</width>
       <height>32</height>
      </rect>
@@ -211,7 +211,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>fraction infected</string>
+     <string>Fraction infected</string>
     </property>
     <property name="scaledContents">
      <bool>false</bool>
@@ -228,6 +228,9 @@
       <width>55</width>
       <height>21</height>
      </rect>
+    </property>
+    <property name="singleStep">
+     <double>0.010000000000000</double>
     </property>
     <property name="value">
      <double>0.100000000000000</double>
@@ -341,7 +344,7 @@
           <number>100000</number>
          </property>
          <property name="value">
-          <number>10000</number>
+          <number>1000</number>
          </property>
         </widget>
        </item>
@@ -362,6 +365,9 @@
          </item>
          <item>
           <widget class="QDoubleSpinBox" name="box_birth_normal">
+           <property name="singleStep">
+            <double>0.010000000000000</double>
+           </property>
            <property name="value">
             <double>0.500000000000000</double>
            </property>
@@ -369,6 +375,9 @@
          </item>
          <item>
           <widget class="QDoubleSpinBox" name="box_death_normal">
+           <property name="singleStep">
+            <double>0.010000000000000</double>
+           </property>
            <property name="value">
             <double>0.200000000000000</double>
            </property>
@@ -376,6 +385,9 @@
          </item>
          <item>
           <widget class="QDoubleSpinBox" name="box_birth_cancer">
+           <property name="singleStep">
+            <double>0.010000000000000</double>
+           </property>
            <property name="value">
             <double>1.000000000000000</double>
            </property>
@@ -383,6 +395,9 @@
          </item>
          <item>
           <widget class="QDoubleSpinBox" name="box_death_cancer">
+           <property name="singleStep">
+            <double>0.010000000000000</double>
+           </property>
            <property name="value">
             <double>0.100000000000000</double>
            </property>
@@ -390,6 +405,9 @@
          </item>
          <item>
           <widget class="QDoubleSpinBox" name="box_birth_infected">
+           <property name="singleStep">
+            <double>0.010000000000000</double>
+           </property>
            <property name="value">
             <double>1.200000000000000</double>
            </property>
@@ -397,6 +415,9 @@
          </item>
          <item>
           <widget class="QDoubleSpinBox" name="box_death_infected">
+           <property name="singleStep">
+            <double>0.010000000000000</double>
+           </property>
            <property name="value">
             <double>0.100000000000000</double>
            </property>
@@ -478,6 +499,35 @@
      </item>
     </layout>
    </widget>
+   <widget class="QLabel" name="label_16">
+    <property name="geometry">
+     <rect>
+      <x>390</x>
+      <y>20</y>
+      <width>120</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Infection_normal</string>
+    </property>
+   </widget>
+   <widget class="QDoubleSpinBox" name="box_prob_normal_infection">
+    <property name="geometry">
+     <rect>
+      <x>510</x>
+      <y>20</y>
+      <width>64</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="singleStep">
+     <double>0.005000000000000</double>
+    </property>
+    <property name="value">
+     <double>0.010000000000000</double>
+    </property>
+   </widget>
    <zorder>layoutWidget</zorder>
    <zorder>q_label</zorder>
    <zorder>btn_start</zorder>
@@ -493,6 +543,8 @@
    <zorder>box_percent_infected</zorder>
    <zorder>label_15</zorder>
    <zorder>box_start_setup</zorder>
+   <zorder>label_16</zorder>
+   <zorder>box_prob_normal_infection</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
