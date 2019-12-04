@@ -5,9 +5,11 @@
 //  Created by Thijs Janzen on 13/11/2019.
 //  Copyright © 2019 Thijs Janzen. All rights reserved.
 //
-#include <assert.h>
+#include <cassert>
 #include "node.hpp"
 #include <iostream>
+#include <array>
+#include <cmath>
 #include <array>
 
 node::node() {
@@ -21,33 +23,32 @@ node::node(size_t p) : pos(p) {
 void node::update_neighbors(std::vector< node >& world,
                             size_t world_size) {
 
-  for(int i = -1; i <= 1; i++) {
-    for(int j = -1; j <= 1; j++) {
-      if(abs(i - j) == 1) {
-        int other_x = static_cast<int>(x_) + i;
-        int other_y = static_cast<int>(y_) + j;
-        int other_pos = other_x * static_cast<int>(world_size) + other_y;
-        if(other_pos >= 0 && other_pos < static_cast<int>(world.size())) {
-          node* neighbor = &world[static_cast<size_t>(other_pos)];
-          neighbors.push_back(neighbor);
-        }
-      }
-    }
-  }
-}
 
-void node::update_neighbor_types() {
-  neighbor_types = std::vector< cell_type>(neighbors.size());
-  size_t j = 0;
-  for(auto it = neighbors.begin(); it != neighbors.end(); ++it) {
-    cell_type other = (*it)->node_type;
-    neighbor_types[j] = other;
-    j++;
-  }
+    static int relative_points[4][2] = { {-1, 0},
+                                        {1, 0},
+                                        {0, 1},
+                                        {0, -1} };
+
+    for(int i = 0; i < 4; ++i) {
+        int other_x = static_cast<int>(x_) + relative_points[i][0];
+        int other_y = static_cast<int>(y_) + relative_points[i][1];
+        if(other_x >= 0 &&
+           other_y >= 0 &&
+           other_x < static_cast<int>(world_size) &&
+           other_y < static_cast<int>(world_size)) {
+            int other_pos = other_y + other_x * static_cast<int>(world_size);
+            if(other_pos >= 0 && other_pos < static_cast<int>(world.size())) {
+                node* neighbor = &world[static_cast<size_t>(other_pos)];
+
+                assert(static_cast<int>(neighbor->x_) == other_x);
+                assert(static_cast<int>(neighbor->y_) == other_y);
+                neighbors.push_back(neighbor);
+            }
+        }
+    }
 }
 
 std::array<float, 3> node::calc_prob_of_growth() {
-  update_neighbor_types(); // this may be removed later perhaps
   std::array<float, 3> prob_of_growth = {0.f, 0.f, 0.f};
 
   if(node_type == normal) {
@@ -76,6 +77,3 @@ void node::set_coordinates(size_t row_size) {
     x_ = pos / row_size;
     y_ = pos % row_size;
 }
-
-
-
