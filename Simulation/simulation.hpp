@@ -53,6 +53,8 @@ private:
 
   std::array< float, 8> rates;
 
+  std::vector<double> long_distance_infection_probability;
+
   void count_cell_types(); // this is very heavy, should not be ran often
   void update_rates();
   void update_total_growth_prob();
@@ -80,8 +82,11 @@ private:
 
   void initialize_full();
 
+  void infect_long_distance(size_t pos);
+
 
   void change_cell_type(const size_t& pos, const cell_type& focal_cell_type);
+  void ask_infect_neighbours(int depth, float p, size_t pos);
 };
 
 

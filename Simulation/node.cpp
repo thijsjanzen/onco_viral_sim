@@ -11,6 +11,7 @@
 #include <array>
 #include <cmath>
 #include <array>
+#include "random_thijs.hpp"
 
 node::node() {
   node_type = empty;
@@ -83,3 +84,6 @@ void node::set_coordinates(size_t row_size) {
     x_ = pos / row_size;
     y_ = pos % row_size;
 }
+
+
+

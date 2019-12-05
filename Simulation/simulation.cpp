@@ -13,7 +13,6 @@
 #include "rndutils.hpp"
 #include <iostream>
 
-
 void simulation::update_one_step() {
     update_rates();
     float lambda = std::accumulate(rates.begin(), rates.end(), 0.0f);
@@ -192,8 +191,38 @@ void simulation::implement_death(const cell_type& parent) {
     update_growth_prob(i->pos);
     if(i->pos < min_pos) min_pos = i->pos;
   }
+  
+  if(parent == infected) {
+      infect_long_distance(position_of_dying_cell);
+  }
 }
 
+void simulation::ask_infect_neighbours(int depth, float p, size_t pos) {
+    if(depth > 1) {
+        depth--;
+        for(auto& n : world[pos].neighbors) {
+            ask_infect_neighbours(depth, p, n->pos);
+        }
+
+    } else {
+        for(auto& n : world[pos].neighbors) {
+            if(rndgen.uniform() < p) {
+                n->node_type = infected;
+                update_death_prob(n->pos);
+                update_growth_prob(n->pos);
+                for(auto i : n->neighbors) {
+                  update_growth_prob(i->pos);
+                }
+            }
+        }
+    }
+}
+
+void simulation::infect_long_distance(size_t pos) {
+   for(size_t i = 1; i < long_distance_infection_probability.size(); ++i) {
+       ask_infect_neighbours(i, long_distance_infection_probability[i], pos);
+   }
+}
 
 
 void simulation::implement_growth(const cell_type& parent) {
@@ -226,7 +255,7 @@ void simulation::implement_growth(const cell_type& parent) {
       break;
   }
 
-  world[position_of_grown_cell].node_type = parent;
+  change_cell_type(position_of_grown_cell, parent);
 
   // update growth probability of cell
   update_growth_prob(position_of_grown_cell);
@@ -344,6 +373,15 @@ simulation::simulation(const Param& param) {
 
   growth_probs.resize(4, std::vector< float >(num_cells, 0.f));
   death_probs.resize( 4, std::vector< float >(num_cells, 0.f));
+
+  long_distance_infection_probability = std::vector<double>(1, 0);
+  float lambda = parameters.distance_infection_upon_death;
+  for(size_t d = 1; d < sq_size; ++d) {
+      double local_prob = parameters.prob_infection_upon_death * lambda * exp(lambda * d);
+      long_distance_infection_probability.push_back(local_prob);
+      if(local_prob < 1e-4) break;
+  }
+
 }
 
 // initialization routines:
@@ -393,6 +431,7 @@ void simulation::infect_random() {
 
     int infected_cells = 0;
     int to_be_infected = static_cast<int>(parameters.percent_infected * num_cancer_cells);
+    if(to_be_infected == 0) return;
     while(infected_cells < to_be_infected && num_cancer_cells > 0) {
         size_t position_of_grown_cell = static_cast<size_t>(death_prob_rnd[cancer](rndgen.rndgen_));
 
@@ -420,6 +459,7 @@ void simulation::infect_center() {
     int num_cancer_cells = static_cast<int>(std::accumulate(death_probs[cancer].begin(), death_probs[cancer].end(), 0));
 
     size_t to_be_infected = static_cast<size_t>(parameters.percent_infected * num_cancer_cells);
+    if(to_be_infected == 0) return;
 
     float avg_x = 0;
     float avg_y = 0;
@@ -470,9 +510,6 @@ void simulation::infect_center() {
         update_growth_prob(i.pos);
         update_death_prob(i.pos);
     }
-
-   // update_growth_cdf(0); // update all vectors from the start.
-   // update_death_cdf_all();
 }
 
 void simulation::infect_all_cancer() {
@@ -496,19 +533,12 @@ void simulation::add_infected() {
         return;
     }
 
-
     switch(parameters.infection_type) {
         case random_infection:
             infect_random();
             break;
         case center_infection:
             infect_center();
-            break;
-        case multinode:
-            // do something
-            break;
-        case perimeter:
-            // do something
             break;
     }
 }

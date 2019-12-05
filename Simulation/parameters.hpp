@@ -10,7 +10,7 @@
 #include <cstdio>
 #include <cmath>
 
-enum infection_routine {random_infection, center_infection, multinode, perimeter};
+enum infection_routine {random_infection, center_infection};
 enum start_type {full, grow};
 
 struct Param {
@@ -39,6 +39,11 @@ struct Param {
   infection_routine infection_type;
 
   float prob_normal_infection;
+
+  float distance_infection_upon_death;
+  float prob_infection_upon_death;
+
+
 
   start_type start_setup;
 
@@ -71,6 +76,8 @@ struct Param {
 
     prob_normal_infection = 0.01f;
     freq_resistant = 0.01f;
+    distance_infection_upon_death = 1;
+    prob_infection_upon_death = 0.f;
   }
 
 

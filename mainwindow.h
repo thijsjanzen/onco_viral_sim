@@ -44,6 +44,7 @@ private:
     QVector<double> y_n;
     QVector<double> y_c;
     QVector<double> y_i;
+    QVector<double> y_r;
 
     bool is_running;
     int update_speed;

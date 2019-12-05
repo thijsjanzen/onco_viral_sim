@@ -238,6 +238,7 @@ void MainWindow::update_plot(double t, const std::vector<int> &cell_numbers) {
     y_n.append(cell_numbers[0]);
     y_c.append(cell_numbers[1]);
     y_i.append(cell_numbers[2]);
+    y_r.append(cell_numbers[3]);
 
     ui->line_plot->graph(0)->clearData();
     ui->line_plot->graph(0)->setData(x_t, y_n);
@@ -247,6 +248,10 @@ void MainWindow::update_plot(double t, const std::vector<int> &cell_numbers) {
 
     ui->line_plot->graph(2)->clearData();
     ui->line_plot->graph(2)->setData(x_t, y_i);
+
+    ui->line_plot->graph(3)->clearData();
+    ui->line_plot->graph(3)->setData(x_t, y_r);
+
 
     ui->line_plot->rescaleAxes();
     ui->line_plot->replot();
