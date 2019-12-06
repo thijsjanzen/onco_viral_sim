@@ -17,6 +17,16 @@ void simulation::update_one_step() {
     update_rates();
     float lambda = std::accumulate(rates.begin(), rates.end(), 0.0f);
     float dt = rndgen.Expon(lambda);
+    while(std::isinf(dt)) {
+        static int counter = 0;
+        dt = rndgen.Expon(lambda);
+        counter++;
+        if(counter > 100) {
+            std::cout << "could not generate non infinite dt\n";
+            exit(1);
+        }
+    }
+
     size_t event = pick_event(rates, lambda);
     do_event(event);
 
@@ -207,7 +217,7 @@ void simulation::ask_infect_neighbours(int depth, float p, size_t pos) {
 
     } else {
         for(auto& n : world[pos].neighbors) {
-            if(n->node_type != infected) {
+            if(n->node_type == cancer) {
                 if(rndgen.uniform() < p) {
                     n->node_type = infected;
                     update_death_prob(n->pos);
