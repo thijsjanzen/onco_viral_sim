@@ -198,6 +198,7 @@ void simulation::implement_death(const cell_type& parent) {
 }
 
 void simulation::ask_infect_neighbours(int depth, float p, size_t pos) {
+    if(p < 1e-6f) return;
     if(depth > 1) {
         depth--;
         for(auto& n : world[pos].neighbors) {
@@ -206,12 +207,14 @@ void simulation::ask_infect_neighbours(int depth, float p, size_t pos) {
 
     } else {
         for(auto& n : world[pos].neighbors) {
-            if(rndgen.uniform() < p) {
-                n->node_type = infected;
-                update_death_prob(n->pos);
-                update_growth_prob(n->pos);
-                for(auto i : n->neighbors) {
-                  update_growth_prob(i->pos);
+            if(n->node_type != infected) {
+                if(rndgen.uniform() < p) {
+                    n->node_type = infected;
+                    update_death_prob(n->pos);
+                    update_growth_prob(n->pos);
+                    for(auto i : n->neighbors) {
+                      update_growth_prob(i->pos);
+                    }
                 }
             }
         }
@@ -375,11 +378,11 @@ simulation::simulation(const Param& param) {
   death_probs.resize( 4, std::vector< float >(num_cells, 0.f));
 
   long_distance_infection_probability = std::vector<double>(1, 0);
-  float lambda = parameters.distance_infection_upon_death;
+  float lambda = 1.0f / parameters.distance_infection_upon_death;
   for(size_t d = 1; d < sq_size; ++d) {
-      double local_prob = parameters.prob_infection_upon_death * lambda * exp(lambda * d);
+      double local_prob = parameters.prob_infection_upon_death * lambda * exp(-lambda * d);
       long_distance_infection_probability.push_back(local_prob);
-      if(local_prob < 1e-4) break;
+      if(local_prob < 1e-3) break;
   }
 
 }
@@ -418,9 +421,9 @@ void simulation::update_growth_probabilities() {
 
 std::vector<int> simulation::get_cell_numbers() {
     std::vector<int> output(4,0);
-    output[normal]      =    static_cast<int>(std::accumulate(death_probs[normal].begin(), death_probs[normal].end(), 0));
-    output[cancer]      =    static_cast<int>(std::accumulate(death_probs[cancer].begin(), death_probs[cancer].end(), 0));
-    output[infected]    =    static_cast<int>(std::accumulate(death_probs[infected].begin(), death_probs[infected].end(), 0));
+    output[normal]      =    static_cast<int>(std::accumulate(death_probs[normal].begin(),    death_probs[normal].end(), 0));
+    output[cancer]      =    static_cast<int>(std::accumulate(death_probs[cancer].begin(),    death_probs[cancer].end(), 0));
+    output[infected]    =    static_cast<int>(std::accumulate(death_probs[infected].begin(),  death_probs[infected].end(), 0));
     output[resistant]   =    static_cast<int>(std::accumulate(death_probs[resistant].begin(), death_probs[resistant].end(), 0));
     return output;
 }

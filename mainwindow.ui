@@ -499,124 +499,134 @@
      </item>
     </layout>
    </widget>
-   <widget class="QLabel" name="label_16">
-    <property name="geometry">
-     <rect>
-      <x>390</x>
-      <y>20</y>
-      <width>120</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Infection_normal</string>
-    </property>
-   </widget>
-   <widget class="QDoubleSpinBox" name="box_prob_normal_infection">
-    <property name="geometry">
-     <rect>
-      <x>510</x>
-      <y>20</y>
-      <width>64</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="singleStep">
-     <double>0.005000000000000</double>
-    </property>
-    <property name="value">
-     <double>0.010000000000000</double>
-    </property>
-   </widget>
-   <widget class="QDoubleSpinBox" name="box_birth_cancer_resistant">
-    <property name="geometry">
-     <rect>
-      <x>530</x>
-      <y>240</y>
-      <width>64</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="singleStep">
-     <double>0.010000000000000</double>
-    </property>
-    <property name="value">
-     <double>0.900000000000000</double>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_17">
+   <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
       <x>380</x>
-      <y>270</y>
-      <width>141</width>
-      <height>24</height>
+      <y>20</y>
+      <width>230</width>
+      <height>211</height>
      </rect>
     </property>
-    <property name="text">
-     <string>death_cancer_resistant</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_18">
-    <property name="geometry">
-     <rect>
-      <x>380</x>
-      <y>239</y>
-      <width>141</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>birth_cancer_resistant</string>
-    </property>
-   </widget>
-   <widget class="QDoubleSpinBox" name="box_death_cancer_resistant">
-    <property name="geometry">
-     <rect>
-      <x>530</x>
-      <y>270</y>
-      <width>64</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="singleStep">
-     <double>0.010000000000000</double>
-    </property>
-    <property name="value">
-     <double>0.100000000000000</double>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_19">
-    <property name="geometry">
-     <rect>
-      <x>390</x>
-      <y>40</y>
-      <width>101</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Frequency resistant cancer</string>
-    </property>
-    <property name="wordWrap">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QDoubleSpinBox" name="box_freq_resistant_cancer">
-    <property name="geometry">
-     <rect>
-      <x>510</x>
-      <y>50</y>
-      <width>64</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="singleStep">
-     <double>0.005000000000000</double>
-    </property>
-    <property name="value">
-     <double>0.010000000000000</double>
-    </property>
+    <layout class="QGridLayout" name="gridLayout_2">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_16">
+       <property name="text">
+        <string>Infection_normal</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" rowspan="2">
+      <widget class="QLabel" name="label_19">
+       <property name="text">
+        <string>Frequency resistant cancer</string>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_20">
+       <property name="text">
+        <string>Distance infection upon death</string>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="2">
+      <widget class="QDoubleSpinBox" name="box_distance_infection_death">
+       <property name="decimals">
+        <number>0</number>
+       </property>
+       <property name="maximum">
+        <double>5.000000000000000</double>
+       </property>
+       <property name="singleStep">
+        <double>1.000000000000000</double>
+       </property>
+       <property name="value">
+        <double>1.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_21">
+       <property name="text">
+        <string>Probability infection upon death</string>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="2">
+      <widget class="QDoubleSpinBox" name="box_prob_infection_death">
+       <property name="singleStep">
+        <double>0.005000000000000</double>
+       </property>
+       <property name="value">
+        <double>0.100000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0" colspan="2">
+      <widget class="QLabel" name="label_18">
+       <property name="text">
+        <string>birth_cancer_resistant</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="2">
+      <widget class="QDoubleSpinBox" name="box_birth_cancer_resistant">
+       <property name="singleStep">
+        <double>0.010000000000000</double>
+       </property>
+       <property name="value">
+        <double>0.900000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0" colspan="2">
+      <widget class="QLabel" name="label_17">
+       <property name="text">
+        <string>death_cancer_resistant</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="2">
+      <widget class="QDoubleSpinBox" name="box_death_cancer_resistant">
+       <property name="singleStep">
+        <double>0.010000000000000</double>
+       </property>
+       <property name="value">
+        <double>0.100000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QDoubleSpinBox" name="box_freq_resistant_cancer">
+       <property name="singleStep">
+        <double>0.005000000000000</double>
+       </property>
+       <property name="value">
+        <double>0.010000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QDoubleSpinBox" name="box_prob_normal_infection">
+       <property name="singleStep">
+        <double>0.005000000000000</double>
+       </property>
+       <property name="value">
+        <double>0.010000000000000</double>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
    <zorder>layoutWidget</zorder>
    <zorder>q_label</zorder>
@@ -641,6 +651,10 @@
    <zorder>box_death_cancer_resistant</zorder>
    <zorder>label_19</zorder>
    <zorder>box_freq_resistant_cancer</zorder>
+   <zorder>box_distance_infection_death</zorder>
+   <zorder>box_prob_infection_death</zorder>
+   <zorder>label_20</zorder>
+   <zorder>label_21</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>

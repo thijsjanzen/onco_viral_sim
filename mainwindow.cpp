@@ -126,6 +126,9 @@ void MainWindow::print_params(const Param& p) {
     s << get_string("Prob normal infection", p.prob_normal_infection);
     s << get_string("Frequency resistant", p.freq_resistant);
 
+    s << get_string("Distance infection upon death", p.distance_infection_upon_death);
+    s << get_string("Probability infection upon death", p.prob_infection_upon_death);
+
     ui->text->appendPlainText(QString::fromStdString(s.str()));
     return;
 }
@@ -156,6 +159,9 @@ void MainWindow::update_parameters(Param& p) {
    p.prob_normal_infection = static_cast<float>(ui->box_prob_normal_infection->value());
    p.freq_resistant = static_cast<float>(ui->box_freq_resistant_cancer->value());
 
+   p.distance_infection_upon_death = static_cast<float>(ui->box_distance_infection_death->value());
+   p.prob_infection_upon_death = static_cast<float>(ui->box_prob_infection_death->value());
+
 
    p.infection_type = random_infection;
 
@@ -185,6 +191,7 @@ void MainWindow::on_btn_start_clicked()
     y_n.clear();
     y_c.clear();
     y_i.clear();
+    y_r.clear();
 
     Param all_parameters;
     update_parameters(all_parameters);
@@ -233,7 +240,7 @@ void MainWindow::on_btn_start_clicked()
 
 }
 
-void MainWindow::update_plot(double t, const std::vector<int> &cell_numbers) {
+void MainWindow::update_plot(double t, const std::vector<int>& cell_numbers) {
     x_t.append(t);
     y_n.append(cell_numbers[0]);
     y_c.append(cell_numbers[1]);
