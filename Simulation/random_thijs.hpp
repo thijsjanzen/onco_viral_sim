@@ -44,6 +44,11 @@ struct rnd_t {
         return std::normal_distribution<float>(m, s)(rndgen_);
     }
 
+    int poisson(double lambda) {
+        return std::poisson_distribution<int>(lambda)(rndgen_);
+    }
+
+
     bool bernouilli() {
         return bern_dist(rndgen_);
     }
@@ -58,6 +63,10 @@ struct rnd_t {
 
     void set_bernoulli(double p) {
         bern_dist = std::bernoulli_distribution(p);
+    }
+
+    int binomial(int n, double p) {
+        return std::binomial_distribution<>(n, p)(rndgen_);
     }
 
 
