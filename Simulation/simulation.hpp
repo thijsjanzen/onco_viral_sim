@@ -33,7 +33,7 @@ public:
 
   rnd_t rndgen;
 
-  const static size_t sq_size = 300;
+  const static size_t sq_size = 250;
 
   const static size_t num_cells = sq_size * sq_size;
 

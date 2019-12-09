@@ -20,7 +20,8 @@ public:
     MainWindow(QWidget *parent = nullptr);
      ~MainWindow();
 
-    void update_image(const std::vector< node >& world);
+    void update_image(const std::vector< node >& world, size_t sq_size);
+
     void update_parameters(Param& p);
     void print_params(const Param& p);
 

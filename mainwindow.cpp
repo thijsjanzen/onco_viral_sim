@@ -69,33 +69,37 @@ void MainWindow::set_pixel(int x, int y, const QColor& col) {
 }
 
 
-void MainWindow::update_image(const std::vector< node >& world) {
-    QPainter p(&image_);
+void MainWindow::update_image(const std::vector< node >& world, size_t sq_size) {
 
-    std::vector< QColor > colorz = {
+    static const std::vector< QColor > colorz = {
         {0, 0, 255},    // blue, normal
         {255, 0, 0},    // red,  cancer
         {0, 255, 0},    // green, infected
         {128, 0, 128},   // purple, resistant
         {0, 0, 0}      // black, empty
-
     };
 
-    for(auto i : world) {
-      QColor c = colorz[i.node_type];
-      p.setPen(c);
-      p.drawPoint(static_cast<int>(i.x_),
-                  static_cast<int>(i.y_));
+    size_t line_size = sq_size;
+    size_t num_lines = sq_size;
+
+    for(size_t i = 0; i < num_lines; ++i) {
+        QRgb* row = (QRgb*) image_.scanLine(i);
+
+        size_t start = i * line_size;
+        size_t end = start + line_size;
+
+        for(size_t index = start; index < end; ++index) {
+            size_t local_index = index - start;
+            row[local_index] = colorz[ world[index].node_type ].rgb();
+        }
     }
 
     int w = ui->q_label->width();
     int h = ui->q_label->height();
 
-     ui->q_label->setPixmap((QPixmap::fromImage(image_)).scaled(w,h, Qt::KeepAspectRatio));
-     ui->q_label->repaint();
-     ui->q_label->update();
-     ui->q_label->show();
-     QApplication::processEvents();
+    ui->q_label->setPixmap((QPixmap::fromImage(image_)).scaled(w,h, Qt::KeepAspectRatio));
+    ui->q_label->update();
+    QApplication::processEvents();
 }
 
 std::string get_string(std::string s, float v) {
@@ -217,7 +221,7 @@ void MainWindow::on_btn_start_clicked()
         ui->progressBar->setValue(progress);
         int update_step = static_cast<int>((1.0f * update_speed / 100) * Simulation.world.size());
         if(counter % update_step == 0) {
-            update_image(Simulation.world);
+            update_image(Simulation.world, Simulation.sq_size);
 
             update_plot(static_cast<double>(Simulation.t),
                         Simulation.get_cell_numbers());
