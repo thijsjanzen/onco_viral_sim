@@ -53,6 +53,16 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->box_start_setup->addItem("Full");
     ui->box_start_setup->addItem("Grow");
+
+
+    ui->drpdwnbox_display->addItem("Cell types");
+    ui->drpdwnbox_display->addItem("Normal Growth Rate");
+    ui->drpdwnbox_display->addItem("Cancer Growth Rate");
+    ui->drpdwnbox_display->addItem("Infected Growth Rate");
+    ui->drpdwnbox_display->addItem("Resistant Growth Rate");
+    ui->drpdwnbox_display->addItem("Dominant Growth Rate");
+
+
 }
 
 MainWindow::~MainWindow()
@@ -99,7 +109,86 @@ void MainWindow::update_image(const std::vector< node >& world, size_t sq_size) 
 
     ui->q_label->setPixmap((QPixmap::fromImage(image_)).scaled(w,h, Qt::KeepAspectRatio));
     ui->q_label->update();
-    QApplication::processEvents();
+}
+
+QRgb get_color(const cell_type focal_cell_type, float rate) {
+
+    if(rate < 1e-6f) {
+        QColor col = {0, 0, 0, 255};
+        return col.rgba();
+    }
+
+
+    if(focal_cell_type == normal) {
+        QColor col = {0, 0, 255, static_cast<int>(rate * 255)};
+        return col.rgba();
+    }
+    if(focal_cell_type == cancer) {
+        QColor col = {255, 0, 0, static_cast<int>(rate * 255)};
+        return col.rgba();
+    }
+    if(focal_cell_type == infected) {
+        QColor col = {0, 255, 0, static_cast<int>(rate * 255)};
+        return col.rgba();
+    }
+    if(focal_cell_type == resistant) {
+        QColor col = {128, 0, 128, static_cast<int>(rate * 255)};
+        return col.rgba();
+    }
+}
+
+int which_max(const std::vector<float>& v) {
+    int max_index = 0;
+    float max_val = v[max_index];
+    for(int i = 1; i < v.size(); ++i) {
+        if(v[i] > max_val) {
+            max_index = i;
+            max_val = v[i];
+        }
+    }
+    return max_index;
+}
+
+void MainWindow::update_image(const std::vector< node >& world,
+                              size_t sq_size,
+                              const std::vector< std::vector< float> > & growth_rate) {
+
+    cell_type focal_cell_type = normal;
+    if( focal_display_type == normal_rate) focal_cell_type = normal;
+    if( focal_display_type == cancer_rate) focal_cell_type = cancer;
+    if( focal_display_type == infected_rate) focal_cell_type = infected;
+    if( focal_display_type == resistant_rate) focal_cell_type = resistant;
+
+    size_t line_size = sq_size;
+    size_t num_lines = sq_size;
+
+    for(size_t i = 0; i < num_lines; ++i) {
+        QRgb* row = (QRgb*) image_.scanLine(i);
+
+        size_t start = i * line_size;
+        size_t end = start + line_size;
+
+        for(size_t index = start; index < end; ++index) {
+            size_t local_index = index - start;
+            if( focal_display_type == dominant_rate) {
+                std::vector<float> probs = {0.0, 0.0, 0.0, 0.0};
+                for(size_t i = 0; i < 4; ++i) probs[i] = growth_rate[i][index];
+                focal_cell_type = static_cast<cell_type>(which_max(probs));
+
+                row[local_index] = get_color(focal_cell_type,
+                                         growth_rate[ focal_cell_type ][index]);
+            } else {
+                row[local_index] = get_color(focal_cell_type,
+                                         growth_rate[ focal_cell_type ][index]);
+            }
+        }
+    }
+
+    int w = ui->q_label->width();
+    int h = ui->q_label->height();
+
+    ui->q_label->setPixmap((QPixmap::fromImage(image_)).scaled(w,h, Qt::KeepAspectRatio));
+    ui->q_label->update();
 }
 
 std::string get_string(std::string s, float v) {
@@ -182,6 +271,20 @@ void MainWindow::update_parameters(Param& p) {
     if(start_string == "Full")
         p.start_setup = full;
 
+   auto display_string = ui->drpdwnbox_display->currentText();
+   if(display_string == "Cell types")
+       focal_display_type = cells;
+   if(display_string == "Normal Growth Rate")
+       focal_display_type = normal_rate;
+   if(display_string == "Cancer Growth Rate")
+       focal_display_type = cancer_rate;
+   if(display_string == "Infected Growth Rate")
+       focal_display_type = infected_rate;
+   if(display_string == "Resistant Growth Rate")
+       focal_display_type = resistant_rate;
+   if(display_string == "Dominant Growth Rate")
+       focal_display_type = dominant_rate;
+
    print_params(p);
    return;
 }
@@ -211,8 +314,6 @@ void MainWindow::on_btn_start_clicked()
     int counter = 0;
     is_running = true;
 
-
-
     while(Simulation.t < all_parameters.maximum_time) {
         Simulation.update_one_step();
         counter++;
@@ -221,10 +322,15 @@ void MainWindow::on_btn_start_clicked()
         ui->progressBar->setValue(progress);
         int update_step = static_cast<int>((1.0f * update_speed / 100) * Simulation.world.size());
         if(counter % update_step == 0) {
-            update_image(Simulation.world, Simulation.sq_size);
+            if(focal_display_type == cells) update_image(Simulation.world, Simulation.sq_size);
+            if(focal_display_type != cells)  {
+                update_image(Simulation.world, Simulation.sq_size,
+                             Simulation.growth_probs);
+            }
 
             update_plot(static_cast<double>(Simulation.t),
                         Simulation.get_cell_numbers());
+            QApplication::processEvents();
         }
         if(!is_running) break;
     }
@@ -266,8 +372,6 @@ void MainWindow::update_plot(double t, const std::vector<int>& cell_numbers) {
 
     ui->line_plot->rescaleAxes();
     ui->line_plot->replot();
-    ui->line_plot->update();
-    QApplication::processEvents();
 }
 
 
@@ -278,4 +382,21 @@ void MainWindow::on_btn_stop_clicked() {
 
 void MainWindow::on_speed_slider_actionTriggered(int action) {
    update_speed = ui->speed_slider->value();
+}
+
+void MainWindow::on_drpdwnbox_display_activated(int index)
+{
+    auto display_string = ui->drpdwnbox_display->currentText();
+    if(display_string == "Cell types")
+        focal_display_type = cells;
+    if(display_string == "Normal Growth Rate")
+        focal_display_type = normal_rate;
+    if(display_string == "Cancer Growth Rate")
+        focal_display_type = cancer_rate;
+    if(display_string == "Infected Growth Rate")
+        focal_display_type = infected_rate;
+    if(display_string == "Resistant Growth Rate")
+        focal_display_type = resistant_rate;
+    if(display_string == "Dominant Growth Rate")
+        focal_display_type = dominant_rate;
 }

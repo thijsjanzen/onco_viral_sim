@@ -499,12 +499,12 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>380</x>
       <y>20</y>
-      <width>230</width>
+      <width>231</width>
       <height>211</height>
      </rect>
     </property>
@@ -608,6 +608,9 @@
      </item>
      <item row="2" column="2">
       <widget class="QDoubleSpinBox" name="box_freq_resistant_cancer">
+       <property name="decimals">
+        <number>5</number>
+       </property>
        <property name="singleStep">
         <double>0.005000000000000</double>
        </property>
@@ -618,8 +621,14 @@
      </item>
      <item row="0" column="2">
       <widget class="QDoubleSpinBox" name="box_prob_normal_infection">
+       <property name="decimals">
+        <number>5</number>
+       </property>
+       <property name="maximum">
+        <double>1.000000000000000</double>
+       </property>
        <property name="singleStep">
-        <double>0.005000000000000</double>
+        <double>0.001000000000000</double>
        </property>
        <property name="value">
         <double>0.010000000000000</double>
@@ -628,6 +637,20 @@
      </item>
     </layout>
    </widget>
+   <widget class="QComboBox" name="drpdwnbox_display">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>370</y>
+      <width>121</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="currentText">
+     <string notr="true"/>
+    </property>
+   </widget>
+   <zorder>layoutWidget</zorder>
    <zorder>layoutWidget</zorder>
    <zorder>q_label</zorder>
    <zorder>btn_start</zorder>
@@ -643,18 +666,7 @@
    <zorder>box_percent_infected</zorder>
    <zorder>label_15</zorder>
    <zorder>box_start_setup</zorder>
-   <zorder>label_16</zorder>
-   <zorder>box_prob_normal_infection</zorder>
-   <zorder>box_birth_cancer_resistant</zorder>
-   <zorder>label_17</zorder>
-   <zorder>label_18</zorder>
-   <zorder>box_death_cancer_resistant</zorder>
-   <zorder>label_19</zorder>
-   <zorder>box_freq_resistant_cancer</zorder>
-   <zorder>box_distance_infection_death</zorder>
-   <zorder>box_prob_infection_death</zorder>
-   <zorder>label_20</zorder>
-   <zorder>label_21</zorder>
+   <zorder>drpdwnbox_display</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>

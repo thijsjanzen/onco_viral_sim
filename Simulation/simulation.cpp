@@ -450,22 +450,16 @@ void simulation::infect_random() {
 
         world[position_of_grown_cell].node_type = infected;
 
-        // update growth probability of cell
-        update_growth_prob(position_of_grown_cell);
-
-        // update growth probabilities of the neighbors:
-        for(auto i : world[position_of_grown_cell].neighbors) {
-          update_growth_prob(i->pos);
-        }
-
         // update death probability of new cell:
         update_death_prob(position_of_grown_cell);
         num_cancer_cells--; // easy count for now.
         infected_cells++;
     }
 
-    update_growth_cdf(0); // update all vectors from the start.
-    update_death_cdf_all();
+    for(auto i : world) {
+        update_growth_prob(i.pos);
+        update_death_prob(i.pos);
+    }
 }
 
 void simulation::infect_center() {

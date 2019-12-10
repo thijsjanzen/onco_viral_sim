@@ -33,9 +33,15 @@ public:
 
   rnd_t rndgen;
 
-  const static size_t sq_size = 250;
+  const static size_t sq_size = 200;
 
   const static size_t num_cells = sq_size * sq_size;
+
+  std::array< binned_distribution<sq_size>, 4 > growth_prob_rnd;
+  std::array< binned_distribution<sq_size>, 4 > death_prob_rnd;
+
+  std::vector< std::vector< float > > growth_probs;
+  std::vector< std::vector< float > > death_probs;
 
 private:
 
@@ -43,11 +49,7 @@ private:
 
   Param parameters;
 
-  std::array< binned_distribution<sq_size>, 4 > growth_prob_rnd;
-  std::array< binned_distribution<sq_size>, 4 > death_prob_rnd;
 
-  std::vector< std::vector< float > > growth_probs;
-  std::vector< std::vector< float > > death_probs;
 
   std::array<float, 4> num_cell_types;
 

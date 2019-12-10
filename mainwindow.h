@@ -11,6 +11,7 @@
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
+enum display_color {cells, normal_rate, cancer_rate, infected_rate, resistant_rate, dominant_rate};
 
 class MainWindow : public QMainWindow
 {
@@ -21,6 +22,8 @@ public:
      ~MainWindow();
 
     void update_image(const std::vector< node >& world, size_t sq_size);
+    void update_image(const std::vector< node >& world, size_t sq_size,
+                                  const std::vector< std::vector< float> > & growth_rate);
 
     void update_parameters(Param& p);
     void print_params(const Param& p);
@@ -37,9 +40,12 @@ private slots:
 
     void on_speed_slider_actionTriggered(int action);
 
+    void on_drpdwnbox_display_activated(int index);
+
 private:
     Ui::MainWindow *ui;
     QImage image_;
+    display_color focal_display_type;
 
     QVector<double> x_t;
     QVector<double> y_n;
