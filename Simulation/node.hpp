@@ -20,6 +20,10 @@ typedef struct node node;
 struct node {
   node();
   node(size_t p, float norm_infection_rate);
+  ~node();
+  node(const node& other);
+
+  void operator=(const node& other);
 
   cell_type node_type;
   size_t pos;
@@ -28,16 +32,20 @@ struct node {
 
   float prob_normal_infected;
   std::vector< node* > neighbors;
+  std::vector< float > freq_type_neighbours;
+  std::vector< float > prob_of_growth;
+
 
   void set_coordinates(size_t row_size);
   void update_neighbors(std::vector< node >& world,
                         size_t world_size);
 
+  void update_freq_neighbours();
+
   std::vector< cell_type > return_neighbor_types();
 
 
-  std::array<float, 4> calc_prob_of_growth();
-  float freq_type_neighbours(const cell_type& ref_type);
+  void update_prob_of_growth();
 
   void die();
 };

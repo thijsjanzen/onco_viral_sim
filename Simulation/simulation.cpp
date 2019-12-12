@@ -55,7 +55,7 @@ void simulation::initialize_network() {
 
     add_cells(normal);
 
-    for(auto i : world) {
+    for(auto& i : world) {
         update_growth_prob(i.pos);
         update_death_prob(i.pos);
     }
@@ -341,15 +341,20 @@ void simulation::add_cells(const cell_type& focal_cell_type) {
 }
 
 void simulation::update_growth_prob(size_t pos) {
-  std::array<float, 4> probs = world[pos].calc_prob_of_growth();
+  world[pos].update_prob_of_growth();
   for (size_t i = 0; i < growth_prob_rnd.size(); ++i) {
       growth_prob_rnd[i].update_entry(growth_probs[i].begin(), growth_probs[i].end(),
-                                      pos, probs[i]);
-      growth_probs[i][pos] = probs[i];
+                                      pos, world[pos].prob_of_growth[i]);
+      growth_probs[i][pos] = world[pos].prob_of_growth[i];
   }
 }
 
 void simulation::update_death_prob(size_t pos) {
+    // only update if there was a change in node type:
+    if(world[pos].node_type != empty &&
+            death_probs[ world[pos].node_type ][pos] != 0.f) return;
+
+    // loop over all and change where needed:
     for (size_t i = 0; i < 4; ++i) {
         float new_val = 0.f;
         if (i == world[pos].node_type) new_val = 1.f;
@@ -380,7 +385,7 @@ simulation::simulation(const Param& param) {
   long_distance_infection_probability = std::vector<double>(1, 0);
   float lambda = 1.0f / parameters.distance_infection_upon_death;
   for(size_t d = 1; d < sq_size; ++d) {
-      double local_prob = parameters.prob_infection_upon_death * lambda * exp(-lambda * d);
+      double local_prob = parameters.prob_infection_upon_death * lambda * expf(-lambda * d);
       long_distance_infection_probability.push_back(local_prob);
       if(local_prob < 1e-3) break;
   }
@@ -391,14 +396,14 @@ simulation::simulation(const Param& param) {
 void simulation::update_growth_probabilities() {
 
   for(auto i : world) {
-    std::array<float, 4> probs = i.calc_prob_of_growth();
+    i.update_prob_of_growth();
 
     size_t pos = i.pos;
 
-    growth_probs[normal][pos] = probs[normal];
-    growth_probs[cancer][pos] = probs[cancer];
-    growth_probs[infected][pos] = probs[infected];
-    growth_probs[resistant][pos] = probs[resistant];
+    growth_probs[normal][pos] = i.prob_of_growth[normal];
+    growth_probs[cancer][pos] = i.prob_of_growth[cancer];
+    growth_probs[infected][pos] = i.prob_of_growth[infected];
+    growth_probs[resistant][pos] = i.prob_of_growth[resistant];
 
     switch(i.node_type) {
       case normal:

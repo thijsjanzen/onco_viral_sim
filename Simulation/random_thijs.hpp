@@ -189,7 +189,7 @@ public:
 
 
    template< typename It>
-   void update_row_sum(It first, int pos, float new_val) {
+   void update_row_sum(It first, size_t pos, float new_val) {
        float old_val = *(first + pos);
        if(old_val == new_val) return;
        size_t row = static_cast<size_t>(pos / bin_size);
@@ -201,7 +201,7 @@ public:
    }
 
    template< typename It>
-   void update_entry(It first, It last, int pos, float new_val) {
+   void update_entry(It first, It last, size_t pos, float new_val) {
        int N = std::distance(first, last);
        bin_size = N / num_bins;
        update_row_sum(first, pos, new_val);
