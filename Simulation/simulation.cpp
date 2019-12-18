@@ -373,6 +373,29 @@ void simulation::update_death_prob(size_t pos) {
 }
 
 
+simulation::simulation() {
+    parameters = Param(); // use default parameters
+    world.resize(num_cells);
+
+    for (size_t i = 0; i < world.size(); ++i) {
+      world[i].pos = i;
+      world[i].set_coordinates(sq_size);
+      world[i].prob_normal_infected = parameters.prob_normal_infection;
+    }
+
+    growth_probs.resize(4, std::vector< float >(num_cells, 0.f));
+    death_probs.resize( 4, std::vector< float >(num_cells, 0.f));
+
+    long_distance_infection_probability = std::vector<double>(1, 0);
+    float lambda = 1.0f / parameters.distance_infection_upon_death;
+    for(size_t d = 1; d < sq_size; ++d) {
+        double local_prob = parameters.prob_infection_upon_death * lambda * expf(-lambda * d);
+        long_distance_infection_probability.push_back(local_prob);
+        if(local_prob < 1e-3) break;
+    }
+
+}
+
 simulation::simulation(const Param& param) {
   parameters = param;
 
@@ -390,11 +413,10 @@ simulation::simulation(const Param& param) {
   long_distance_infection_probability = std::vector<double>(1, 0);
   float lambda = 1.0f / parameters.distance_infection_upon_death;
   for(size_t d = 1; d < sq_size; ++d) {
-      double local_prob = parameters.prob_infection_upon_death * lambda * exp(-lambda * d);
+      double local_prob = parameters.prob_infection_upon_death * lambda * expf(-lambda * d);
       long_distance_infection_probability.push_back(local_prob);
       if(local_prob < 1e-3) break;
   }
-
 }
 
 // initialization routines:

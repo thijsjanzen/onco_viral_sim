@@ -7,6 +7,7 @@
 #include "qcustomplot.h"
 #include "Simulation/node.hpp"
 #include "Simulation/parameters.hpp"
+#include "Simulation/simulation.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -22,8 +23,8 @@ public:
      ~MainWindow();
 
     void update_image(const std::vector< node >& world, size_t sq_size);
-    void update_image(const std::vector< node >& world, size_t sq_size,
-                                  const std::vector< std::vector< float> > & growth_rate);
+    void update_image(size_t sq_size,
+                      const std::vector< std::vector< float> > & growth_rate);
 
     void update_parameters(Param& p);
     void print_params(const Param& p);
@@ -32,6 +33,7 @@ public:
     void set_pixel(int x, int y, const QColor& col);
 
     void update_plot(double t, const std::vector<int>& cell_numbers);
+    void setup_simulation();
 
 private slots:
     void on_btn_start_clicked();
@@ -41,6 +43,8 @@ private slots:
     void on_speed_slider_actionTriggered(int action);
 
     void on_drpdwnbox_display_activated(int index);
+
+    void on_btn_setup_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -54,6 +58,11 @@ private:
     QVector<double> y_r;
 
     bool is_running;
+    bool is_paused;
     int update_speed;
+
+    simulation Simulation;
+    Param all_parameters;
+
 };
 #endif // MAINWINDOW_H

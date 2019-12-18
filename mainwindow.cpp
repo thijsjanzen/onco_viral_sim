@@ -62,7 +62,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->drpdwnbox_display->addItem("Resistant Growth Rate");
     ui->drpdwnbox_display->addItem("Dominant Growth Rate");
 
-
+    is_paused = false;
+    is_running = false;
 }
 
 MainWindow::~MainWindow()
@@ -149,8 +150,7 @@ int which_max(const std::vector<float>& v) {
     return max_index;
 }
 
-void MainWindow::update_image(const std::vector< node >& world,
-                              size_t sq_size,
+void MainWindow::update_image(size_t sq_size,
                               const std::vector< std::vector< float> > & growth_rate) {
 
     cell_type focal_cell_type = normal;
@@ -289,10 +289,14 @@ void MainWindow::update_parameters(Param& p) {
    return;
 }
 
+void MainWindow::setup_simulation() {
+    if(is_running) {
+        QMessageBox::warning(this,
+                             tr("Oncolytic Virus Simulator"),
+                             tr("Simulation is still running, please stop first"));
+        return;
+    }
 
-void MainWindow::on_btn_start_clicked()
-{
-    auto start_time = std::chrono::high_resolution_clock::now();
 
     x_t.clear();
     y_n.clear();
@@ -300,10 +304,9 @@ void MainWindow::on_btn_start_clicked()
     y_i.clear();
     y_r.clear();
 
-    Param all_parameters;
     update_parameters(all_parameters);
 
-    simulation Simulation(all_parameters);
+    Simulation = simulation(all_parameters);
 
     Simulation.initialize_network();
 
@@ -311,9 +314,25 @@ void MainWindow::on_btn_start_clicked()
                    static_cast<int>(Simulation.sq_size));
 
     Simulation.t = 0.0;
-    int counter = 0;
-    is_running = true;
 
+    ui->btn_start->setText("Start");
+}
+
+
+
+void MainWindow::on_btn_start_clicked()
+{
+    if(is_running) return; // pre emptive return if the simulation is already running
+
+    if(!is_paused) setup_simulation(); // only setup if it is not paused
+
+    is_paused = false; // now everything is setup, no need to pause.
+
+    auto start_time = std::chrono::high_resolution_clock::now();
+    ui->btn_start->setText("Start");
+
+    is_running = true;
+    int counter = 0;
     while(Simulation.t < all_parameters.maximum_time) {
         Simulation.update_one_step();
         counter++;
@@ -324,8 +343,7 @@ void MainWindow::on_btn_start_clicked()
         if(counter % update_step == 0) {
             if(focal_display_type == cells) update_image(Simulation.world, Simulation.sq_size);
             if(focal_display_type != cells)  {
-                update_image(Simulation.world, Simulation.sq_size,
-                             Simulation.growth_probs);
+                update_image(Simulation.sq_size, Simulation.growth_probs);
             }
 
             update_plot(static_cast<double>(Simulation.t),
@@ -339,7 +357,7 @@ void MainWindow::on_btn_start_clicked()
     auto end_time = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>( end_time - start_time ).count();
 
-    float time_taken = 1.f * duration / 1000;
+    float time_taken = 1.f * duration / 1000; // this is a rather ugly translation of milli seconds to seconds
 
     std::stringstream st;
     st << "This took ";
@@ -347,7 +365,6 @@ void MainWindow::on_btn_start_clicked()
     st << " seconds\n";
     ui->text->appendPlainText(QString::fromStdString(st.str()));
     std::cout << time_taken<< "\n";
-
 }
 
 void MainWindow::update_plot(double t, const std::vector<int>& cell_numbers) {
@@ -374,10 +391,10 @@ void MainWindow::update_plot(double t, const std::vector<int>& cell_numbers) {
     ui->line_plot->replot();
 }
 
-
-
 void MainWindow::on_btn_stop_clicked() {
     is_running = false;
+    is_paused = true;
+    ui->btn_start->setText("Resume");
 }
 
 void MainWindow::on_speed_slider_actionTriggered(int action) {
@@ -399,4 +416,9 @@ void MainWindow::on_drpdwnbox_display_activated(int index)
         focal_display_type = resistant_rate;
     if(display_string == "Dominant Growth Rate")
         focal_display_type = dominant_rate;
+}
+
+void MainWindow::on_btn_setup_clicked()
+{
+    setup_simulation();
 }

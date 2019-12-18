@@ -21,6 +21,7 @@
 
 class simulation {
 public:
+  simulation();
   simulation(const Param& param);
   void run();
   void initialize_network();
@@ -33,7 +34,7 @@ public:
 
   rnd_t rndgen;
 
-  const static size_t sq_size = 200;
+  const static size_t sq_size = 1000;
 
   const static size_t num_cells = sq_size * sq_size;
 
