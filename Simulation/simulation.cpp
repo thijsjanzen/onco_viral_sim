@@ -462,20 +462,32 @@ std::vector<int> simulation::get_cell_numbers() {
 
 void simulation::infect_random() {
     // count number of cancer cells
-    int num_cancer_cells = static_cast<int>(std::accumulate(death_probs[cancer].begin(), death_probs[cancer].end(), 0));
+    size_t num_cancer_cells = static_cast<size_t>(std::accumulate(death_probs[cancer].begin(), death_probs[cancer].end(), 0));
 
     int infected_cells = 0;
     int to_be_infected = static_cast<int>(parameters.percent_infected * num_cancer_cells);
     if(to_be_infected == 0) return;
+
+    std::vector< size_t > cancer_pos(num_cancer_cells);
+    int j = 0;
+    for(auto i : world) {
+        if(i.node_type == cancer) {
+            cancer_pos[j] = static_cast<size_t>(i.pos);
+            j++;
+        }
+    }
+
     while(infected_cells < to_be_infected && num_cancer_cells > 0) {
-        size_t position_of_grown_cell = static_cast<size_t>(death_prob_rnd[cancer](rndgen.rndgen_));
+        //size_t position_of_grown_cell = static_cast<size_t>(death_prob_rnd[cancer](rndgen.rndgen_));
+        size_t index = static_cast<size_t>(rndgen.random_number(cancer_pos.size()));
+        size_t position_of_infected_cell = cancer_pos[ index ];
 
-        world[position_of_grown_cell].node_type = infected;
+        world[position_of_infected_cell].node_type = infected;
 
-        // update death probability of new cell:
-        update_death_prob(position_of_grown_cell);
         num_cancer_cells--; // easy count for now.
         infected_cells++;
+        cancer_pos[index] = cancer_pos.back();
+        cancer_pos.pop_back();
     }
 
     for(auto i : world) {
@@ -601,4 +613,12 @@ void simulation::initialize_full() {
         growth_prob_rnd[i].update_row_cdf(growth_probs[i].begin());
         death_prob_rnd[i].update_row_cdf(death_probs[i].begin());
     }
+}
+
+void simulation::set_infection_type(const infection_routine& infect_type) {
+    parameters.infection_type = infect_type;
+}
+
+void simulation::set_percent_infected(const float& percent) {
+    parameters.percent_infected = percent;
 }

@@ -265,7 +265,7 @@ void MainWindow::update_parameters(Param& p) {
        p.infection_type = center_infection;
 
 
-   auto start_string = ui->box_start_setup->currentText();
+    auto start_string = ui->box_start_setup->currentText();
     if(start_string == "Grow")
         p.start_setup = grow;
     if(start_string == "Full")
@@ -297,7 +297,6 @@ void MainWindow::setup_simulation() {
         return;
     }
 
-
     x_t.clear();
     y_n.clear();
     y_c.clear();
@@ -316,6 +315,15 @@ void MainWindow::setup_simulation() {
     Simulation.t = 0.0;
 
     ui->btn_start->setText("Start");
+
+    if(focal_display_type == cells) update_image(Simulation.world, Simulation.sq_size);
+    if(focal_display_type != cells)  {
+        update_image(Simulation.sq_size, Simulation.growth_probs);
+    }
+
+    update_plot(static_cast<double>(Simulation.t),
+                Simulation.get_cell_numbers());
+    QApplication::processEvents();
 }
 
 
@@ -339,7 +347,13 @@ void MainWindow::on_btn_start_clicked()
 
         int progress = static_cast<int>(100.f * Simulation.t / all_parameters.maximum_time);
         ui->progressBar->setValue(progress);
-        int update_step = static_cast<int>((1.0f * update_speed / 100) * Simulation.world.size());
+
+
+        // update speed is in 1 - 100
+        const static size_t range = 2 * Simulation.world.size();
+
+        int update_step = 1 + (update_speed - 1) * 0.01f * range;
+
         if(counter % update_step == 0) {
             if(focal_display_type == cells) update_image(Simulation.world, Simulation.sq_size);
             if(focal_display_type != cells)  {
@@ -421,4 +435,17 @@ void MainWindow::on_drpdwnbox_display_activated(int index)
 void MainWindow::on_btn_setup_clicked()
 {
     setup_simulation();
+}
+
+void MainWindow::on_btn_add_virus_clicked()
+{
+   auto infection_string = ui->box_infection_routine->currentText();
+   if(infection_string == "Random")
+       Simulation.set_infection_type(random_infection);
+   if(infection_string == "Center")
+       Simulation.set_infection_type(center_infection);
+
+   Simulation.set_percent_infected(static_cast<float>(ui->box_percent_infected->value()));
+
+   Simulation.add_infected();
 }

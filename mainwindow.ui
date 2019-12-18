@@ -43,9 +43,14 @@
      <rect>
       <x>10</x>
       <y>60</y>
-      <width>113</width>
+      <width>151</width>
       <height>32</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
     </property>
     <property name="text">
      <string>Start</string>
@@ -104,9 +109,14 @@
      <rect>
       <x>10</x>
       <y>100</y>
-      <width>113</width>
+      <width>151</width>
       <height>32</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
     </property>
     <property name="text">
      <string>Stop</string>
@@ -133,6 +143,11 @@
       <width>160</width>
       <height>22</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>5</pointsize>
+     </font>
     </property>
     <property name="minimum">
      <number>1</number>
@@ -637,44 +652,70 @@
      </item>
     </layout>
    </widget>
-   <widget class="QComboBox" name="drpdwnbox_display">
-    <property name="geometry">
-     <rect>
-      <x>480</x>
-      <y>230</y>
-      <width>141</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="currentText">
-     <string notr="true"/>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_22">
-    <property name="geometry">
-     <rect>
-      <x>380</x>
-      <y>240</y>
-      <width>140</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>color scheme</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="btn_setup">
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>20</y>
-      <width>113</width>
+      <width>151</width>
       <height>32</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
     </property>
     <property name="text">
      <string>Setup</string>
     </property>
+   </widget>
+   <widget class="QPushButton" name="btn_add_virus">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>280</y>
+      <width>231</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Cooper Black</family>
+      <pointsize>28</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Add virus</string>
+    </property>
+   </widget>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>230</y>
+      <width>231</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" name="gridLayout_3">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_22">
+       <property name="text">
+        <string>color scheme</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QComboBox" name="drpdwnbox_display">
+       <property name="currentText">
+        <string notr="true"/>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
    <zorder>layoutWidget</zorder>
    <zorder>layoutWidget</zorder>
@@ -695,6 +736,7 @@
    <zorder>drpdwnbox_display</zorder>
    <zorder>label_22</zorder>
    <zorder>btn_setup</zorder>
+   <zorder>btn_add_virus</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>

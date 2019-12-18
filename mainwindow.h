@@ -46,6 +46,8 @@ private slots:
 
     void on_btn_setup_clicked();
 
+    void on_btn_add_virus_clicked();
+
 private:
     Ui::MainWindow *ui;
     QImage image_;
