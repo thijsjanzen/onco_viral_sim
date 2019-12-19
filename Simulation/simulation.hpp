@@ -65,7 +65,10 @@ private:
   void implement_death(const cell_type& parent);
   void implement_growth(const cell_type& parent);
   void update_growth_prob(size_t pos);
+  void set_growth_prob(size_t pos);
+
   void update_death_prob(size_t pos);
+  void update_death_prob(size_t pos, cell_type old_type);
 
   void add_cells(const cell_type& focal_cell_type);
 
@@ -85,7 +88,7 @@ private:
   void infect_long_distance(size_t pos);
 
 
-  void change_cell_type(const size_t& pos, const cell_type& focal_cell_type);
+//  void change_cell_type(const size_t& pos, const cell_type& focal_cell_type);
   void ask_infect_neighbours(int depth, float p, size_t pos);
 };
 

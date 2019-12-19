@@ -78,6 +78,39 @@ void MainWindow::update_image(const std::vector< node >& world) {
         {0, 255, 0},    // green, infected
         {128, 0, 128},   // purple, resistant
         {0, 0, 0}      // black, empty
+<<<<<<< Updated upstream
+=======
+    };
+
+    size_t line_size = sq_size;
+    size_t num_lines = sq_size;
+
+    for(size_t i = 0; i < num_lines; ++i) {
+        QRgb* row = (QRgb*) image_.scanLine(i);
+
+        size_t start = i * line_size;
+        size_t end = start + line_size;
+
+        for(size_t index = start; index < end; ++index) {
+            size_t local_index = index - start;
+            row[local_index] = colorz[ world[index].get_node_type() ].rgb();
+        }
+    }
+
+    int w = ui->q_label->width();
+    int h = ui->q_label->height();
+
+    ui->q_label->setPixmap((QPixmap::fromImage(image_)).scaled(w,h, Qt::KeepAspectRatio));
+    ui->q_label->update();
+}
+
+QRgb get_color(const cell_type focal_cell_type, float rate) {
+
+    if(rate < 1e-6f) {
+        QColor col = {0, 0, 0, 255};
+        return col.rgba();
+    }
+>>>>>>> Stashed changes
 
     };
 

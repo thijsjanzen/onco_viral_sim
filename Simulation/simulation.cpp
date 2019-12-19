@@ -48,7 +48,7 @@ void simulation::initialize_network() {
 
   for(auto& i : world) {
     i.update_neighbors(world, sq_size);
-    i.node_type = empty;
+    i.set_node_type(empty);
   }
 
   if(parameters.start_setup == grow) {
@@ -56,7 +56,13 @@ void simulation::initialize_network() {
     add_cells(normal);
 
     for(auto& i : world) {
+<<<<<<< Updated upstream
         update_growth_prob(i.pos);
+=======
+        i.set_all_neighbor_freqs();
+        i.calc_prob_of_growth();
+        set_growth_prob(i.pos);
+>>>>>>> Stashed changes
         update_death_prob(i.pos);
     }
 
@@ -79,7 +85,7 @@ void simulation::initialize_network() {
 void simulation::count_cell_types() {
   num_cell_types = {0, 0, 0};
   for(auto i : world) {
-      num_cell_types[i.node_type]++;
+      num_cell_types[i.get_node_type()]++;
   }
 }
 
@@ -182,14 +188,14 @@ void simulation::implement_death(const cell_type& parent) {
       break;
   }
 
-  world[position_of_dying_cell].node_type = empty;
-  update_death_prob(position_of_dying_cell);
+  cell_type previous_type = world[position_of_dying_cell].get_node_type();
+  world[position_of_dying_cell].set_node_type(empty);
+  update_death_prob(position_of_dying_cell, previous_type);
 
-  size_t min_pos = world.size();
   update_growth_prob(position_of_dying_cell);
+
   for(auto i : world[position_of_dying_cell].neighbors) {
     update_growth_prob(i->pos);
-    if(i->pos < min_pos) min_pos = i->pos;
   }
   
   if(parent == infected) {
@@ -207,10 +213,14 @@ void simulation::ask_infect_neighbours(int depth, float p, size_t pos) {
 
     } else {
         for(auto& n : world[pos].neighbors) {
+<<<<<<< Updated upstream
             if(n->node_type != infected) {
+=======
+            if(n->get_node_type() == cancer) {
+>>>>>>> Stashed changes
                 if(rndgen.uniform() < p) {
-                    n->node_type = infected;
-                    update_death_prob(n->pos);
+                    n->set_node_type(infected);
+                    update_death_prob(n->pos, cancer);
                     update_growth_prob(n->pos);
                     for(auto i : n->neighbors) {
                       update_growth_prob(i->pos);
@@ -258,11 +268,17 @@ void simulation::implement_growth(const cell_type& parent) {
       break;
   }
 
-  change_cell_type(position_of_grown_cell, parent);
+  cell_type old_type = world[position_of_grown_cell].get_node_type();
+  world[position_of_grown_cell].set_node_type(parent);
+  if(parent == cancer) {
+      if(rndgen.uniform() < parameters.freq_resistant) {
+          world[position_of_grown_cell].set_node_type(resistant);
+      }
+  }
 
   // update growth probability of cell
   update_growth_prob(position_of_grown_cell);
-  update_death_prob(position_of_grown_cell);
+  update_death_prob(position_of_grown_cell, old_type);
 
   // update growth probabilities of the neighbors:
   for(auto i : world[position_of_grown_cell].neighbors) {
@@ -291,17 +307,6 @@ void simulation::update_growth_cdf(size_t pos) {
     }
 }
 
-void simulation::change_cell_type(const size_t& pos, const cell_type& focal_cell_type) {
-    if(focal_cell_type == cancer) {
-        if(rndgen.uniform() < parameters.freq_resistant) {
-            world[pos].node_type = resistant;
-        } else {
-            world[pos].node_type = cancer;
-        }
-    } else {
-        world[pos].node_type = focal_cell_type;
-    }
-}
 
 
 void simulation::add_cells(const cell_type& focal_cell_type) {
@@ -310,8 +315,7 @@ void simulation::add_cells(const cell_type& focal_cell_type) {
   size_t y = sq_size / 2;
   size_t focal_pos = x * sq_size + y;
   std::vector<size_t> cells_turned(1, focal_pos);
-
-  change_cell_type(focal_pos, focal_cell_type);
+  std::vector<cell_type> cell_types_turned(1, world[focal_pos].get_node_type());
 
   auto max_number_of_cells = static_cast<size_t>(parameters.initial_number_cancer_cells);
   if (focal_cell_type == normal) max_number_of_cells = parameters.initial_number_normal_cells;
@@ -321,32 +325,81 @@ void simulation::add_cells(const cell_type& focal_cell_type) {
     focal_pos = cells_turned[counter];
     for (size_t i = 0; i < world[focal_pos].neighbors.size(); ++i) {
       size_t other_pos = world[focal_pos].neighbors[i]->pos;
-      if (world[other_pos].node_type != focal_cell_type) {
-
-        change_cell_type(other_pos, focal_cell_type);
+      if (world[other_pos].get_node_type() != focal_cell_type) {
+        cell_types_turned.push_back(world[other_pos].get_node_type());
+        //change_cell_type(other_pos, focal_cell_type);
+        world[other_pos].set_node_type(focal_cell_type);
         cells_turned.push_back(other_pos);
+
         if (cells_turned.size() >= max_number_of_cells) break;
       }
     }
     counter++;
   }
 
-  for (auto& i : cells_turned) {
-    update_growth_prob(i);
-    update_death_prob(i);
-    for (auto& j : world[i].neighbors) {
+  for (size_t i = 0; i < cells_turned.size(); ++i) {
+    world[ cells_turned[i] ].set_all_neighbor_freqs();
+    update_growth_prob(cells_turned[i]);
+    update_death_prob(cells_turned[i], cell_types_turned[i]);
+    for (auto& j : world[cells_turned[i]].neighbors) {
+      j->set_all_neighbor_freqs();
       update_growth_prob(j->pos);
     }
   }
 }
 
 void simulation::update_growth_prob(size_t pos) {
+<<<<<<< Updated upstream
   world[pos].update_prob_of_growth();
   for (size_t i = 0; i < growth_prob_rnd.size(); ++i) {
       growth_prob_rnd[i].update_entry(growth_probs[i].begin(), growth_probs[i].end(),
                                       pos, world[pos].prob_of_growth[i]);
       growth_probs[i][pos] = world[pos].prob_of_growth[i];
+=======
+  std::vector<float> old_probs = world[pos].prob_of_growth_;
+  world[pos].calc_prob_of_growth();
+  for (size_t i = 0; i < growth_prob_rnd.size(); ++i) {
+      if(old_probs[i] != world[pos].prob_of_growth_[i]) {
+          growth_prob_rnd[i].update_entry(growth_probs[i].begin(), growth_probs[i].end(),
+                                          pos, world[pos].prob_of_growth_[i]);
+          growth_probs[i][pos] = world[pos].prob_of_growth_[i];
+      }
   }
+}
+
+void simulation::set_growth_prob(size_t pos) {
+  world[pos].calc_prob_of_growth();
+  for (size_t i = 0; i < growth_prob_rnd.size(); ++i) {
+      growth_prob_rnd[i].update_entry(growth_probs[i].begin(), growth_probs[i].end(),
+                                      pos, world[pos].prob_of_growth_[i]);
+      growth_probs[i][pos] = world[pos].prob_of_growth_[i];
+>>>>>>> Stashed changes
+  }
+}
+
+
+
+
+void simulation::update_death_prob(size_t pos, cell_type old_type) {
+
+    if(old_type != empty) {
+        death_prob_rnd[old_type].update_entry(death_probs[old_type].begin(),
+                                               death_probs[old_type].end(),
+                                               pos,
+                                               0.f);
+
+        death_probs[old_type][pos] = 0.f;
+    }
+
+    cell_type new_type = world[pos].get_node_type();
+    if(new_type != empty) {
+        death_prob_rnd[new_type].update_entry(death_probs[new_type].begin(),
+                                           death_probs[new_type].end(),
+                                           pos,
+                                           1.f);
+
+        death_probs[new_type][pos] = 1.f;
+    }
 }
 
 void simulation::update_death_prob(size_t pos) {
@@ -357,7 +410,7 @@ void simulation::update_death_prob(size_t pos) {
     // loop over all and change where needed:
     for (size_t i = 0; i < 4; ++i) {
         float new_val = 0.f;
-        if (i == world[pos].node_type) new_val = 1.f;
+        if (i == world[pos].get_node_type()) new_val = 1.f;
 
         death_prob_rnd[i].update_entry(death_probs[i].begin(),
                                        death_probs[i].end(),
@@ -368,6 +421,31 @@ void simulation::update_death_prob(size_t pos) {
 }
 
 
+<<<<<<< Updated upstream
+=======
+simulation::simulation() {
+    parameters = Param(); // use default parameters
+    world.resize(num_cells);
+
+    for (size_t i = 0; i < world.size(); ++i) {
+      world[i].pos = i;
+      world[i].set_coordinates(sq_size);
+      world[i].prob_normal_infected = parameters.prob_normal_infection;
+    }
+
+    growth_probs.resize(4, std::vector< float >(num_cells, 0.f));
+    death_probs.resize( 4, std::vector< float >(num_cells, 0.f));
+
+    long_distance_infection_probability = std::vector<double>(1, 0);
+    float lambda = 1.0f / parameters.distance_infection_upon_death;
+    for(size_t d = 1; d < sq_size; ++d) {
+        double local_prob = parameters.prob_infection_upon_death * lambda * expf(-lambda * d);
+        long_distance_infection_probability.push_back(local_prob);
+        if(local_prob < 1e-3) break;
+    }
+}
+
+>>>>>>> Stashed changes
 simulation::simulation(const Param& param) {
   parameters = param;
 
@@ -395,6 +473,7 @@ simulation::simulation(const Param& param) {
 // initialization routines:
 void simulation::update_growth_probabilities() {
 
+<<<<<<< Updated upstream
   for(auto i : world) {
     i.update_prob_of_growth();
 
@@ -404,8 +483,20 @@ void simulation::update_growth_probabilities() {
     growth_probs[cancer][pos] = i.prob_of_growth[cancer];
     growth_probs[infected][pos] = i.prob_of_growth[infected];
     growth_probs[resistant][pos] = i.prob_of_growth[resistant];
+=======
+  for(auto& i : world) {
+    i.set_all_neighbor_freqs();
+    i.calc_prob_of_growth();
 
-    switch(i.node_type) {
+    size_t pos = i.pos;
+
+    growth_probs[normal][pos]       = i.prob_of_growth_[normal];
+    growth_probs[cancer][pos]       = i.prob_of_growth_[cancer];
+    growth_probs[infected][pos]     = i.prob_of_growth_[infected];
+    growth_probs[resistant][pos]    = i.prob_of_growth_[resistant];
+>>>>>>> Stashed changes
+
+    switch(i.get_node_type()) {
       case normal:
         death_probs[normal][pos] = 1.f;
         break;
@@ -443,15 +534,30 @@ void simulation::infect_random() {
     while(infected_cells < to_be_infected && num_cancer_cells > 0) {
         size_t position_of_grown_cell = static_cast<size_t>(death_prob_rnd[cancer](rndgen.rndgen_));
 
+<<<<<<< Updated upstream
         world[position_of_grown_cell].node_type = infected;
+=======
+    std::vector< size_t > cancer_pos(num_cancer_cells);
+    int j = 0;
+    for(auto i : world) {
+        if(i.get_node_type() == cancer) {
+            cancer_pos[j] = static_cast<size_t>(i.pos);
+            j++;
+        }
+    }
+>>>>>>> Stashed changes
 
         // update growth probability of cell
         update_growth_prob(position_of_grown_cell);
 
+<<<<<<< Updated upstream
         // update growth probabilities of the neighbors:
         for(auto i : world[position_of_grown_cell].neighbors) {
           update_growth_prob(i->pos);
         }
+=======
+        world[position_of_infected_cell].set_node_type(infected);
+>>>>>>> Stashed changes
 
         // update death probability of new cell:
         update_death_prob(position_of_grown_cell);
@@ -459,8 +565,17 @@ void simulation::infect_random() {
         infected_cells++;
     }
 
+<<<<<<< Updated upstream
     update_growth_cdf(0); // update all vectors from the start.
     update_death_cdf_all();
+=======
+    // hard, full update
+    for(auto i : world) {
+        i.set_all_neighbor_freqs();
+        update_growth_prob(i.pos);
+        update_death_prob(i.pos);
+    }
+>>>>>>> Stashed changes
 }
 
 void simulation::infect_center() {
@@ -472,7 +587,7 @@ void simulation::infect_center() {
     float avg_x = 0;
     float avg_y = 0;
     for(auto i : world) {
-        if(i.node_type == cancer) {
+        if(i.get_node_type() == cancer) {
             avg_x += i.x_;
             avg_y += i.y_;
         }
@@ -483,9 +598,9 @@ void simulation::infect_center() {
 
     //now find starting cell to infect
     size_t starting_pos = start_x * sq_size + start_y;
-    while(world[starting_pos].node_type != cancer) {
+    while(world[starting_pos].get_node_type() != cancer) {
         for(size_t i = 0; i < world[starting_pos].neighbors.size(); ++i) {
-            if( world[starting_pos].neighbors[i]->node_type == cancer) {
+            if( world[starting_pos].neighbors[i]->get_node_type() == cancer) {
                 starting_pos = world[starting_pos].neighbors[i]->pos;
                 break;
             }
@@ -496,14 +611,14 @@ void simulation::infect_center() {
 
     size_t focal_pos = starting_pos;
     std::vector<size_t> cells_turned(1, focal_pos);
-    world[focal_pos].node_type = infected;
+    world[focal_pos].set_node_type(infected);
     size_t counter = 0;
     while(cells_turned.size() < to_be_infected && num_cancer_cells > 0) {
       focal_pos = cells_turned[counter];
       for(size_t i = 0; i < world[focal_pos].neighbors.size(); ++i) {
         size_t other_pos = world[focal_pos].neighbors[i]->pos;
-        if(world[other_pos].node_type == cancer) {
-           world[other_pos].node_type = infected;
+        if(world[other_pos].get_node_type() == cancer) {
+           world[other_pos].set_node_type(infected);
            cells_turned.push_back(other_pos);
            num_cancer_cells--;
 
@@ -515,6 +630,7 @@ void simulation::infect_center() {
     }
 
     for(auto i : world) {
+        i.set_all_neighbor_freqs();
         update_growth_prob(i.pos);
         update_death_prob(i.pos);
     }
@@ -522,8 +638,8 @@ void simulation::infect_center() {
 
 void simulation::infect_all_cancer() {
     for(auto& i : world) {
-        if(i.node_type == cancer) {
-               i.node_type = infected;
+        if(i.get_node_type() == cancer) {
+            i.set_node_type(infected);
         }
     }
 
@@ -554,8 +670,13 @@ void simulation::add_infected() {
 void simulation::initialize_full() {
 
     for(auto& i : world) {
-        i.node_type = normal;
+        i.initialize_node_type(normal);
         i.prob_normal_infected = parameters.prob_normal_infection;
+    }
+    // still have to update neighbor frequencies, because not all neighbors
+    // were initialized in the previous loop
+    for(auto& i : world) {
+        i.set_all_neighbor_freqs();
     }
 
     parameters.initial_number_cancer_cells = static_cast<int>(0.1f * world.size());
@@ -563,7 +684,8 @@ void simulation::initialize_full() {
 
     // just for safety, do a full scan:
     for(auto& i : world) {
-        update_growth_prob(i.pos);
+        i.set_all_neighbor_freqs();
+        set_growth_prob(i.pos);
         update_death_prob(i.pos);
     }
 

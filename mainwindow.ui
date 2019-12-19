@@ -144,10 +144,19 @@
      <number>1</number>
     </property>
     <property name="value">
-     <number>1</number>
+     <number>10</number>
+    </property>
+    <property name="tracking">
+     <bool>true</bool>
     </property>
     <property name="orientation">
      <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="invertedAppearance">
+     <bool>false</bool>
+    </property>
+    <property name="invertedControls">
+     <bool>true</bool>
     </property>
     <property name="tickPosition">
      <enum>QSlider::TicksBelow</enum>
@@ -628,6 +637,76 @@
      </item>
     </layout>
    </widget>
+<<<<<<< Updated upstream
+=======
+   <widget class="QPushButton" name="btn_setup">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>151</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Setup</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_add_virus">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>280</y>
+      <width>231</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Cooper Black</family>
+      <pointsize>28</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Add virus</string>
+    </property>
+   </widget>
+   <widget class="QWidget" name="layoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>230</y>
+      <width>231</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" name="gridLayout_3">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_22">
+       <property name="text">
+        <string>color scheme</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QComboBox" name="drpdwnbox_display">
+       <property name="currentText">
+        <string notr="true"/>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <zorder>layoutWidget</zorder>
+>>>>>>> Stashed changes
+   <zorder>layoutWidget</zorder>
    <zorder>layoutWidget</zorder>
    <zorder>q_label</zorder>
    <zorder>btn_start</zorder>
@@ -643,6 +722,7 @@
    <zorder>box_percent_infected</zorder>
    <zorder>label_15</zorder>
    <zorder>box_start_setup</zorder>
+<<<<<<< Updated upstream
    <zorder>label_16</zorder>
    <zorder>box_prob_normal_infection</zorder>
    <zorder>box_birth_cancer_resistant</zorder>
@@ -655,6 +735,10 @@
    <zorder>box_prob_infection_death</zorder>
    <zorder>label_20</zorder>
    <zorder>label_21</zorder>
+=======
+   <zorder>btn_setup</zorder>
+   <zorder>btn_add_virus</zorder>
+>>>>>>> Stashed changes
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
