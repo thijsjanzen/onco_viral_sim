@@ -29,11 +29,6 @@ node::node(size_t p, float norm_infected) :
     neighbor_freq = 0.25;
 }
 
-node::~node() {
-    std::cout << "destructor\n";
-    neighbors.clear();
-}
-
 node::node(const node& other) {
     node_type = other.node_type;
     pos = other.pos;
@@ -45,6 +40,8 @@ node::node(const node& other) {
     prob_of_growth = other.prob_of_growth;
 
     neighbors = other.neighbors;
+    neighbor_freq = other.neighbor_freq;
+    neighbor_freqs = other.neighbor_freqs;
 }
 
 void node::operator=(const node& other) {
@@ -58,11 +55,14 @@ void node::operator=(const node& other) {
     prob_of_growth = other.prob_of_growth;
 
     neighbors = other.neighbors;
+    neighbor_freq = other.neighbor_freq;
+    neighbor_freqs = other.neighbor_freqs;
 }
 
 void node::update_neighbors(std::vector< node >& world,
                             size_t world_size) {
 
+    neighbors.clear();
 
     static int relative_points[4][2] = { {-1, 0},
                                         {1, 0},
@@ -89,34 +89,6 @@ void node::update_neighbors(std::vector< node >& world,
     neighbor_freq = 1.0f / neighbors.size();
 }
 
-<<<<<<< Updated upstream
-void node::update_freq_neighbours() {
-    freq_type_neighbours = {0.f, 0.f, 0.f, 0.f};
-    float one = 0.25;
-    for(auto i : neighbors) {
-        freq_type_neighbours[i->node_type] += one;
-    }
-}
-
-
-void node::update_prob_of_growth() {
-  prob_of_growth = {0.f, 0.f, 0.f, 0.f};
-
-  update_freq_neighbours();
-
-  if(node_type == normal) {
-    // infected can grow into this, but at lower frequency:
-    prob_of_growth[infected]  =  prob_normal_infected * freq_type_neighbours[infected];
-  }
-  if(node_type == cancer) {
-    // infected nodes can grow into this
-    prob_of_growth[infected]  = freq_type_neighbours[infected];
-  }
-  if(node_type == empty) {
-    prob_of_growth[normal]    = freq_type_neighbours[normal];
-    prob_of_growth[cancer]    = freq_type_neighbours[cancer];
-    prob_of_growth[resistant] = freq_type_neighbours[resistant];
-=======
 void node::calc_prob_of_growth() {
   std::fill(prob_of_growth_.begin(), prob_of_growth_.end(), 0.f);
 
@@ -141,7 +113,6 @@ float node::freq_type_neighbors(const cell_type& ref_type) {
   int count = 0;
   for(auto i : neighbors) {
     if(i->node_type == ref_type) count++;
->>>>>>> Stashed changes
   }
 }
 
@@ -182,7 +153,6 @@ cell_type node::get_node_type() const {
     return node_type;
 }
 
-
 void node::set_all_neighbor_freqs() {
    // std::fill(neighbor_freqs.begin(), neighbor_freqs.end(), 0);
     neighbor_freqs.assign(5, 0.f); // 5 types, although #5 is never used
@@ -190,7 +160,6 @@ void node::set_all_neighbor_freqs() {
         neighbor_freqs[ i->node_type]+= neighbor_freq;
     }
     assert((neighbor_freqs[0] + neighbor_freqs[1] + neighbor_freqs[2] +
-           neighbor_freqs[3] + neighbor_freqs[4]) == 1.f);
+          neighbor_freqs[3] + neighbor_freqs[4]) >= (1.f - 1e-6f));
 }
-
 

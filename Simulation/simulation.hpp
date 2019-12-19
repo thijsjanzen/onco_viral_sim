@@ -21,6 +21,7 @@
 
 class simulation {
 public:
+  simulation();
   simulation(const Param& param);
   void run();
   void initialize_network();
@@ -33,21 +34,24 @@ public:
 
   rnd_t rndgen;
 
-  const static size_t sq_size = 100;
+  const static size_t sq_size = 1000;
 
   const static size_t num_cells = sq_size * sq_size;
-
-private:
-
-  int num_nodes;
-
-  Param parameters;
 
   std::array< binned_distribution<sq_size>, 4 > growth_prob_rnd;
   std::array< binned_distribution<sq_size>, 4 > death_prob_rnd;
 
   std::vector< std::vector< float >> growth_probs;
   std::vector< std::vector< float >> death_probs;
+  void set_infection_type(const infection_routine& infect_type) ;
+
+  void set_percent_infected(const float& percent);
+    void add_infected();
+private:
+
+  int num_nodes;
+
+  Param parameters;
 
   std::array<float, 4> num_cell_types;
 
@@ -74,11 +78,7 @@ private:
 
   void print_to_file(float t);
 
-  void update_death_cdf(const cell_type& parent, size_t pos);
-  void update_growth_cdf(size_t pos);
-  void update_death_cdf_all();
 
-  void add_infected();
   void infect_random();
   void infect_center();
   void infect_all_cancer();
@@ -90,6 +90,8 @@ private:
 
 //  void change_cell_type(const size_t& pos, const cell_type& focal_cell_type);
   void ask_infect_neighbours(int depth, float p, size_t pos);
+
+
 };
 
 

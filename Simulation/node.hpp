@@ -20,7 +20,6 @@ typedef struct node node;
 struct node {
   node();
   node(size_t p, float norm_infection_rate);
-  ~node();
   node(const node& other);
 
   void operator=(const node& other);
@@ -51,15 +50,12 @@ struct node {
   void calc_prob_of_growth();
   float freq_type_neighbors(const cell_type& ref_type);
 
-<<<<<<< Updated upstream
-  void update_prob_of_growth();
-=======
   void update_neighbor_freq(const cell_type& old_type,
                             const cell_type& new_type);
   void set_all_neighbor_freqs();
 
   float neighbor_freq; // frequency of one neighbor, e.g. 1 / num neighbors
->>>>>>> Stashed changes
+
 
   void die();
 

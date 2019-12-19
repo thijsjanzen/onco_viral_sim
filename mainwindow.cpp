@@ -53,6 +53,19 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->box_start_setup->addItem("Full");
     ui->box_start_setup->addItem("Grow");
+
+
+    ui->drpdwnbox_display->addItem("Cell types");
+    ui->drpdwnbox_display->addItem("Normal Growth Rate");
+    ui->drpdwnbox_display->addItem("Cancer Growth Rate");
+    ui->drpdwnbox_display->addItem("Infected Growth Rate");
+    ui->drpdwnbox_display->addItem("Resistant Growth Rate");
+    ui->drpdwnbox_display->addItem("Dominant Growth Rate");
+
+    is_paused = false;
+    is_running = false;
+
+    Simulation = simulation();
 }
 
 MainWindow::~MainWindow()
@@ -69,17 +82,14 @@ void MainWindow::set_pixel(int x, int y, const QColor& col) {
 }
 
 
-void MainWindow::update_image(const std::vector< node >& world) {
-    QPainter p(&image_);
+void MainWindow::update_image(const std::vector< node >& world, size_t sq_size) {
 
-    std::vector< QColor > colorz = {
+    static const std::vector< QColor > colorz = {
         {0, 0, 255},    // blue, normal
         {255, 0, 0},    // red,  cancer
         {0, 255, 0},    // green, infected
         {128, 0, 128},   // purple, resistant
         {0, 0, 0}      // black, empty
-<<<<<<< Updated upstream
-=======
     };
 
     size_t line_size = sq_size;
@@ -110,25 +120,77 @@ QRgb get_color(const cell_type focal_cell_type, float rate) {
         QColor col = {0, 0, 0, 255};
         return col.rgba();
     }
->>>>>>> Stashed changes
 
-    };
 
-    for(auto i : world) {
-      QColor c = colorz[i.node_type];
-      p.setPen(c);
-      p.drawPoint(static_cast<int>(i.x_),
-                  static_cast<int>(i.y_));
+    if(focal_cell_type == normal) {
+        QColor col = {0, 0, 255, static_cast<int>(rate * 255)};
+        return col.rgba();
+    }
+    if(focal_cell_type == cancer) {
+        QColor col = {255, 0, 0, static_cast<int>(rate * 255)};
+        return col.rgba();
+    }
+    if(focal_cell_type == infected) {
+        QColor col = {0, 255, 0, static_cast<int>(rate * 255)};
+        return col.rgba();
+    }
+    if(focal_cell_type == resistant) {
+        QColor col = {128, 0, 128, static_cast<int>(rate * 255)};
+        return col.rgba();
+    }
+}
+
+int which_max(const std::vector<float>& v) {
+    int max_index = 0;
+    float max_val = v[max_index];
+    for(int i = 1; i < v.size(); ++i) {
+        if(v[i] > max_val) {
+            max_index = i;
+            max_val = v[i];
+        }
+    }
+    return max_index;
+}
+
+void MainWindow::update_image(size_t sq_size,
+                              const std::vector< std::vector< float> > & growth_rate) {
+
+    cell_type focal_cell_type = normal;
+    if( focal_display_type == normal_rate) focal_cell_type = normal;
+    if( focal_display_type == cancer_rate) focal_cell_type = cancer;
+    if( focal_display_type == infected_rate) focal_cell_type = infected;
+    if( focal_display_type == resistant_rate) focal_cell_type = resistant;
+
+    size_t line_size = sq_size;
+    size_t num_lines = sq_size;
+
+    for(size_t i = 0; i < num_lines; ++i) {
+        QRgb* row = (QRgb*) image_.scanLine(i);
+
+        size_t start = i * line_size;
+        size_t end = start + line_size;
+
+        for(size_t index = start; index < end; ++index) {
+            size_t local_index = index - start;
+            if( focal_display_type == dominant_rate) {
+                std::vector<float> probs = {0.0, 0.0, 0.0, 0.0};
+                for(size_t i = 0; i < 4; ++i) probs[i] = growth_rate[i][index];
+                focal_cell_type = static_cast<cell_type>(which_max(probs));
+
+                row[local_index] = get_color(focal_cell_type,
+                                         growth_rate[ focal_cell_type ][index]);
+            } else {
+                row[local_index] = get_color(focal_cell_type,
+                                         growth_rate[ focal_cell_type ][index]);
+            }
+        }
     }
 
     int w = ui->q_label->width();
     int h = ui->q_label->height();
 
-     ui->q_label->setPixmap((QPixmap::fromImage(image_)).scaled(w,h, Qt::KeepAspectRatio));
-     ui->q_label->repaint();
-     ui->q_label->update();
-     ui->q_label->show();
-     QApplication::processEvents();
+    ui->q_label->setPixmap((QPixmap::fromImage(image_)).scaled(w,h, Qt::KeepAspectRatio));
+    ui->q_label->update();
 }
 
 std::string get_string(std::string s, float v) {
@@ -205,20 +267,37 @@ void MainWindow::update_parameters(Param& p) {
        p.infection_type = center_infection;
 
 
-   auto start_string = ui->box_start_setup->currentText();
+    auto start_string = ui->box_start_setup->currentText();
     if(start_string == "Grow")
         p.start_setup = grow;
     if(start_string == "Full")
         p.start_setup = full;
 
+   auto display_string = ui->drpdwnbox_display->currentText();
+   if(display_string == "Cell types")
+       focal_display_type = cells;
+   if(display_string == "Normal Growth Rate")
+       focal_display_type = normal_rate;
+   if(display_string == "Cancer Growth Rate")
+       focal_display_type = cancer_rate;
+   if(display_string == "Infected Growth Rate")
+       focal_display_type = infected_rate;
+   if(display_string == "Resistant Growth Rate")
+       focal_display_type = resistant_rate;
+   if(display_string == "Dominant Growth Rate")
+       focal_display_type = dominant_rate;
+
    print_params(p);
    return;
 }
 
-
-void MainWindow::on_btn_start_clicked()
-{
-    auto start_time = std::chrono::high_resolution_clock::now();
+void MainWindow::setup_simulation() {
+    if(is_running) {
+        QMessageBox::warning(this,
+                             tr("Oncolytic Virus Simulator"),
+                             tr("Simulation is still running, please stop first"));
+        return;
+    }
 
     x_t.clear();
     y_n.clear();
@@ -226,10 +305,9 @@ void MainWindow::on_btn_start_clicked()
     y_i.clear();
     y_r.clear();
 
-    Param all_parameters;
     update_parameters(all_parameters);
 
-    simulation Simulation(all_parameters);
+    Simulation = simulation(all_parameters);
 
     Simulation.initialize_network();
 
@@ -237,23 +315,56 @@ void MainWindow::on_btn_start_clicked()
                    static_cast<int>(Simulation.sq_size));
 
     Simulation.t = 0.0;
-    int counter = 0;
+
+    ui->btn_start->setText("Start");
+
+    if(focal_display_type == cells) update_image(Simulation.world, Simulation.sq_size);
+    if(focal_display_type != cells)  {
+        update_image(Simulation.sq_size, Simulation.growth_probs);
+    }
+
+    update_plot(static_cast<double>(Simulation.t),
+                Simulation.get_cell_numbers());
+    QApplication::processEvents();
+}
+
+
+
+void MainWindow::on_btn_start_clicked()
+{
+    if(is_running) return; // pre emptive return if the simulation is already running
+
+    if(!is_paused) setup_simulation(); // only setup if it is not paused
+
+    is_paused = false; // now everything is setup, no need to pause.
+
+    auto start_time = std::chrono::high_resolution_clock::now();
+    ui->btn_start->setText("Start");
+
     is_running = true;
-
-
-
+    int counter = 0;
     while(Simulation.t < all_parameters.maximum_time) {
         Simulation.update_one_step();
         counter++;
 
         int progress = static_cast<int>(100.f * Simulation.t / all_parameters.maximum_time);
         ui->progressBar->setValue(progress);
-        int update_step = static_cast<int>((1.0f * update_speed / 100) * Simulation.world.size());
+
+
+        // update speed is in 1 - 100
+        const static size_t range = 2 * Simulation.world.size();
+
+        int update_step = 1 + (update_speed - 1) * 0.01f * range;
+
         if(counter % update_step == 0) {
-            update_image(Simulation.world);
+            if(focal_display_type == cells) update_image(Simulation.world, Simulation.sq_size);
+            if(focal_display_type != cells)  {
+                update_image(Simulation.sq_size, Simulation.growth_probs);
+            }
 
             update_plot(static_cast<double>(Simulation.t),
                         Simulation.get_cell_numbers());
+            QApplication::processEvents();
         }
         if(!is_running) break;
     }
@@ -262,7 +373,7 @@ void MainWindow::on_btn_start_clicked()
     auto end_time = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>( end_time - start_time ).count();
 
-    float time_taken = 1.f * duration / 1000;
+    float time_taken = 1.f * duration / 1000; // this is a rather ugly translation of milli seconds to seconds
 
     std::stringstream st;
     st << "This took ";
@@ -270,7 +381,6 @@ void MainWindow::on_btn_start_clicked()
     st << " seconds\n";
     ui->text->appendPlainText(QString::fromStdString(st.str()));
     std::cout << time_taken<< "\n";
-
 }
 
 void MainWindow::update_plot(double t, const std::vector<int>& cell_numbers) {
@@ -295,16 +405,49 @@ void MainWindow::update_plot(double t, const std::vector<int>& cell_numbers) {
 
     ui->line_plot->rescaleAxes();
     ui->line_plot->replot();
-    ui->line_plot->update();
-    QApplication::processEvents();
 }
-
-
 
 void MainWindow::on_btn_stop_clicked() {
     is_running = false;
+    is_paused = true;
+    ui->btn_start->setText("Resume");
 }
 
 void MainWindow::on_speed_slider_actionTriggered(int action) {
    update_speed = ui->speed_slider->value();
+}
+
+void MainWindow::on_drpdwnbox_display_activated(int index)
+{
+    auto display_string = ui->drpdwnbox_display->currentText();
+    if(display_string == "Cell types")
+        focal_display_type = cells;
+    if(display_string == "Normal Growth Rate")
+        focal_display_type = normal_rate;
+    if(display_string == "Cancer Growth Rate")
+        focal_display_type = cancer_rate;
+    if(display_string == "Infected Growth Rate")
+        focal_display_type = infected_rate;
+    if(display_string == "Resistant Growth Rate")
+        focal_display_type = resistant_rate;
+    if(display_string == "Dominant Growth Rate")
+        focal_display_type = dominant_rate;
+}
+
+void MainWindow::on_btn_setup_clicked()
+{
+    setup_simulation();
+}
+
+void MainWindow::on_btn_add_virus_clicked()
+{
+   auto infection_string = ui->box_infection_routine->currentText();
+   if(infection_string == "Random")
+       Simulation.set_infection_type(random_infection);
+   if(infection_string == "Center")
+       Simulation.set_infection_type(center_infection);
+
+   Simulation.set_percent_infected(static_cast<float>(ui->box_percent_infected->value()));
+
+   Simulation.add_infected();
 }

@@ -42,10 +42,15 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>20</y>
-      <width>113</width>
+      <y>60</y>
+      <width>151</width>
       <height>32</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
     </property>
     <property name="text">
      <string>Start</string>
@@ -103,10 +108,15 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>60</y>
-      <width>113</width>
+      <y>100</y>
+      <width>151</width>
       <height>32</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+     </font>
     </property>
     <property name="text">
      <string>Stop</string>
@@ -134,6 +144,11 @@
       <height>22</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <pointsize>5</pointsize>
+     </font>
+    </property>
     <property name="minimum">
      <number>1</number>
     </property>
@@ -146,17 +161,8 @@
     <property name="value">
      <number>10</number>
     </property>
-    <property name="tracking">
-     <bool>true</bool>
-    </property>
     <property name="orientation">
      <enum>Qt::Horizontal</enum>
-    </property>
-    <property name="invertedAppearance">
-     <bool>false</bool>
-    </property>
-    <property name="invertedControls">
-     <bool>true</bool>
     </property>
     <property name="tickPosition">
      <enum>QSlider::TicksBelow</enum>
@@ -508,12 +514,12 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>380</x>
       <y>20</y>
-      <width>230</width>
+      <width>231</width>
       <height>211</height>
      </rect>
     </property>
@@ -617,8 +623,11 @@
      </item>
      <item row="2" column="2">
       <widget class="QDoubleSpinBox" name="box_freq_resistant_cancer">
+       <property name="decimals">
+        <number>5</number>
+       </property>
        <property name="singleStep">
-        <double>0.005000000000000</double>
+        <double>0.001000000000000</double>
        </property>
        <property name="value">
         <double>0.010000000000000</double>
@@ -627,8 +636,14 @@
      </item>
      <item row="0" column="2">
       <widget class="QDoubleSpinBox" name="box_prob_normal_infection">
+       <property name="decimals">
+        <number>5</number>
+       </property>
+       <property name="maximum">
+        <double>1.000000000000000</double>
+       </property>
        <property name="singleStep">
-        <double>0.005000000000000</double>
+        <double>0.001000000000000</double>
        </property>
        <property name="value">
         <double>0.010000000000000</double>
@@ -637,8 +652,6 @@
      </item>
     </layout>
    </widget>
-<<<<<<< Updated upstream
-=======
    <widget class="QPushButton" name="btn_setup">
     <property name="geometry">
      <rect>
@@ -705,7 +718,6 @@
     </layout>
    </widget>
    <zorder>layoutWidget</zorder>
->>>>>>> Stashed changes
    <zorder>layoutWidget</zorder>
    <zorder>layoutWidget</zorder>
    <zorder>q_label</zorder>
@@ -722,23 +734,8 @@
    <zorder>box_percent_infected</zorder>
    <zorder>label_15</zorder>
    <zorder>box_start_setup</zorder>
-<<<<<<< Updated upstream
-   <zorder>label_16</zorder>
-   <zorder>box_prob_normal_infection</zorder>
-   <zorder>box_birth_cancer_resistant</zorder>
-   <zorder>label_17</zorder>
-   <zorder>label_18</zorder>
-   <zorder>box_death_cancer_resistant</zorder>
-   <zorder>label_19</zorder>
-   <zorder>box_freq_resistant_cancer</zorder>
-   <zorder>box_distance_infection_death</zorder>
-   <zorder>box_prob_infection_death</zorder>
-   <zorder>label_20</zorder>
-   <zorder>label_21</zorder>
-=======
    <zorder>btn_setup</zorder>
    <zorder>btn_add_virus</zorder>
->>>>>>> Stashed changes
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
