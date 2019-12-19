@@ -68,7 +68,6 @@ std::array<float, 4> node::calc_prob_of_growth() {
     prob_of_growth[resistant] = freq_type_neighbours(resistant);
   }
 
-
   return prob_of_growth;
 }
 
@@ -84,6 +83,3 @@ void node::set_coordinates(size_t row_size) {
     x_ = pos / row_size;
     y_ = pos % row_size;
 }
-
-
-

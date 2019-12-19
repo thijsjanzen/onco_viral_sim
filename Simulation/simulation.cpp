@@ -87,7 +87,7 @@ void simulation::initialize_network() {
 }
 
 void simulation::count_cell_types() {
-  num_cell_types = {0, 0, 0};
+  num_cell_types = {0, 0, 0, 0, 0};
   for(auto i : world) {
       num_cell_types[i.node_type]++;
   }
@@ -268,7 +268,12 @@ void simulation::implement_growth(const cell_type& parent) {
       break;
   }
 
-  change_cell_type(position_of_grown_cell, parent);
+  world[position_of_grown_cell].node_type = parent;
+  if(parent == cancer) {
+      if(rndgen.uniform() < parameters.freq_resistant) {
+          world[position_of_grown_cell].node_type = resistant;
+      }
+  }
 
   // update growth probability of cell
   update_growth_prob(position_of_grown_cell);
@@ -280,39 +285,6 @@ void simulation::implement_growth(const cell_type& parent) {
   }
 }
 
-void simulation::update_death_cdf(const cell_type& parent, size_t pos) {
-    death_prob_rnd[parent].mutate(death_probs[parent].begin(),
-                                  death_probs[parent].end(),
-                                  pos);
-}
-
-void simulation::update_death_cdf_all() {
-    for(size_t i = 0; i < death_prob_rnd.size(); ++i) {
-        death_prob_rnd[i].mutate_all(death_probs[i].begin(),
-                                     death_probs[i].end());
-    }
-}
-
-void simulation::update_growth_cdf(size_t pos) {
-    for(size_t i = 0; i < growth_prob_rnd.size(); ++i) {
-        growth_prob_rnd[i].mutate(growth_probs[i].begin(),
-                                  growth_probs[i].end(),
-                                  pos);
-    }
-}
-
-void simulation::change_cell_type(const size_t& pos, const cell_type& focal_cell_type) {
-    if(focal_cell_type == cancer) {
-        if(rndgen.uniform() < parameters.freq_resistant) {
-            world[pos].node_type = resistant;
-        } else {
-            world[pos].node_type = cancer;
-        }
-    } else {
-        world[pos].node_type = focal_cell_type;
-    }
-}
-
 
 void simulation::add_cells(const cell_type& focal_cell_type) {
     // pick center node:
@@ -321,7 +293,7 @@ void simulation::add_cells(const cell_type& focal_cell_type) {
   size_t focal_pos = x * sq_size + y;
   std::vector<size_t> cells_turned(1, focal_pos);
 
-  change_cell_type(focal_pos, focal_cell_type);
+  world[focal_pos].node_type = focal_cell_type;
 
   auto max_number_of_cells = static_cast<size_t>(parameters.initial_number_cancer_cells);
   if (focal_cell_type == normal) max_number_of_cells = parameters.initial_number_normal_cells;
@@ -333,7 +305,7 @@ void simulation::add_cells(const cell_type& focal_cell_type) {
       size_t other_pos = world[focal_pos].neighbors[i]->pos;
       if (world[other_pos].node_type != focal_cell_type) {
 
-        change_cell_type(other_pos, focal_cell_type);
+        world[other_pos].node_type = focal_cell_type;
         cells_turned.push_back(other_pos);
         if (cells_turned.size() >= max_number_of_cells) break;
       }
@@ -462,7 +434,10 @@ std::vector<int> simulation::get_cell_numbers() {
 
 void simulation::infect_random() {
     // count number of cancer cells
-    size_t num_cancer_cells = static_cast<size_t>(std::accumulate(death_probs[cancer].begin(), death_probs[cancer].end(), 0));
+    //size_t num_cancer_cells = static_cast<size_t>(std::accumulate(death_probs[cancer].begin(), death_probs[cancer].end(), 0));
+
+    count_cell_types();
+    int num_cancer_cells = num_cell_types[cancer];
 
     int infected_cells = 0;
     int to_be_infected = static_cast<int>(parameters.percent_infected * num_cancer_cells);
@@ -497,7 +472,8 @@ void simulation::infect_random() {
 }
 
 void simulation::infect_center() {
-    int num_cancer_cells = static_cast<int>(std::accumulate(death_probs[cancer].begin(), death_probs[cancer].end(), 0));
+    count_cell_types();
+    int num_cancer_cells = num_cell_types[cancer];
 
     size_t to_be_infected = static_cast<size_t>(parameters.percent_infected * num_cancer_cells);
     if(to_be_infected == 0) return;

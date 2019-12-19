@@ -51,15 +51,13 @@ public:
 
   void set_infection_type(const infection_routine& infect_type);
   void set_percent_infected(const float& percent);
+  std::array<int, 5> num_cell_types;
+
 private:
 
   int num_nodes;
 
   Param parameters;
-
-
-
-  std::array<float, 4> num_cell_types;
 
   std::array< float, 8> rates;
 
