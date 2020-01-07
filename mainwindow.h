@@ -5,7 +5,6 @@
 #include <QPaintEvent>
 #include <QPainter>
 #include "qcustomplot.h"
-#include "Simulation/node.hpp"
 #include "Simulation/parameters.hpp"
 #include "Simulation/simulation.hpp"
 
@@ -22,6 +21,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
      ~MainWindow();
 
+    void update_image(const std::vector< node >& world);
     void update_image(const std::vector< node >& world, size_t sq_size);
     void update_image(size_t sq_size,
                       const std::vector< std::vector< float> > & growth_rate);
@@ -47,6 +47,8 @@ private slots:
     void on_btn_setup_clicked();
 
     void on_btn_add_virus_clicked();
+
+    void on_btn_voronoi_toggled(bool checked);
 
 private:
     Ui::MainWindow *ui;

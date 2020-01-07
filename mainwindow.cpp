@@ -13,6 +13,7 @@
 #include "Simulation/rndutils.hpp"
 
 
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -78,6 +79,43 @@ void MainWindow::set_resolution(int width, int height) {
 void MainWindow::set_pixel(int x, int y, const QColor& col) {
     image_.setPixel(x, y, col.rgb());
 }
+
+void MainWindow::update_image(const std::vector< node >& world) {
+
+    static const std::vector< QColor > colorz = {
+        {0, 0, 255},    // blue, normal
+        {255, 0, 0},    // red,  cancer
+        {0, 255, 0},    // green, infected
+        {128, 0, 128},   // purple, resistant
+        {0, 0, 0}      // black, empty
+    };
+
+
+    QPainter painter(&image_);
+
+    for(auto& i: world) {
+        painter.setBrush(colorz[i.node_type]);
+        QPolygonF polygon;
+        //for(int j = 0; j < i.edges.size(); j++) {
+        std::vector< plot_edge > focal_edges = i.edges;
+        sort_edges(focal_edges);
+        for(auto j : focal_edges) {
+            polygon << QPointF(j.x0_, j.y0_);
+            polygon << QPointF(j.x1_, j.y1_);
+        }
+
+        painter.drawPolygon(polygon);
+    }
+
+    int w = ui->q_label->width();
+    int h = ui->q_label->height();
+
+    ui->q_label->setPixmap((QPixmap::fromImage(image_)).scaled(w,h, Qt::KeepAspectRatio));
+    ui->q_label->update();
+}
+
+
+
 
 
 void MainWindow::update_image(const std::vector< node >& world, size_t sq_size) {
@@ -316,7 +354,8 @@ void MainWindow::setup_simulation() {
 
     ui->btn_start->setText("Start");
 
-    if(focal_display_type == cells) update_image(Simulation.world, Simulation.sq_size);
+   // if(focal_display_type == cells) update_image(Simulation.world, Simulation.sq_size);
+    if(focal_display_type == cells) update_image(Simulation.world);
     if(focal_display_type != cells)  {
         update_image(Simulation.sq_size, Simulation.growth_probs);
     }
@@ -448,4 +487,10 @@ void MainWindow::on_btn_add_virus_clicked()
    Simulation.set_percent_infected(static_cast<float>(ui->box_percent_infected->value()));
 
    Simulation.add_infected();
+}
+
+void MainWindow::on_btn_voronoi_toggled(bool checked)
+{
+   bool is_voronoi = checked;
+
 }

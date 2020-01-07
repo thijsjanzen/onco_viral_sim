@@ -6,11 +6,12 @@
 //  Copyright © 2019 Thijs Janzen. All rights reserved.
 //
 #include <cassert>
-#include "node.hpp"
 #include <iostream>
 #include <array>
 #include <cmath>
 #include <array>
+
+#include "node.hpp"
 #include "random_thijs.hpp"
 
 node::node() {
@@ -22,6 +23,28 @@ node::node(size_t p, float norm_infected) :
     prob_normal_infected(norm_infected) {
     node_type = empty;
 }
+
+node::node(size_t p, float norm_infected, float x, float y) :
+    pos(p),
+    prob_normal_infected(norm_infected),
+    x_(x), y_(y){
+    node_type = empty;
+}
+
+void node::add_neighbor(std::vector< node >& world,
+                        size_t other_pos) {
+
+    for(auto i : neighbors) {
+        if(i->pos == other_pos) {
+            return; // if the neighbor is already added, don't add again.
+        }
+    }
+
+
+    node* neighbor = &world[static_cast<size_t>(other_pos)];
+    neighbors.push_back(neighbor);
+}
+
 
 void node::update_neighbors(std::vector< node >& world,
                             size_t world_size) {
@@ -82,4 +105,58 @@ float node::freq_type_neighbours(const cell_type& ref_type) {
 void node::set_coordinates(size_t row_size) {
     x_ = pos / row_size;
     y_ = pos % row_size;
+}
+
+void node::sort_edges() {
+    if(edges.empty()) return;
+
+    std::vector< plot_edge > temp = edges;
+    std::vector< plot_edge >  sorted_edges;
+    sorted_edges.push_back(temp[0]);
+    temp[0] = temp.back();
+    temp.pop_back();
+    while(!temp.empty()) {
+        // find match!
+        float focal_x = sorted_edges.back().x1_;
+        float focal_y = sorted_edges.back().y1_;
+        size_t connecting_index = -1;
+        for(size_t i = 0; i < temp.size(); ++i) {
+            if(temp[i].x0_ == focal_x && temp[i].y0_ == focal_y) {
+                connecting_index = i;
+                break;
+            }
+        }
+
+        sorted_edges.push_back(temp[connecting_index]);
+        temp[connecting_index] = temp.back();
+        temp.pop_back();
+    }
+    edges = sorted_edges;
+}
+
+void sort_edges(std::vector< plot_edge>& edges) {
+    if(edges.empty()) return;
+
+    std::vector< plot_edge > temp = edges;
+    std::vector< plot_edge >  sorted_edges;
+    sorted_edges.push_back(temp[0]);
+    temp[0] = temp.back();
+    temp.pop_back();
+    while(!temp.empty()) {
+        // find match!
+        float focal_x = sorted_edges.back().x1_;
+        float focal_y = sorted_edges.back().y1_;
+        size_t connecting_index = -1;
+        for(size_t i = 0; i < temp.size(); ++i) {
+            if(temp[i].x0_ == focal_x && temp[i].y0_ == focal_y) {
+                connecting_index = i;
+                break;
+            }
+        }
+
+        sorted_edges.push_back(temp[connecting_index]);
+        temp[connecting_index] = temp.back();
+        temp.pop_back();
+    }
+    edges = sorted_edges;
 }

@@ -7,11 +7,15 @@
 //
 
 #include <algorithm>
-#include "simulation.hpp"
 #include <chrono>
 #include <fstream>
-#include "rndutils.hpp"
 #include <iostream>
+
+#include "voronoi.hpp"
+
+#include "simulation.hpp"
+#include "rndutils.hpp"
+
 
 void simulation::update_one_step() {
     update_rates();
@@ -56,9 +60,13 @@ void simulation::initialize_network() {
   // we first make a regular network
   // we will do voronoi later...
 
-  for(auto& i : world) {
-    i.update_neighbors(world, sq_size);
-    i.node_type = empty;
+  if(parameters.use_voronoi_grid) {
+      setup_voronoi();
+  } else {
+      for(auto& i : world) {
+        i.update_neighbors(world, sq_size);
+        i.node_type = empty;
+      }
   }
 
   if(parameters.start_setup == grow) {
@@ -598,3 +606,70 @@ void simulation::set_infection_type(const infection_routine& infect_type) {
 void simulation::set_percent_infected(const float& percent) {
     parameters.percent_infected = percent;
 }
+
+void simulation::setup_voronoi() {
+   using namespace cinekine;
+
+   voronoi::Sites sites;
+   world.clear();
+
+   for(size_t i = 0; i < num_cells; ++i) {
+     //  float x = i / sq_size;
+     //  float y = i % sq_size;
+       float x = rndgen.uniform() * sq_size;
+       float y = rndgen.uniform() * sq_size;
+
+       voronoi::Vertex temp_vertex(x, y);
+       sites.push_back(temp_vertex);
+       //node temp_node(i, parameters.prob_normal_infection,
+       //               x, y);
+      // world.push_back(temp_node);
+   }
+
+   voronoi::Graph graph = voronoi::build(std::move(sites), sq_size, sq_size);
+
+   int cnt = 0;
+   for(auto cell : graph.cells()) {
+
+       voronoi::Site focal_site = graph.sites()[cell.site];
+
+       node temp_node(cnt, parameters.prob_normal_infection,
+                      focal_site.x, focal_site.y);
+
+       for(auto edge : cell.halfEdges) {
+           voronoi::Edge focal_edge = graph.edges()[edge.edge];
+           plot_edge local_edge(focal_edge.p0.x, focal_edge.p0.y,
+                                focal_edge.p1.x, focal_edge.p1.y,
+                                focal_edge.leftSite, focal_edge.rightSite);
+           temp_node.edges.push_back(local_edge);
+       }
+       world.push_back(temp_node);
+       cnt++;
+   }
+
+   for(auto i : world) {
+       for(auto edge : i.edges) {
+           int left = edge.left;
+           int right = edge.right;
+
+           if(left >= 0 && right >= 0) {
+               world[left].add_neighbor(world, right);
+               world[right].add_neighbor(world, left);
+           }
+       }
+   }
+
+   for(auto& i : world) {
+ //      i.sort_edges();
+       update_growth_prob(i.pos);
+       update_death_prob(i.pos);
+   }
+
+   for(size_t i = 0; i < growth_probs.size(); ++i) {
+       growth_prob_rnd[i].update_row_cdf(growth_probs[i].begin());
+       death_prob_rnd[i].update_row_cdf(death_probs[i].begin());
+   }
+
+}
+
+

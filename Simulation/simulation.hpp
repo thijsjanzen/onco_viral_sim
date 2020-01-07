@@ -11,13 +11,13 @@
 
 #include <cstdio>
 #include <vector>
-#include "parameters.hpp"
 #include <array>
 #include <cmath>
-#include "node.hpp"
+
+#include "parameters.hpp"
 #include "rndutils.hpp"
 #include "random_thijs.hpp"
-
+#include "node.hpp"
 
 class simulation {
 public:
@@ -34,7 +34,7 @@ public:
 
   rnd_t rndgen;
 
-  const static size_t sq_size = 1000; // hard coded, because the binned distribution
+  const static size_t sq_size = 100; // hard coded, because the binned distribution
                                       // uses array dynamics
 
   const static size_t num_cells = sq_size * sq_size;
@@ -91,6 +91,8 @@ private:
   void initialize_full();
 
   void infect_long_distance(size_t pos);
+
+  void setup_voronoi();
 
 
   void change_cell_type(const size_t& pos, const cell_type& focal_cell_type);

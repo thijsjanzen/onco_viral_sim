@@ -43,6 +43,7 @@ struct Param {
   float distance_infection_upon_death;
   float prob_infection_upon_death;
 
+  bool use_voronoi_grid;
 
 
   start_type start_setup;
@@ -78,6 +79,8 @@ struct Param {
     freq_resistant = 0.01f;
     distance_infection_upon_death = 1;
     prob_infection_upon_death = 0.f;
+
+    use_voronoi_grid = true;
   }
 
 
