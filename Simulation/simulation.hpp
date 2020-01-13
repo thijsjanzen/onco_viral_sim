@@ -34,9 +34,8 @@ public:
 
   rnd_t rndgen;
 
-  const static size_t sq_size = 100; // hard coded, because the binned distribution
+  const static size_t sq_size = 1000; // hard coded, because the binned distribution
                                       // uses array dynamics
-
   const static size_t num_cells = sq_size * sq_size;
 
   std::array< binned_distribution<sq_size>, 4 > growth_prob_rnd;

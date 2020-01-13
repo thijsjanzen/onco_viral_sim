@@ -34,12 +34,13 @@ node::node(size_t p, float norm_infected, float x, float y) :
 void node::add_neighbor(std::vector< node >& world,
                         size_t other_pos) {
 
-    for(auto i : neighbors) {
-        if(i->pos == other_pos) {
-            return; // if the neighbor is already added, don't add again.
+    if(!neighbors.empty()) {
+        for(auto i : neighbors) {
+            if(i->pos == other_pos) {
+                return; // if the neighbor is already added, don't add again.
+            }
         }
     }
-
 
     node* neighbor = &world[static_cast<size_t>(other_pos)];
     neighbors.push_back(neighbor);
@@ -107,56 +108,83 @@ void node::set_coordinates(size_t row_size) {
     y_ = pos % row_size;
 }
 
-void node::sort_edges() {
-    if(edges.empty()) return;
-
-    std::vector< plot_edge > temp = edges;
-    std::vector< plot_edge >  sorted_edges;
-    sorted_edges.push_back(temp[0]);
-    temp[0] = temp.back();
-    temp.pop_back();
-    while(!temp.empty()) {
-        // find match!
-        float focal_x = sorted_edges.back().x1_;
-        float focal_y = sorted_edges.back().y1_;
-        size_t connecting_index = -1;
-        for(size_t i = 0; i < temp.size(); ++i) {
-            if(temp[i].x0_ == focal_x && temp[i].y0_ == focal_y) {
-                connecting_index = i;
-                break;
-            }
+/*
+void node::clean_edges() {
+    std::sort(edges.begin(), edges.end());
+    for(size_t i = edges.size() - 1; i > 0; i--) {
+        if(edges[i] == edges[i-1]) {
+            edges[i] = edges.back();
+            edges.pop_back();
         }
-
-        sorted_edges.push_back(temp[connecting_index]);
-        temp[connecting_index] = temp.back();
-        temp.pop_back();
     }
-    edges = sorted_edges;
+}*/
+
+void node::invert_edges() {
+    // check for inverted edges.
+    for(auto& i : edges) {
+        if(i.right != pos) {
+            std::swap(i.left, i.right);
+            std::swap(i.start, i.end);
+        }
+    }
 }
 
-void sort_edges(std::vector< plot_edge>& edges) {
+
+void node::clean_edges() {
+    // the goal is to connect all edges, and then provide
+    // all the outer points
     if(edges.empty()) return;
 
-    std::vector< plot_edge > temp = edges;
-    std::vector< plot_edge >  sorted_edges;
-    sorted_edges.push_back(temp[0]);
-    temp[0] = temp.back();
-    temp.pop_back();
-    while(!temp.empty()) {
-        // find match!
-        float focal_x = sorted_edges.back().x1_;
-        float focal_y = sorted_edges.back().y1_;
-        size_t connecting_index = -1;
-        for(size_t i = 0; i < temp.size(); ++i) {
-            if(temp[i].x0_ == focal_x && temp[i].y0_ == focal_y) {
-                connecting_index = i;
+    invert_edges();
+
+
+    std::vector< voronoi_edge > old_edges = edges; // for debugging only
+
+    std::sort(edges.begin(), edges.end());
+
+    std::vector< voronoi_edge > new_edges;
+
+    voronoi_edge focal_edge = edges.back();
+    new_edges.push_back(focal_edge);
+    edges.pop_back();
+
+    while(!edges.empty()) {
+        size_t match = 1e6; // should give out of bounds access if failure.
+        for(size_t i = 0; i < edges.size(); ++i) {
+            if(edges[i].start == focal_edge.end) {
+                match = i;
                 break;
             }
         }
-
-        sorted_edges.push_back(temp[connecting_index]);
-        temp[connecting_index] = temp.back();
-        temp.pop_back();
+        focal_edge = edges[match];
+        edges[match] = edges.back();
+        edges.pop_back();
+        new_edges.push_back(focal_edge);
     }
-    edges = sorted_edges;
+    // allright, we have connected them now
+    // now we collect the starting points
+    for(auto i : new_edges) {
+        voronoi_point temp_point = i.start;
+        outer_points.push_back(temp_point);
+    }
+    edges = new_edges;
+    // done!
+}
+
+float node::calc_distance(const node& other) {
+    float squared_distance = (x_ - other.x_) * (x_ - other.x_) +
+                             (y_ - other.y_) * (y_ - other.y_);
+    float dist = sqrtf(squared_distance);
+    return dist;
+}
+
+void node::check_distances(float max_dist) {
+
+    for(auto i : neighbors) {
+      float dist = calc_distance(*i);
+      if(dist > max_dist) {
+          std::cout << "distance between neighbors is way too far!\n";
+          return;
+      }
+    }
 }

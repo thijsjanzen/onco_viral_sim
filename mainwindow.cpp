@@ -65,6 +65,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     is_paused = false;
     is_running = false;
+
+    set_resolution(3000, 3000); // 3000 x 3000 pizels, for ease of display.
 }
 
 MainWindow::~MainWindow()
@@ -73,14 +75,19 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::set_resolution(int width, int height) {
-    image_ = QImage(width,height, QImage::Format_RGB32);
+    row_size = width;
+    col_size = height;
+
+    image_ = QImage(row_size, col_size, QImage::Format_RGB32);
 }
 
 void MainWindow::set_pixel(int x, int y, const QColor& col) {
     image_.setPixel(x, y, col.rgb());
 }
 
-void MainWindow::update_image(const std::vector< node >& world) {
+void MainWindow::update_image(const std::vector< node >& world,
+                              bool use_polygons,
+                              int sq_size) {
 
     static const std::vector< QColor > colorz = {
         {0, 0, 255},    // blue, normal
@@ -91,19 +98,49 @@ void MainWindow::update_image(const std::vector< node >& world) {
     };
 
 
+  /*  QImage image2_ = QImage(1000, 1000, QImage::Format_RGB32);
+    image2_.fill(Qt::gray);
+    QPainter p(&image2_);
+    QPolygonF polygon;
+    for(auto j : world[101].outer_points) {
+        polygon << QPointF( j.x_, j.y_);
+    }
+    QBrush brush(colorz[1]); // Qt::SolidPattern by default.
+
+    QPainterPath path;
+    //path.addPolygon(polygon.boundingRect());
+    path.addPolygon(polygon);
+
+    p.fillPath(path, brush);
+    p.drawPolygon(polygon);
+
+
+    image2_.save("/Users/janzen/test.PNG", "PNG");
+    p.end();
+
+*/
+
+    image_.fill(Qt::gray);
+
     QPainter painter(&image_);
 
-    for(auto& i: world) {
-        painter.setBrush(colorz[i.node_type]);
-        QPolygonF polygon;
-        //for(int j = 0; j < i.edges.size(); j++) {
-        std::vector< plot_edge > focal_edges = i.edges;
-        sort_edges(focal_edges);
-        for(auto j : focal_edges) {
-            polygon << QPointF(j.x0_, j.y0_);
-            polygon << QPointF(j.x1_, j.y1_);
-        }
+    for(auto i: world) {
+      //  painter.setBrush(colorz[i.node_type]);
 
+
+        float factor_x = row_size / sq_size;
+        float factor_y = col_size / sq_size;
+
+        QPolygonF polygon;
+        for(auto j : i.outer_points) {
+             polygon << QPointF(j.x_ * factor_x, j.y_ * factor_y);
+        }
+        QBrush brush(colorz[i.node_type]); // Qt::SolidPattern by default.
+
+        QPainterPath path;
+        path.addPolygon(polygon);
+
+        painter.fillPath(path, brush);
         painter.drawPolygon(polygon);
     }
 
@@ -112,11 +149,11 @@ void MainWindow::update_image(const std::vector< node >& world) {
 
     ui->q_label->setPixmap((QPixmap::fromImage(image_)).scaled(w,h, Qt::KeepAspectRatio));
     ui->q_label->update();
+  //  ui->q_label->repaint();
+
+  //   image_.save("/Users/janzen/test2.PNG", "PNG");
+   //     int a = 5;
 }
-
-
-
-
 
 void MainWindow::update_image(const std::vector< node >& world, size_t sq_size) {
 
@@ -128,8 +165,8 @@ void MainWindow::update_image(const std::vector< node >& world, size_t sq_size) 
         {0, 0, 0}      // black, empty
     };
 
-    size_t line_size = sq_size;
-    size_t num_lines = sq_size;
+    size_t line_size = row_size;
+    size_t num_lines = col_size;
 
     for(size_t i = 0; i < num_lines; ++i) {
         QRgb* row = (QRgb*) image_.scanLine(i);
@@ -156,7 +193,6 @@ QRgb get_color(const cell_type focal_cell_type, float rate) {
         QColor col = {0, 0, 0, 255};
         return col.rgba();
     }
-
 
     if(focal_cell_type == normal) {
         QColor col = {0, 0, 255, static_cast<int>(rate * 255)};
@@ -197,8 +233,8 @@ void MainWindow::update_image(size_t sq_size,
     if( focal_display_type == infected_rate) focal_cell_type = infected;
     if( focal_display_type == resistant_rate) focal_cell_type = resistant;
 
-    size_t line_size = sq_size;
-    size_t num_lines = sq_size;
+    size_t line_size = row_size;
+    size_t num_lines = col_size;
 
     for(size_t i = 0; i < num_lines; ++i) {
         QRgb* row = (QRgb*) image_.scanLine(i);
@@ -347,21 +383,25 @@ void MainWindow::setup_simulation() {
 
     Simulation.initialize_network();
 
-    set_resolution(static_cast<int>(Simulation.sq_size),
-                   static_cast<int>(Simulation.sq_size));
-
     Simulation.t = 0.0;
 
     ui->btn_start->setText("Start");
 
+    set_resolution(3000, 3000);
+
    // if(focal_display_type == cells) update_image(Simulation.world, Simulation.sq_size);
-    if(focal_display_type == cells) update_image(Simulation.world);
+    if(focal_display_type == cells) {
+        update_image(Simulation.world, all_parameters.use_voronoi_grid, Simulation.sq_size);
+    }
     if(focal_display_type != cells)  {
         update_image(Simulation.sq_size, Simulation.growth_probs);
     }
 
     update_plot(static_cast<double>(Simulation.t),
                 Simulation.get_cell_numbers());
+
+    is_paused = true;
+
     QApplication::processEvents();
 }
 
@@ -394,7 +434,9 @@ void MainWindow::on_btn_start_clicked()
         int update_step = 1 + (update_speed - 1) * 0.01f * range;
 
         if(counter % update_step == 0) {
-            if(focal_display_type == cells) update_image(Simulation.world, Simulation.sq_size);
+            if(focal_display_type == cells) {
+                update_image(Simulation.world, all_parameters.use_voronoi_grid, Simulation.sq_size);
+            }
             if(focal_display_type != cells)  {
                 update_image(Simulation.sq_size, Simulation.growth_probs);
             }

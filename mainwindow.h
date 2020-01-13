@@ -21,7 +21,9 @@ public:
     MainWindow(QWidget *parent = nullptr);
      ~MainWindow();
 
-    void update_image(const std::vector< node >& world);
+    void update_image(const std::vector< node >& world,
+                      bool use_polygons,
+                      int sq_size);
     void update_image(const std::vector< node >& world, size_t sq_size);
     void update_image(size_t sq_size,
                       const std::vector< std::vector< float> > & growth_rate);
@@ -53,6 +55,10 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QImage image_;
+
+    int row_size;
+    int col_size;
+
     display_color focal_display_type;
 
     QVector<double> x_t;
