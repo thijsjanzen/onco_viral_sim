@@ -34,13 +34,8 @@ public:
 
   rnd_t rndgen;
 
-  const static size_t sq_size = 1000; // hard coded, because the binned distribution
-                                      // uses array dynamics
-
-  const static size_t num_cells = sq_size * sq_size;
-
-  std::array< binned_distribution<sq_size>, 4 > growth_prob_rnd;
-  std::array< binned_distribution<sq_size>, 4 > death_prob_rnd;
+  std::array< binned_distribution, 4 > growth_prob_rnd;
+  std::array< binned_distribution, 4 > death_prob_rnd;
 
   std::vector< std::vector< float > > growth_probs;
   std::vector< std::vector< float > > death_probs;
@@ -56,6 +51,8 @@ public:
 private:
 
   int num_nodes;
+  int num_cells;
+  int sq_size;
 
   Param parameters;
 

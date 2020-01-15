@@ -255,6 +255,7 @@ void MainWindow::update_parameters(Param& p) {
    p.distance_infection_upon_death = static_cast<float>(ui->box_distance_infection_death->value());
    p.prob_infection_upon_death = static_cast<float>(ui->box_prob_infection_death->value());
 
+   p.resolution = static_cast<int>(ui->box_resolution->value());
 
    p.infection_type = random_infection;
 
@@ -309,16 +310,16 @@ void MainWindow::setup_simulation() {
 
     Simulation.initialize_network();
 
-    set_resolution(static_cast<int>(Simulation.sq_size),
-                   static_cast<int>(Simulation.sq_size));
+    set_resolution(static_cast<int>(all_parameters.resolution),
+                   static_cast<int>(all_parameters.resolution));
 
     Simulation.t = 0.0;
 
     ui->btn_start->setText("Start");
 
-    if(focal_display_type == cells) update_image(Simulation.world, Simulation.sq_size);
+    if(focal_display_type == cells) update_image(Simulation.world, all_parameters.resolution);
     if(focal_display_type != cells)  {
-        update_image(Simulation.sq_size, Simulation.growth_probs);
+        update_image(all_parameters.resolution, Simulation.growth_probs);
     }
 
     update_plot(static_cast<double>(Simulation.t),
@@ -355,9 +356,9 @@ void MainWindow::on_btn_start_clicked()
         int update_step = 1 + (update_speed - 1) * 0.01f * range;
 
         if(counter % update_step == 0) {
-            if(focal_display_type == cells) update_image(Simulation.world, Simulation.sq_size);
+            if(focal_display_type == cells) update_image(Simulation.world, all_parameters.resolution);
             if(focal_display_type != cells)  {
-                update_image(Simulation.sq_size, Simulation.growth_probs);
+                update_image(all_parameters.resolution, Simulation.growth_probs);
             }
 
             update_plot(static_cast<double>(Simulation.t),

@@ -56,6 +56,12 @@ void simulation::initialize_network() {
   // we first make a regular network
   // we will do voronoi later...
 
+  // initialize default.
+  for(size_t i = 0; i < 4; ++i) {
+       growth_prob_rnd[i] = binned_distribution(sq_size);
+       death_prob_rnd[i] = binned_distribution(sq_size);
+  }
+
   for(auto& i : world) {
     i.update_neighbors(world, sq_size);
     i.node_type = empty;
@@ -71,17 +77,13 @@ void simulation::initialize_network() {
     }
 
     for(size_t i = 0; i < 4; ++i) {
-        growth_prob_rnd[i] = binned_distribution<sq_size>(growth_probs[i].begin(), growth_probs[i].end());
+        growth_prob_rnd[i] = binned_distribution(growth_probs[i].begin(), growth_probs[i].end(), sq_size);
 
-        death_prob_rnd[i] = binned_distribution<sq_size>(death_probs[i].begin(), death_probs[i].end());
+        death_prob_rnd[i] = binned_distribution(death_probs[i].begin(), death_probs[i].end(), sq_size);
     }
   }
 
   if(parameters.start_setup == full) {
-    for(size_t i = 0; i < 4; ++i) {
-         growth_prob_rnd[i] = binned_distribution<sq_size>();
-         death_prob_rnd[i] = binned_distribution<sq_size>();
-    }
     initialize_full();
   }
 }
@@ -165,32 +167,8 @@ size_t simulation::pick_event(const std::array< float, 8>& rates, float sum) {
 }
 
 void simulation::implement_death(const cell_type& parent) {
-  size_t position_of_dying_cell = 0;
-  switch(parent) {
-    case normal:
-      position_of_dying_cell = static_cast<size_t>(death_prob_rnd[normal].draw_explicit(death_probs[normal].begin(),
-                                                                                        death_probs[normal].end(),
-                                                                                        rndgen)); //static_cast<size_t>(death_prob_rnd[normal](rndgen.rndgen_));
-      break;
-    case cancer:
-      position_of_dying_cell = static_cast<size_t>(death_prob_rnd[cancer].draw_explicit(death_probs[cancer].begin(),
-                                                                                        death_probs[cancer].end(),
-                                                                                        rndgen));//static_cast<size_t>(death_prob_rnd[cancer](rndgen.rndgen_));
-      break;
-    case infected:
-      position_of_dying_cell = static_cast<size_t>(death_prob_rnd[infected].draw_explicit(death_probs[infected].begin(),
-                                                                                          death_probs[infected].end(),
-                                                                                            rndgen));
-      break;
-    case resistant:
-      position_of_dying_cell = static_cast<size_t>(death_prob_rnd[resistant].draw_explicit(death_probs[resistant].begin(),
-                                                                                          death_probs[resistant].end(),
-                                                                                            rndgen));
-      break;
-    case empty:
-      position_of_dying_cell = 0;
-      break;
-  }
+  size_t position_of_dying_cell = death_prob_rnd[parent].draw_explicit(death_probs[parent].begin(),
+                                                                       rndgen);
 
   world[position_of_dying_cell].node_type = empty;
   update_death_prob(position_of_dying_cell);
@@ -241,32 +219,8 @@ void simulation::infect_long_distance(size_t pos) {
 void simulation::implement_growth(const cell_type& parent) {
 
    // drawing position of growth is slow/bottleneck:
-  size_t position_of_grown_cell = 0;
-  switch(parent) {
-    case normal:
-      position_of_grown_cell = static_cast<size_t>(growth_prob_rnd[normal].draw_explicit(growth_probs[normal].begin(),
-                                                                     growth_probs[normal].end(),
-                                                                     rndgen));
-      break;
-    case cancer:
-      position_of_grown_cell = static_cast<size_t>(growth_prob_rnd[cancer].draw_explicit(growth_probs[cancer].begin(),
-                                                                     growth_probs[cancer].end(),
-                                                                     rndgen));
-      break;
-    case infected:
-      position_of_grown_cell = static_cast<size_t>(growth_prob_rnd[infected].draw_explicit(growth_probs[infected].begin(),
-                                                                        growth_probs[infected].end(),
-                                                                        rndgen));
-      break;
-    case resistant:
-      position_of_grown_cell = static_cast<size_t>(growth_prob_rnd[resistant].draw_explicit(growth_probs[resistant].begin(),
-                                                                      growth_probs[resistant].end(),
-                                                                      rndgen));
-        break;
-    case empty:
-      position_of_grown_cell = 0;
-      break;
-  }
+  size_t position_of_grown_cell = growth_prob_rnd[parent].draw_explicit(growth_probs[parent].begin(),
+                                                                        rndgen);
 
   world[position_of_grown_cell].node_type = parent;
   if(parent == cancer) {
@@ -325,22 +279,23 @@ void simulation::add_cells(const cell_type& focal_cell_type) {
 void simulation::update_growth_prob(size_t pos) {
   std::array<float, 4> probs = world[pos].calc_prob_of_growth();
   for (size_t i = 0; i < growth_prob_rnd.size(); ++i) {
-      growth_prob_rnd[i].update_entry(growth_probs[i].begin(), growth_probs[i].end(),
-                                      pos, probs[i]);
+      float old_val = growth_probs[i][pos];
       growth_probs[i][pos] = probs[i];
+      float new_val = probs[i];
+      growth_prob_rnd[i].update_entry(growth_probs[i].begin(), pos,
+                                      old_val, new_val);
   }
 }
 
 void simulation::update_death_prob(size_t pos) {
     for (size_t i = 0; i < 4; ++i) {
         float new_val = 0.f;
+        float old_val = death_probs[i][pos];
         if (i == world[pos].node_type) new_val = 1.f;
 
-        death_prob_rnd[i].update_entry(death_probs[i].begin(),
-                                       death_probs[i].end(),
-                                       pos,
-                                       new_val);
         death_probs[i][pos] = new_val;
+        death_prob_rnd[i].update_entry(death_probs[i].begin(), pos,
+                                       old_val, new_val);
     }
 }
 
@@ -370,6 +325,8 @@ simulation::simulation() {
 
 simulation::simulation(const Param& param) {
   parameters = param;
+  sq_size = param.resolution;
+  num_cells = param.resolution * param.resolution;
 
   world.resize(num_cells);
 

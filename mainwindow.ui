@@ -691,13 +691,13 @@
      <string>Add virus</string>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>380</x>
       <y>230</y>
       <width>231</width>
-      <height>31</height>
+      <height>32</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout_3">
@@ -717,6 +717,42 @@
      </item>
     </layout>
    </widget>
+   <widget class="QLabel" name="label_23">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>300</y>
+      <width>120</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>resolution</string>
+    </property>
+   </widget>
+   <widget class="QDoubleSpinBox" name="box_resolution">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>300</y>
+      <width>64</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="decimals">
+     <number>0</number>
+    </property>
+    <property name="maximum">
+     <double>1000.000000000000000</double>
+    </property>
+    <property name="singleStep">
+     <double>50.000000000000000</double>
+    </property>
+    <property name="value">
+     <double>100.000000000000000</double>
+    </property>
+   </widget>
+   <zorder>layoutWidget</zorder>
    <zorder>layoutWidget</zorder>
    <zorder>layoutWidget</zorder>
    <zorder>q_label</zorder>
@@ -733,10 +769,10 @@
    <zorder>box_percent_infected</zorder>
    <zorder>label_15</zorder>
    <zorder>box_start_setup</zorder>
-   <zorder>drpdwnbox_display</zorder>
-   <zorder>label_22</zorder>
    <zorder>btn_setup</zorder>
    <zorder>btn_add_virus</zorder>
+   <zorder>label_23</zorder>
+   <zorder>box_resolution</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
