@@ -67,7 +67,7 @@ void simulation::initialize_network() {
     i.node_type = empty;
   }
 
-  if(parameters.start_setup == grow) {
+  if(parameters.start_setup == grow || parameters.start_setup == converge) {
 
     add_cells(normal);
 
@@ -88,11 +88,13 @@ void simulation::initialize_network() {
   }
 }
 
-void simulation::count_cell_types() {
-  num_cell_types = {0, 0, 0, 0, 0};
+std::array<int, 5> simulation::count_cell_types() {
+  std::array<int, 5> total_num_cell_types = {0, 0, 0, 0, 0};
   for(auto i : world) {
-      num_cell_types[i.node_type]++;
+      total_num_cell_types[i.node_type]++;
   }
+  num_cell_types = total_num_cell_types;
+  return total_num_cell_types;
 }
 
 void simulation::do_event(size_t event) {
@@ -239,18 +241,48 @@ void simulation::implement_growth(const cell_type& parent) {
   }
 }
 
+size_t simulation::find_center(const cell_type& focal_cell_type) {
+  float avg_x = 0;
+  float avg_y = 0;
+  int count = 0;
+  for(auto i : world) {
+      if(i.node_type == focal_cell_type) {
+          avg_x += i.x_;
+          avg_y += i.y_;
+          count++;
+      }
+  }
+
+  size_t start_x = static_cast<size_t>(avg_x / count);
+  size_t start_y = static_cast<size_t>(avg_y / count);
+  size_t starting_pos = start_x * sq_size + start_y;
+  while(world[starting_pos].node_type != focal_cell_type) {
+      for(size_t i = 0; i < world[starting_pos].neighbors.size(); ++i) {
+          if( world[starting_pos].neighbors[i]->node_type == cancer) {
+              starting_pos = world[starting_pos].neighbors[i]->pos;
+              break;
+          }
+      }
+      int rand_index = rndgen.random_number(world[starting_pos].neighbors.size());
+      starting_pos = world[starting_pos].neighbors[rand_index]->pos;
+  }
+  return starting_pos;
+}
+
 
 void simulation::add_cells(const cell_type& focal_cell_type) {
     // pick center node:
-  size_t x = sq_size / 2;
-  size_t y = sq_size / 2;
-  size_t focal_pos = x * sq_size + y;
-  std::vector<size_t> cells_turned(1, focal_pos);
+  cell_type empty_cell_type = empty;
+  if(focal_cell_type == cancer) empty_cell_type = normal;
+  if(focal_cell_type == infected) empty_cell_type = cancer;
+  size_t focal_pos = find_center(empty_cell_type);
 
+  std::vector<size_t> cells_turned(1, focal_pos);
   world[focal_pos].node_type = focal_cell_type;
 
   auto max_number_of_cells = static_cast<size_t>(parameters.initial_number_cancer_cells);
   if (focal_cell_type == normal) max_number_of_cells = parameters.initial_number_normal_cells;
+
   if (max_number_of_cells > world.size()) max_number_of_cells = world.size();
   size_t counter = 0;
   while (cells_turned.size() < max_number_of_cells) {
@@ -258,7 +290,6 @@ void simulation::add_cells(const cell_type& focal_cell_type) {
     for (size_t i = 0; i < world[focal_pos].neighbors.size(); ++i) {
       size_t other_pos = world[focal_pos].neighbors[i]->pos;
       if (world[other_pos].node_type != focal_cell_type) {
-
         world[other_pos].node_type = focal_cell_type;
         cells_turned.push_back(other_pos);
         if (cells_turned.size() >= max_number_of_cells) break;

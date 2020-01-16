@@ -11,7 +11,7 @@
 #include <cmath>
 
 enum infection_routine {random_infection, center_infection};
-enum start_type {full, grow};
+enum start_type {full, grow, converge};
 
 struct Param {
 
@@ -61,6 +61,7 @@ struct Param {
     time_adding_cancer = 1000; // normally the population is first allowed to stabilize
 
     initial_number_cancer_cells = 5;
+    initial_number_normal_cells = 1000;
 
     birth_normal = 0.5f;
     birth_cancer = 1.0f;
@@ -81,6 +82,8 @@ struct Param {
     prob_infection_upon_death = 0.f;
 
     resolution = 100;
+
+    start_setup = converge;
   }
 
 

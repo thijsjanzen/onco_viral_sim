@@ -48,6 +48,8 @@ public:
   void set_percent_infected(const float& percent);
   std::array<int, 5> num_cell_types;
 
+  std::array<int, 5> count_cell_types(); // this is very heavy, should not be ran often
+  void add_cells(const cell_type& focal_cell_type);
 private:
 
   int num_nodes;
@@ -60,7 +62,7 @@ private:
 
   std::vector<double> long_distance_infection_probability;
 
-  void count_cell_types(); // this is very heavy, should not be ran often
+
   void update_rates();
   void update_total_growth_prob();
 
@@ -71,8 +73,8 @@ private:
   void implement_growth(const cell_type& parent);
   void update_growth_prob(size_t pos);
   void update_death_prob(size_t pos);
+  size_t find_center(const cell_type& focal_cell_type);
 
-  void add_cells(const cell_type& focal_cell_type);
 
   void print_to_file(float t);
 

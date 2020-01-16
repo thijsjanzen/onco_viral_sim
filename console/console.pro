@@ -16,7 +16,8 @@ HEADERS += \
     ../Simulation/parameters.hpp \
     ../Simulation/random_thijs.hpp \
     ../Simulation/rndutils.hpp \
-    ../Simulation/simulation.hpp
+    ../Simulation/simulation.hpp \
+    config_parser.h
 
 DISTFILES += \
     config.ini
