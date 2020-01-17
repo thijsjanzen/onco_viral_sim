@@ -101,6 +101,7 @@ public:
    binned_distribution(It first, It last) {
      int N = std::distance(first, last);
      bin_size = N / num_bins;
+<<<<<<< Updated upstream
      for(int i = 0; i < num_bins; ++i) {
        auto start_it = first + i * bin_size;
        auto end_it = start_it + bin_size - 1;
@@ -160,6 +161,27 @@ public:
        auto N = std::distance(first, last);
        bin_size = N / num_bins;
        size_t row = static_cast<size_t>(pos / bin_size);
+=======
+     row_sum.resize(num_bins);
+     values = std::vector<float>(first, last);
+     update_all_row_sums(first);
+    }
+
+   size_t draw_explicit(rnd_t& r)
+   {
+      size_t row = draw_cdf(row_sum.begin(), row_sum.end(), r);
+      size_t col;
+      float frac = row_sum[row] * 1.f / bin_size;
+      auto first = values.begin();
+      auto start = first + row * bin_size;
+      auto end = start + bin_size - 1;
+      if(frac < 0.1f) {
+       col = draw_cdf(start, end, r);
+      } else {
+       col = draw_from_dist(start, end, 1.f, r);
+     }
+      size_t result = row * bin_size + col;
+>>>>>>> Stashed changes
 
        auto start_it = first + row * bin_size;
        auto end_it = start_it + bin_size - 1;
@@ -169,6 +191,7 @@ public:
        rows.mutate(row_sum.begin(), row_sum.end());
    }
 
+<<<<<<< Updated upstream
    template< typename It>
    void mutate_all(It first, It last) {
        auto N = std::distance(first, last);
@@ -180,12 +203,29 @@ public:
          row_sum[i] = dist[i].cdf().back();
        }
        rows.mutate(row_sum.begin(), row_sum.end());
+=======
+   float get_value(int pos) const {
+     return values[pos];
+   }
+
+   template <typename It>
+   int draw_from_dist(It first, It last, float max_val, rnd_t& r) {
+     int max_index = std::distance(first, last);
+     while (true) {
+       int index = r.random_number(static_cast<size_t>(max_index));
+       float val = *(first + index);
+       if (r.uniform() < (1.f * val / max_val)) {
+         return index;
+       }
+     }
+>>>>>>> Stashed changes
    }
 
    float get_total_sum() {
        return total_sum;
    }
 
+<<<<<<< Updated upstream
 
 
    template< typename It>
@@ -213,6 +253,21 @@ public:
            It start = first + i * bin_size;
            It end = start + bin_size - 1;
            row_sum[i] = std::accumulate(start, end, 0.0);
+=======
+   void update_entry(size_t pos, float new_val) {
+     size_t row = pos / bin_size;
+     float old_val = values[pos];
+     values[pos] = new_val;
+     row_sum[row] += new_val - old_val;
+   }
+
+   template< typename It>
+   void update_all_row_sums(It first) {
+       for(size_t i = 0; i < num_bins; ++i) {
+         auto start_it = first + i * bin_size;
+         auto end_it  = start_it + bin_size - 1;
+         row_sum[i] = std::accumulate(start_it, end_it, 0.f);
+>>>>>>> Stashed changes
        }
 
        rows.mutate(row_sum.begin(), row_sum.end());
@@ -220,11 +275,18 @@ public:
    }
 
  private:
+<<<<<<< Updated upstream
     int bin_size;
     float total_sum;
     std::array<float, num_bins> row_sum;
     std::array< rndutils::mutable_discrete_distribution< int, rndutils::all_zero_policy_nothing >, num_bins > dist;
     rndutils::mutable_discrete_distribution< int, rndutils::all_zero_policy_nothing > rows;
+=======
+    size_t bin_size;
+    size_t num_bins;
+    std::vector<float> row_sum;
+    std::vector<float> values;
+>>>>>>> Stashed changes
 };
 
 

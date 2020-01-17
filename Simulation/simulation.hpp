@@ -36,6 +36,7 @@ public:
 
   const static size_t sq_size = 1000;
 
+<<<<<<< Updated upstream
   const static size_t num_cells = sq_size * sq_size;
 
   std::array< binned_distribution<sq_size>, 4 > growth_prob_rnd;
@@ -44,6 +45,10 @@ public:
   std::vector< std::vector< float >> growth_probs;
   std::vector< std::vector< float >> death_probs;
   void set_infection_type(const infection_routine& infect_type) ;
+=======
+  void add_infected(); // has to be public to allow for interaction by pressing
+                       // a button
+>>>>>>> Stashed changes
 
   void set_percent_infected(const float& percent);
     void add_infected();

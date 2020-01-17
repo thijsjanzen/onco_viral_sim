@@ -24,7 +24,7 @@ public:
 
     void update_image(const std::vector< node >& world, size_t sq_size);
     void update_image(size_t sq_size,
-                      const std::vector< std::vector< float> > & growth_rate);
+                      const std::array< binned_distribution, 4 >& rates);
 
     void update_parameters(Param& p);
     void print_params(const Param& p);

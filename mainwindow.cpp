@@ -11,6 +11,7 @@
 #include "Simulation/parameters.hpp"
 #include "Simulation/simulation.hpp"
 #include "Simulation/rndutils.hpp"
+#include "Simulation/random_thijs.hpp"
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -82,7 +83,8 @@ void MainWindow::set_pixel(int x, int y, const QColor& col) {
 }
 
 
-void MainWindow::update_image(const std::vector< node >& world, size_t sq_size) {
+void MainWindow::update_image(const std::vector< node >& world,
+                              size_t sq_size) {
 
     static const std::vector< QColor > colorz = {
         {0, 0, 255},    // blue, normal
@@ -153,7 +155,7 @@ int which_max(const std::vector<float>& v) {
 }
 
 void MainWindow::update_image(size_t sq_size,
-                              const std::vector< std::vector< float> > & growth_rate) {
+                              const std::array< binned_distribution, 4 >& rates) {
 
     cell_type focal_cell_type = normal;
     if( focal_display_type == normal_rate) focal_cell_type = normal;
@@ -174,14 +176,14 @@ void MainWindow::update_image(size_t sq_size,
             size_t local_index = index - start;
             if( focal_display_type == dominant_rate) {
                 std::vector<float> probs = {0.0, 0.0, 0.0, 0.0};
-                for(size_t i = 0; i < 4; ++i) probs[i] = growth_rate[i][index];
+                for(size_t i = 0; i < 4; ++i) probs[i] = rates[i].get_value(index);
                 focal_cell_type = static_cast<cell_type>(which_max(probs));
 
                 row[local_index] = get_color(focal_cell_type,
-                                         growth_rate[ focal_cell_type ][index]);
+                                         rates[ focal_cell_type ].get_value(index));
             } else {
                 row[local_index] = get_color(focal_cell_type,
-                                         growth_rate[ focal_cell_type ][index]);
+                                         rates[ focal_cell_type ].get_value(index));
             }
         }
     }
@@ -320,7 +322,11 @@ void MainWindow::setup_simulation() {
 
     if(focal_display_type == cells) update_image(Simulation.world, Simulation.sq_size);
     if(focal_display_type != cells)  {
+<<<<<<< Updated upstream
         update_image(Simulation.sq_size, Simulation.growth_probs);
+=======
+        update_image(all_parameters.resolution, Simulation.growth_prob_rnd);
+>>>>>>> Stashed changes
     }
 
     update_plot(static_cast<double>(Simulation.t),
@@ -359,7 +365,11 @@ void MainWindow::on_btn_start_clicked()
         if(counter % update_step == 0) {
             if(focal_display_type == cells) update_image(Simulation.world, Simulation.sq_size);
             if(focal_display_type != cells)  {
+<<<<<<< Updated upstream
                 update_image(Simulation.sq_size, Simulation.growth_probs);
+=======
+                update_image(all_parameters.resolution, Simulation.growth_prob_rnd);
+>>>>>>> Stashed changes
             }
 
             update_plot(static_cast<double>(Simulation.t),
