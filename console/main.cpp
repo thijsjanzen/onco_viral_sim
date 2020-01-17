@@ -11,8 +11,7 @@ void obtain_equilibrium(simulation& Simulation, const Param& all_parameters);
 std::string get_outcome(const std::array<int, 5>& cell_counts);
 std::string do_analysis(Param all_parameters);
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     std::string file_name = "config.ini";
 
     Param all_parameters;
@@ -59,10 +58,13 @@ int main(int argc, char *argv[])
      * // parameter setting
     */
 
-    std::string outcome = do_analysis(all_parameters);
-    std::cout << all_parameters.birth_infected << "\t"
-              << all_parameters.death_infected << "\t"
-              << outcome << "\n";
+   // std::string outcome = do_analysis(all_parameters);
+   // std::cout << all_parameters.birth_infected << "\t"
+   //           << all_parameters.death_infected << "\t"
+   //           << outcome << "\n";
+
+
+   std::string outcome = do_analysis(all_parameters);
 
     return 0;
 }
@@ -80,13 +82,16 @@ std::string do_analysis(Param all_parameters) {
   all_parameters.time_adding_virus = 7 * 24; // 7 days of 24 hours after adding cancer
   all_parameters.maximum_time = 1000 * 24; // 1000 days of 24 hours.
 
+  std::cout << "initializing grid\n";
   simulation Simulation(all_parameters);
   Simulation.initialize_network();
+  std::cout << "starting simulation\n";
   Simulation.t = 0.f;
   float prev_t = Simulation.t;
   std::array<int, 5> cell_counts;
 
   if(all_parameters.start_setup == converge) {
+      std::cout << "simulating until having reached equilibrium with normal cells\n";
       obtain_equilibrium(Simulation, all_parameters); // this obtains a fully grown grid, with normal cells
   }
 
@@ -99,6 +104,7 @@ std::string do_analysis(Param all_parameters) {
           if(prev_t < all_parameters.time_adding_cancer &&
              Simulation.t >= all_parameters.time_adding_cancer &&
              cancer_added == false) {
+              std::cout << "adding cancer!\n";
               Simulation.add_cells(cancer);
               Simulation.t = 0.f; // reset time
               cancer_added = true;
@@ -106,6 +112,7 @@ std::string do_analysis(Param all_parameters) {
           if(prev_t < all_parameters.time_adding_virus &&
              Simulation.t >= all_parameters.time_adding_virus &&
              virus_added == false) {
+              std::cout << "adding virus!\n";
              Simulation.add_cells(infected);
              Simulation.t = 0.f;
              virus_added = true;
@@ -115,9 +122,11 @@ std::string do_analysis(Param all_parameters) {
             std::cout << Simulation.t << "\t" << cell_counts[normal] << "\t" << cell_counts[cancer] << "\t" << cell_counts[infected] << "\n";
             cell_counts = Simulation.count_cell_types();
             if(cell_counts[cancer] < 1 && cancer_added == true && cell_counts[infected] < 1) {
+                std::cout << "Simulation stopped because the cancer is gone\n";
                 break; // stop if cancer is extinct
             }
             if(cell_counts[normal] < 1 && cell_counts[infected] < 1 && virus_added == true) {
+                std::cout << "Simulation stopped because cancer has taken over\n";
                 break; // stop if normal and virus are extinct
             }
           }
@@ -154,7 +163,8 @@ void obtain_equilibrium(simulation& Simulation, const Param& all_parameters) {
                    sum_first_half  += densities[i ];
                    sum_second_half += densities[i + 5];
                }
-               std::cout << Simulation.t << "\t" << sum_first_half * 0.2 << "\t" << sum_second_half * 0.2 << "\n";
+               std::cout << Simulation.t << "\t" << sum_first_half * 0.2f
+                         << "\t" << sum_second_half * 0.2f << "\n";
                if(sum_first_half >= sum_second_half) {
                    break;
                }
@@ -181,11 +191,11 @@ std::string get_outcome(const std::array<int, 5>& cell_counts) {
   // C: co-existence of the three populations
   for(size_t i = 0; i < 3; ++i) freq[i] *= 1.0f / total_num_cells;
 
-  if(freq[normal] == 1 && freq[cancer] == 0 && freq[infected] == 0) {
+  if(freq[normal] >= (1-1e-6f) && freq[cancer] <= 1e-6f && freq[infected] <= 1e-6f) {
       return "A";
   }
 
-  if(freq[normal] == 0 && freq[cancer] == 1 && freq[infected] == 0) {
+  if(freq[normal] <= 1e-6f && freq[cancer] >= (1-1e-6f) && freq[infected] <= 1e-6f) {
       return "B";
   }
 
