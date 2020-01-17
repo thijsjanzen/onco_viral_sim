@@ -2,7 +2,7 @@ CFLAGS = -std=c++17 -O3 -Wall
 OBJS = main.o simulation.o node.o 
 
 all: ${OBJS}
-	g++ ${CFLAGS} ${OBJS} -o testmodel.out
+	g++ ${CFLAGS} ${OBJS} -o onco_model
 
 main.o: ./Simulation/main.cpp
 	g++ ${CFLAGS} -c ./Simulation/main.cpp
