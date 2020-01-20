@@ -12,6 +12,10 @@ std::string get_outcome(const std::array<int, 5>& cell_counts);
 std::string do_analysis(Param all_parameters);
 
 int main(int argc, char *argv[]) {
+
+    std::cout << "All files are to be found in this folder: \n";
+    std::cout << argv[0] << "\n";
+
     std::string file_name = "config.ini";
 
     Param all_parameters;
@@ -65,6 +69,12 @@ int main(int argc, char *argv[]) {
 
 
    std::string outcome = do_analysis(all_parameters);
+   std::ofstream outfile("output.txt", std::ios::app);
+   outfile << all_parameters.birth_infected << "\t"
+           << all_parameters.death_infected << "\t"
+           << outcome << "\n";
+   outfile.close();
+
 
     return 0;
 }
