@@ -11,6 +11,7 @@
 #include "Simulation/parameters.hpp"
 #include "Simulation/simulation.hpp"
 #include "Simulation/rndutils.hpp"
+#include "Simulation/random_thijs.hpp"
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -64,6 +65,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     is_paused = false;
     is_running = false;
+
+    Simulation = simulation();
 }
 
 MainWindow::~MainWindow()
@@ -79,10 +82,10 @@ void MainWindow::set_pixel(int x, int y, const QColor& col) {
     image_.setPixel(x, y, col.rgb());
 }
 
+void MainWindow::update_image(const std::vector< node >& world,
+                              size_t sq_size) {
 
-void MainWindow::update_image(const std::vector< node >& world, size_t sq_size) {
-
-    static const std::vector< QColor > colorz = {
+  static const std::vector< QColor > colorz = {
         {0, 0, 255},    // blue, normal
         {255, 0, 0},    // red,  cancer
         {0, 255, 0},    // green, infected
@@ -101,7 +104,7 @@ void MainWindow::update_image(const std::vector< node >& world, size_t sq_size) 
 
         for(size_t index = start; index < end; ++index) {
             size_t local_index = index - start;
-            row[local_index] = colorz[ world[index].node_type ].rgb();
+            row[local_index] = colorz[ world[index].get_node_type() ].rgb();
         }
     }
 
@@ -172,6 +175,7 @@ void MainWindow::update_image(size_t sq_size,
             size_t local_index = index - start;
             if( focal_display_type == dominant_rate) {
                 std::vector<float> probs = {0.0, 0.0, 0.0, 0.0};
+
                 for(size_t i = 0; i < 4; ++i) {
                     probs[i] = growth_rate[i].get_value(index);
                 }
@@ -182,6 +186,7 @@ void MainWindow::update_image(size_t sq_size,
             } else {
                 row[local_index] = get_color(focal_cell_type,
                                          growth_rate[ focal_cell_type ].get_value(index));
+
             }
         }
     }
@@ -288,7 +293,6 @@ void MainWindow::update_parameters(Param& p) {
    if(display_string == "Dominant Growth Rate")
        focal_display_type = dominant_rate;
 
-
    p.sq_num_pixels = static_cast<int>(ui->box_sq_num_pixels->value());
    set_resolution(p.sq_num_pixels, p.sq_num_pixels);
 
@@ -323,17 +327,15 @@ void MainWindow::setup_simulation() {
 
     ui->btn_start->setText("Start");
 
-    if(focal_display_type == cells) update_image(Simulation.world, all_parameters.sq_num_cells);
+    if(focal_display_type == cells) update_image(Simulation.world, Simulation.sq_size);
     if(focal_display_type != cells)  {
-        update_image(all_parameters.sq_num_cells, Simulation.growth_prob);
+        update_image(Simulation.sq_size, Simulation.growth_probs);
     }
 
     update_plot(static_cast<double>(Simulation.t),
                 Simulation.get_cell_numbers());
     QApplication::processEvents();
 }
-
-
 
 void MainWindow::on_btn_start_clicked()
 {
@@ -365,6 +367,7 @@ void MainWindow::on_btn_start_clicked()
             if(focal_display_type == cells) update_image(Simulation.world, all_parameters.sq_num_cells);
             if(focal_display_type != cells)  {
                 update_image(all_parameters.sq_num_cells, Simulation.growth_prob);
+
             }
 
             update_plot(static_cast<double>(Simulation.t),
@@ -439,8 +442,7 @@ void MainWindow::on_drpdwnbox_display_activated(int index)
         focal_display_type = dominant_rate;
 }
 
-void MainWindow::on_btn_setup_clicked()
-{
+void MainWindow::on_btn_setup_clicked() {
   ui->progressBar->setValue(0);
   setup_simulation();
 }

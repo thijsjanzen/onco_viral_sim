@@ -115,26 +115,16 @@ public:
      row_sum.resize(num_bins);
      values = std::vector<float>(first, last);
 
-     for(size_t i = 0; i < num_bins; ++i) {
-       auto start_it = values.begin() + i * bin_size;
+     for(int i = 0; i < num_bins; ++i) {
+       auto start_it = first + i * bin_size;
+
        auto end_it = start_it + bin_size - 1;
        row_sum[i] = std::accumulate(start_it, end_it, 0.f);
      }
     }
 
-   template <typename It>
-   int draw_from_dist(It first, It last, float max_val, rnd_t& r) const {
-     int max_index = std::distance(first, last);
-     while (true) {
-       int index = r.random_number(static_cast<size_t>(max_index));
-       float val = *(first + index);
-       if (r.uniform() < (1.f * val / max_val)) {
-         return index;
-       }
-     }
-   }
-
-   size_t draw_explicit(rnd_t& r) const {
+   size_t draw_explicit(rnd_t& r)
+   {
       size_t row = draw_cdf(row_sum.begin(), row_sum.end(), r);
       size_t col;
       float frac = row_sum[row] * 1.f / bin_size;
@@ -157,24 +147,17 @@ public:
       return(static_cast<size_t>(draw_dist(r.rndgen_)));
    }
 
-  /* template< typename It>
-   void update_row_sum(It first, size_t pos) {
-       size_t row = pos / bin_size;
-       It start = first + row * bin_size;
-       It end = start + bin_size - 1;
-       row_sum[row] = std::accumulate(start, end, 0.0f);
-   }*/
 
-   void update_entry(size_t pos, float new_val) {
-   //  if(new_val == old_val) return;
-   //  update_row_sum(first, pos);
-     float old_val = values[pos];
-     if(old_val == new_val) return;
-     values[pos] = new_val;
-     size_t row = pos / bin_size;
-     row_sum[row] += new_val - old_val;
-     if(row_sum[row] < 0.f) row_sum[row] = 0.f;
-     assert(row_sum[row] >= 0.f);
+   template <typename It>
+   int draw_from_dist(It first, It last, float max_val, rnd_t& r) {
+     int max_index = std::distance(first, last);
+     while (true) {
+       int index = r.random_number(static_cast<size_t>(max_index));
+       float val = *(first + index);
+       if (r.uniform() < (1.f * val / max_val)) {
+         return index;
+       }
+     }
    }
 
    float get_total_sum() const {
@@ -191,6 +174,23 @@ public:
 
    float get_value(size_t pos) const {
      return values[pos];
+   }
+
+   void update_entry(size_t pos, float new_val) {
+     size_t row = pos / bin_size;
+     float old_val = values[pos];
+     values[pos] = new_val;
+     row_sum[row] += new_val - old_val;
+   }
+
+   template< typename It>
+   void update_all_row_sums(It first) {
+       for(size_t i = 0; i < num_bins; ++i) {
+         auto start_it = first + i * bin_size;
+         auto end_it  = start_it + bin_size - 1;
+         row_sum[i] = std::accumulate(start_it, end_it, 0.f);
+       }
+
    }
 
  private:

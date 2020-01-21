@@ -159,7 +159,7 @@
      <number>1</number>
     </property>
     <property name="value">
-     <number>1</number>
+     <number>10</number>
     </property>
     <property name="orientation">
      <enum>Qt::Horizontal</enum>
@@ -717,6 +717,7 @@
      </item>
     </layout>
    </widget>
+<<<<<<< HEAD
    <widget class="QLabel" name="label_23">
     <property name="geometry">
      <rect>
@@ -790,6 +791,8 @@
      <string>sqrt(#pixels)</string>
     </property>
    </widget>
+=======
+>>>>>>> develop
    <zorder>layoutWidget</zorder>
    <zorder>layoutWidget</zorder>
    <zorder>layoutWidget</zorder>
@@ -809,10 +812,13 @@
    <zorder>box_start_setup</zorder>
    <zorder>btn_setup</zorder>
    <zorder>btn_add_virus</zorder>
+<<<<<<< HEAD
    <zorder>label_23</zorder>
    <zorder>box_sq_num_cells</zorder>
    <zorder>box_sq_num_pixels</zorder>
    <zorder>label_24</zorder>
+=======
+>>>>>>> develop
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>

@@ -50,6 +50,16 @@ private:
 
   Param parameters;
 
+  void set_percent_infected(const float& percent);
+    void add_infected();
+private:
+
+  int num_nodes;
+
+  Param parameters;
+
+  std::array<float, 4> num_cell_types;
+
   std::array< float, 8> rates;
 
   std::vector<double> long_distance_infection_probability;
@@ -64,16 +74,14 @@ private:
   void implement_death(const cell_type& parent);
   void implement_growth(const cell_type& parent);
   void update_growth_prob(size_t pos);
+  void set_growth_prob(size_t pos);
+
   void update_death_prob(size_t pos);
+  void update_death_prob(size_t pos, cell_type old_type);
 
   void add_cells(const cell_type& focal_cell_type);
 
   void print_to_file(float t);
-
-  void update_death_cdf(const cell_type& parent, size_t pos);
-  void update_growth_cdf(size_t pos);
-  void update_death_cdf_all();
-
 
   void infect_random();
   void infect_center();
@@ -83,8 +91,6 @@ private:
 
   void infect_long_distance(size_t pos);
 
-
-  void change_cell_type(const size_t& pos, const cell_type& focal_cell_type);
   void ask_infect_neighbours(int depth, float p, size_t pos);
 };
 
