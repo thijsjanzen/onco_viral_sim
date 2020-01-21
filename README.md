@@ -1,6 +1,6 @@
 # onco_viral_sim
 
-Simulate the spread of a virus
+Simulate the use of a virus to combat tumor growth
 
 
 Branch|[![Travis CI logo](ci_setup/pics/TravisCI.png)](https://travis-ci.org)
