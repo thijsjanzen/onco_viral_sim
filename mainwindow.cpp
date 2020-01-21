@@ -151,7 +151,7 @@ int which_max(const std::vector<float>& v) {
 }
 
 void MainWindow::update_image(size_t sq_size,
-                              const std::vector< std::vector< float> > & growth_rate) {
+                              const std::array< binned_distribution, 4 > & growth_rate) {
 
     cell_type focal_cell_type = normal;
     if( focal_display_type == normal_rate) focal_cell_type = normal;
@@ -172,14 +172,16 @@ void MainWindow::update_image(size_t sq_size,
             size_t local_index = index - start;
             if( focal_display_type == dominant_rate) {
                 std::vector<float> probs = {0.0, 0.0, 0.0, 0.0};
-                for(size_t i = 0; i < 4; ++i) probs[i] = growth_rate[i][index];
+                for(size_t i = 0; i < 4; ++i) {
+                    probs[i] = growth_rate[i].get_value(index);
+                }
                 focal_cell_type = static_cast<cell_type>(which_max(probs));
 
                 row[local_index] = get_color(focal_cell_type,
-                                         growth_rate[ focal_cell_type ][index]);
+                                         growth_rate[ focal_cell_type ].get_value(index));
             } else {
                 row[local_index] = get_color(focal_cell_type,
-                                         growth_rate[ focal_cell_type ][index]);
+                                         growth_rate[ focal_cell_type ].get_value(index));
             }
         }
     }
@@ -255,7 +257,7 @@ void MainWindow::update_parameters(Param& p) {
    p.distance_infection_upon_death = static_cast<float>(ui->box_distance_infection_death->value());
    p.prob_infection_upon_death = static_cast<float>(ui->box_prob_infection_death->value());
 
-   p.resolution = static_cast<int>(ui->box_resolution->value());
+   p.sq_num_cells = static_cast<size_t>(ui->box_sq_num_cells->value());
 
    p.infection_type = random_infection;
 
@@ -286,6 +288,10 @@ void MainWindow::update_parameters(Param& p) {
    if(display_string == "Dominant Growth Rate")
        focal_display_type = dominant_rate;
 
+
+   p.sq_num_pixels = static_cast<int>(ui->box_sq_num_pixels->value());
+   set_resolution(p.sq_num_pixels, p.sq_num_pixels);
+
    print_params(p);
    return;
 }
@@ -310,16 +316,16 @@ void MainWindow::setup_simulation() {
 
     Simulation.initialize_network();
 
-    set_resolution(static_cast<int>(all_parameters.resolution),
-                   static_cast<int>(all_parameters.resolution));
+    set_resolution(static_cast<int>(all_parameters.sq_num_pixels),
+                   static_cast<int>(all_parameters.sq_num_pixels));
 
     Simulation.t = 0.0;
 
     ui->btn_start->setText("Start");
 
-    if(focal_display_type == cells) update_image(Simulation.world, all_parameters.resolution);
+    if(focal_display_type == cells) update_image(Simulation.world, all_parameters.sq_num_cells);
     if(focal_display_type != cells)  {
-        update_image(all_parameters.resolution, Simulation.growth_probs);
+        update_image(all_parameters.sq_num_cells, Simulation.growth_prob);
     }
 
     update_plot(static_cast<double>(Simulation.t),
@@ -356,9 +362,9 @@ void MainWindow::on_btn_start_clicked()
         int update_step = 1 + (update_speed - 1) * 0.01f * range;
 
         if(counter % update_step == 0) {
-            if(focal_display_type == cells) update_image(Simulation.world, all_parameters.resolution);
+            if(focal_display_type == cells) update_image(Simulation.world, all_parameters.sq_num_cells);
             if(focal_display_type != cells)  {
-                update_image(all_parameters.resolution, Simulation.growth_probs);
+                update_image(all_parameters.sq_num_cells, Simulation.growth_prob);
             }
 
             update_plot(static_cast<double>(Simulation.t),
@@ -435,7 +441,8 @@ void MainWindow::on_drpdwnbox_display_activated(int index)
 
 void MainWindow::on_btn_setup_clicked()
 {
-    setup_simulation();
+  ui->progressBar->setValue(0);
+  setup_simulation();
 }
 
 void MainWindow::on_btn_add_virus_clicked()

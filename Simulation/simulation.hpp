@@ -34,12 +34,8 @@ public:
 
   rnd_t rndgen;
 
-  std::array< binned_distribution, 4 > growth_prob_rnd;
-  std::array< binned_distribution, 4 > death_prob_rnd;
-
-  std::vector< std::vector< float > > growth_probs;
-  std::vector< std::vector< float > > death_probs;
-
+  std::array< binned_distribution, 4 > growth_prob;
+  std::array< binned_distribution, 4 > death_prob;
 
   void add_infected(); // has to be public to allow for interaction by pressing
                        // a button
@@ -49,8 +45,6 @@ public:
   std::array<int, 5> num_cell_types;
 
 private:
-
-  int num_nodes;
   int num_cells;
   int sq_size;
 

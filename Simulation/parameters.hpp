@@ -43,14 +43,42 @@ struct Param {
   float distance_infection_upon_death;
   float prob_infection_upon_death;
 
-  int resolution;
-
+  size_t sq_num_cells;
+  size_t sq_num_pixels;
 
   start_type start_setup;
 
 
     Param(const Param& other) {
-        maximum_time = other.maximum_time;
+      maximum_time = other.maximum_time;
+            time_adding_virus = other.time_adding_virus; // default from Berg et al 2019
+            time_adding_cancer = other.time_adding_cancer; // normally the population is first allowed to stabilize
+
+            initial_number_cancer_cells = other.initial_number_cancer_cells;
+            initial_number_normal_cells = other.initial_number_normal_cells;
+
+            birth_normal = other.birth_normal;
+            birth_cancer = other.birth_cancer;
+            birth_infected = other.birth_infected;
+            death_normal = other.death_normal;
+            death_cancer = other.death_cancer;
+            death_infected = other.death_infected;
+
+            death_cancer_resistant = other.death_cancer_resistant;
+            birth_cancer_resistant = other.birth_cancer_resistant;
+
+            infection_type = other.infection_type;
+            percent_infected = other.percent_infected;
+
+            prob_normal_infection = other.prob_normal_infection;
+            freq_resistant = other.freq_resistant;
+            distance_infection_upon_death = other.distance_infection_upon_death;
+            prob_infection_upon_death = other.prob_infection_upon_death;
+
+            start_setup = other.start_setup;
+
+            sq_num_cells = other.sq_num_cells;
+            sq_num_pixels = other.sq_num_pixels;
 
     }
 
@@ -80,7 +108,8 @@ struct Param {
     distance_infection_upon_death = 1;
     prob_infection_upon_death = 0.f;
 
-    resolution = 100;
+    sq_num_cells = 100;
+    sq_num_pixels = 1000;
   }
 
 

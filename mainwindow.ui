@@ -727,10 +727,10 @@
      </rect>
     </property>
     <property name="text">
-     <string>resolution</string>
+     <string>sqrt(#cells)</string>
     </property>
    </widget>
-   <widget class="QDoubleSpinBox" name="box_resolution">
+   <widget class="QDoubleSpinBox" name="box_sq_num_cells">
     <property name="geometry">
      <rect>
       <x>110</x>
@@ -750,6 +750,44 @@
     </property>
     <property name="value">
      <double>100.000000000000000</double>
+    </property>
+   </widget>
+   <widget class="QDoubleSpinBox" name="box_sq_num_pixels">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>320</y>
+      <width>64</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="decimals">
+     <number>0</number>
+    </property>
+    <property name="minimum">
+     <double>100.000000000000000</double>
+    </property>
+    <property name="maximum">
+     <double>5000.000000000000000</double>
+    </property>
+    <property name="singleStep">
+     <double>50.000000000000000</double>
+    </property>
+    <property name="value">
+     <double>1000.000000000000000</double>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_24">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>320</y>
+      <width>120</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>sqrt(#pixels)</string>
     </property>
    </widget>
    <zorder>layoutWidget</zorder>
@@ -772,7 +810,9 @@
    <zorder>btn_setup</zorder>
    <zorder>btn_add_virus</zorder>
    <zorder>label_23</zorder>
-   <zorder>box_resolution</zorder>
+   <zorder>box_sq_num_cells</zorder>
+   <zorder>box_sq_num_pixels</zorder>
+   <zorder>label_24</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
