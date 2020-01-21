@@ -28,6 +28,7 @@ HEADERS += \
     Simulation/random_thijs.hpp \
     Simulation/rndutils.hpp \
     Simulation/simulation.hpp \
+    Simulation/voronoi.hpp \
     mainwindow.h \
     qcustomplot.h
 

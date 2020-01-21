@@ -45,6 +45,7 @@ struct Param {
 
   size_t sq_num_cells;
   size_t sq_num_pixels;
+  bool use_voronoi_grid;
 
   start_type start_setup;
 
@@ -110,9 +111,8 @@ struct Param {
 
     sq_num_cells = 100;
     sq_num_pixels = 1000;
+    use_voronoi_grid = true;
   }
-
-
 };
 
 #endif /* parameters_h */

@@ -5,7 +5,6 @@
 #include <QPaintEvent>
 #include <QPainter>
 #include "qcustomplot.h"
-#include "Simulation/node.hpp"
 #include "Simulation/parameters.hpp"
 #include "Simulation/simulation.hpp"
 #include "Simulation/random_thijs.hpp"
@@ -23,6 +22,9 @@ public:
     MainWindow(QWidget *parent = nullptr);
      ~MainWindow();
 
+    void update_image(const std::vector< node >& world,
+                      bool use_polygons,
+                      int sq_size);
     void update_image(const std::vector< node >& world, size_t sq_size);
     void update_image(size_t sq_size,
                       const std::array< binned_distribution, 4 > & growth_rate);
@@ -49,9 +51,15 @@ private slots:
 
     void on_btn_add_virus_clicked();
 
+    void on_btn_voronoi_toggled(bool checked);
+
 private:
     Ui::MainWindow *ui;
     QImage image_;
+
+    int row_size;
+    int col_size;
+
     display_color focal_display_type;
 
     QVector<double> x_t;

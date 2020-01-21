@@ -34,8 +34,16 @@ public:
 
   rnd_t rndgen;
 
-  std::array< binned_distribution, 4 > growth_prob;
-  std::array< binned_distribution, 4 > death_prob;
+  const static size_t sq_size = 100; // hard coded, because the binned distribution
+                                      // uses array dynamics
+  const static size_t num_cells = sq_size * sq_size;
+
+  std::array< binned_distribution, 4 > growth_prob_rnd;
+  std::array< binned_distribution, 4 > death_prob_rnd;
+
+  std::vector< std::vector< float > > growth_probs;
+  std::vector< std::vector< float > > death_probs;
+
 
   void add_infected(); // has to be public to allow for interaction by pressing
                        // a button
@@ -45,8 +53,8 @@ public:
   std::array<int, 5> num_cell_types;
 
 private:
-  int num_cells;
-  int sq_size;
+
+  int num_nodes;
 
   Param parameters;
 

@@ -13,6 +13,7 @@
 #include "Simulation/rndutils.hpp"
 
 
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -72,13 +73,58 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::set_resolution(int width, int height) {
-    image_ = QImage(width,height, QImage::Format_RGB32);
+    row_size = width;
+    col_size = height;
+
+    image_ = QImage(row_size, col_size, QImage::Format_RGB32);
 }
 
 void MainWindow::set_pixel(int x, int y, const QColor& col) {
     image_.setPixel(x, y, col.rgb());
 }
 
+void MainWindow::update_image(const std::vector< node >& world,
+                              bool use_polygons,
+                              int sq_size) {
+
+    static const std::vector< QColor > colorz = {
+        {0, 0, 255},    // blue, normal
+        {255, 0, 0},    // red,  cancer
+        {0, 255, 0},    // green, infected
+        {128, 0, 128},   // purple, resistant
+        {0, 0, 0}      // black, empty
+    };
+
+    image_.fill(Qt::gray);
+
+    QPainter painter(&image_);
+
+    for(auto i: world) {
+      //  painter.setBrush(colorz[i.node_type]);
+
+
+        float factor_x = row_size / sq_size;
+        float factor_y = col_size / sq_size;
+
+        QPolygonF polygon;
+        for(auto j : i.outer_points) {
+             polygon << QPointF(j.x_ * factor_x, j.y_ * factor_y);
+        }
+        QBrush brush(colorz[i.node_type]); // Qt::SolidPattern by default.
+
+        QPainterPath path;
+        path.addPolygon(polygon);
+
+        painter.fillPath(path, brush);
+        painter.drawPolygon(polygon);
+    }
+
+    int w = ui->q_label->width();
+    int h = ui->q_label->height();
+
+    ui->q_label->setPixmap((QPixmap::fromImage(image_)).scaled(w,h, Qt::KeepAspectRatio));
+    ui->q_label->update();
+}
 
 void MainWindow::update_image(const std::vector< node >& world, size_t sq_size) {
 
@@ -90,8 +136,8 @@ void MainWindow::update_image(const std::vector< node >& world, size_t sq_size) 
         {0, 0, 0}      // black, empty
     };
 
-    size_t line_size = sq_size;
-    size_t num_lines = sq_size;
+    size_t line_size = row_size;
+    size_t num_lines = col_size;
 
     for(size_t i = 0; i < num_lines; ++i) {
         QRgb* row = (QRgb*) image_.scanLine(i);
@@ -118,7 +164,6 @@ QRgb get_color(const cell_type focal_cell_type, float rate) {
         QColor col = {0, 0, 0, 255};
         return col.rgba();
     }
-
 
     if(focal_cell_type == normal) {
         QColor col = {0, 0, 255, static_cast<int>(rate * 255)};
@@ -159,8 +204,8 @@ void MainWindow::update_image(size_t sq_size,
     if( focal_display_type == infected_rate) focal_cell_type = infected;
     if( focal_display_type == resistant_rate) focal_cell_type = resistant;
 
-    size_t line_size = sq_size;
-    size_t num_lines = sq_size;
+    size_t line_size = row_size;
+    size_t num_lines = col_size;
 
     for(size_t i = 0; i < num_lines; ++i) {
         QRgb* row = (QRgb*) image_.scanLine(i);
@@ -323,13 +368,23 @@ void MainWindow::setup_simulation() {
 
     ui->btn_start->setText("Start");
 
+
+    // TODO: implement VORONOI FLAG
     if(focal_display_type == cells) update_image(Simulation.world, all_parameters.sq_num_cells);
+
+    if(focal_display_type == cells) {
+        update_image(Simulation.world, all_parameters.use_voronoi_grid, Simulation.sq_size);
+    }
+
     if(focal_display_type != cells)  {
         update_image(all_parameters.sq_num_cells, Simulation.growth_prob);
     }
 
     update_plot(static_cast<double>(Simulation.t),
                 Simulation.get_cell_numbers());
+
+    is_paused = true;
+
     QApplication::processEvents();
 }
 
@@ -363,6 +418,9 @@ void MainWindow::on_btn_start_clicked()
 
         if(counter % update_step == 0) {
             if(focal_display_type == cells) update_image(Simulation.world, all_parameters.sq_num_cells);
+            if(focal_display_type == cells) {
+                update_image(Simulation.world, all_parameters.use_voronoi_grid, Simulation.sq_size);
+            }
             if(focal_display_type != cells)  {
                 update_image(all_parameters.sq_num_cells, Simulation.growth_prob);
             }
@@ -456,4 +514,10 @@ void MainWindow::on_btn_add_virus_clicked()
    Simulation.set_percent_infected(static_cast<float>(ui->box_percent_infected->value()));
 
    Simulation.add_infected();
+}
+
+void MainWindow::on_btn_voronoi_toggled(bool checked)
+{
+   bool is_voronoi = checked;
+
 }
