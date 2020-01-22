@@ -8,7 +8,7 @@ main.o: ./Simulation/main.cpp
 	g++ ${CFLAGS} -c ./Simulation/main.cpp
 
 simulation.o: ./Simulation/simulation.cpp
-	g++ ${CFLAGS} -c ./Simulation/simulation.cpp
+	g++ ${CFLAGS} -c ./Simulation/simulation.cpp ./Simulation/setup.cpp
   
 node.o: ./Simulation/node.cpp
 	g++ ${CFLAGS} -c ./Simulation/node.cpp
