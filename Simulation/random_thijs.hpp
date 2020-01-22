@@ -19,13 +19,10 @@ struct rnd_t {
     rndgen_ = rndutils::make_random_engine(rd());
   }
 
-  std::cauchy_distribution<float> cauch_dist =
-  std::cauchy_distribution<float>(0.f, 0.01f);
-  std::bernoulli_distribution bern_dist =
-  std::bernoulli_distribution(0.01);
+  std::cauchy_distribution<float> cauch_dist = std::cauchy_distribution<float>(0.f, 0.01f);
+  std::bernoulli_distribution bern_dist = std::bernoulli_distribution(0.01);
 
   rndutils::uniform01_distribution<float> rndutil_norm;
-
 
   int random_number(size_t n)    {
     if(n <= 1) return 0;
@@ -49,7 +46,6 @@ struct rnd_t {
     return std::poisson_distribution<int>(lambda)(rndgen_);
   }
 
-
   bool bernouilli() {
     return bern_dist(rndgen_);
   }
@@ -70,21 +66,20 @@ struct rnd_t {
     return std::binomial_distribution<>(n, p)(rndgen_);
   }
 
-
-  template< typename it>
+ /* template< typename it>
   size_t draw_from_dist(it begin, it end, float max) {
     size_t max_index = end - begin;
     float mult = 1.f / max;
-    while (true) {
-      size_t index = static_cast<size_t>(random_number(max_index));
-      if (max == 0.f) return index;
-      float prob = *(begin + index) * mult;
 
-      if (uniform() < prob) {
-        return index;
-      }
+    size_t index = static_cast<size_t>(random_number(max_index));
+    if (max == 0.f) return index; // uniform drawing
+    float prob = *(begin + index) * mult;
+    while (uniform() < prob) {
+      index = static_cast<size_t>(random_number(max_index));
+      prob = *(begin + index) * mult;
     }
-  }
+    return index;
+  }*/
 };
 
 struct binned_distribution {
@@ -98,7 +93,6 @@ public:
   }
 
   binned_distribution(size_t num_of_bins, size_t num_values) {
-
     bin_size = num_values / num_of_bins;
     num_bins = num_of_bins;
 
@@ -124,14 +118,14 @@ public:
 
   template <typename It>
   int draw_from_dist(It first, It last, float max_val, rnd_t& r) const {
-    int max_index = std::distance(first, last);
-    while (true) {
-      int index = r.random_number(static_cast<size_t>(max_index));
-      float val = *(first + index);
-      if (r.uniform() < (1.f * val / max_val)) {
-        return index;
-      }
-    }
+   int max_index = std::distance(first, last);
+   while (true) {
+     int index = r.random_number(static_cast<size_t>(max_index));
+     float val = *(first + index);
+     if (r.uniform() < (1.f * val / max_val)) {
+       return index;
+     }
+   }
   }
 
   size_t draw_explicit(rnd_t& r) const {

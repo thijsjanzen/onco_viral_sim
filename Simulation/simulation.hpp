@@ -30,8 +30,6 @@ public:
   void update_one_step();
 
   std::vector< node > world;
-  std::vector<int> get_cell_numbers();
-
   rnd_t rndgen;
 
   std::array< binned_distribution, 4 > growth_prob;
@@ -43,6 +41,7 @@ public:
   void set_infection_type(const infection_routine& infect_type);
   void set_percent_infected(const float& percent);
   std::array<int, 5> num_cell_types;
+  std::array<int, 5> count_cell_types();
 
 private:
   int num_cells;
@@ -54,7 +53,8 @@ private:
 
   std::vector<double> long_distance_infection_probability;
 
-  void count_cell_types(); // this is very heavy, should not be ran often
+
+
   void update_rates();
   void update_total_growth_prob();
 
@@ -63,8 +63,12 @@ private:
   void update_growth_probabilities();
   void implement_death(const cell_type& parent);
   void implement_growth(const cell_type& parent);
+  void update_cell(size_t pos);
   void update_growth_prob(size_t pos);
   void update_death_prob(size_t pos);
+  void update_death_prob(size_t pos,
+                         cell_type old_type,
+                         cell_type new_type);
 
   void add_cells(const cell_type& focal_cell_type);
 

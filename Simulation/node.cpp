@@ -108,17 +108,6 @@ void node::set_coordinates(size_t row_size) {
     y_ = pos % row_size;
 }
 
-/*
-void node::clean_edges() {
-    std::sort(edges.begin(), edges.end());
-    for(size_t i = edges.size() - 1; i > 0; i--) {
-        if(edges[i] == edges[i-1]) {
-            edges[i] = edges.back();
-            edges.pop_back();
-        }
-    }
-}*/
-
 void node::invert_edges() {
     // check for inverted edges.
     for(auto& i : edges) {
@@ -129,14 +118,12 @@ void node::invert_edges() {
     }
 }
 
-
 void node::clean_edges() {
     // the goal is to connect all edges, and then provide
     // all the outer points
     if(edges.empty()) return;
 
     invert_edges();
-
 
     std::vector< voronoi_edge > old_edges = edges; // for debugging only
 

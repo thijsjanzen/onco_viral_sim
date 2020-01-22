@@ -17,6 +17,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     Simulation/node.cpp \
+    Simulation/setup.cpp \
     Simulation/simulation.cpp \
     main.cpp \
     mainwindow.cpp \

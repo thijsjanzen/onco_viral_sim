@@ -32,10 +32,6 @@ struct voronoi_point {
 
     voronoi_point(float x, float y) : x_(x), y_(y) {}
 
-
-
-
-
     bool operator=(const voronoi_point& other) {
         x_ = other.x_;
         y_ = other.y_;
