@@ -4,8 +4,8 @@ OBJS = main.o simulation.o node.o
 all: ${OBJS}
 	g++ ${CFLAGS} ${OBJS} -o onco_model
 
-main.o: ./Simulation/main.cpp
-	g++ ${CFLAGS} -c ./Simulation/main.cpp
+main.o: ./console/main.cpp
+	g++ ${CFLAGS} -c ./console/main.cpp
 
 simulation.o: ./Simulation/simulation.cpp
 	g++ ${CFLAGS} -c ./Simulation/simulation.cpp
