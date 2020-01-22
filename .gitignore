@@ -5,3 +5,5 @@
 *.autosave
 *.user
 *.user
+*.o
+*.out
