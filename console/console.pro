@@ -8,6 +8,7 @@ QMAKE_CXXFLAGS_RELEASE += -O3
 
 SOURCES += \
         ../Simulation/node.cpp \
+        ../Simulation/setup.cpp \
         ../Simulation/simulation.cpp \
         main.cpp
 

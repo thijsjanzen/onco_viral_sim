@@ -75,8 +75,6 @@ struct Param {
       distance_infection_upon_death = other.distance_infection_upon_death;
       prob_infection_upon_death = other.prob_infection_upon_death;
 
-      resolution = other.resolution;
-
       start_setup = other.start_setup;
 
       sq_num_cells = other.sq_num_cells;
@@ -110,8 +108,6 @@ struct Param {
     freq_resistant = 0.01f;
     distance_infection_upon_death = 1;
     prob_infection_upon_death = 0.f;
-
-    resolution = 100;
 
     start_setup = converge;
 

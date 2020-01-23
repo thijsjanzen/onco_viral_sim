@@ -246,7 +246,7 @@ void read_parameters_from_ini(Param& p, const std::string file_name) {
   p.distance_infection_upon_death = from_config.getValueOfKey<float>("distance_infection_upon_death");
   p.prob_infection_upon_death = from_config.getValueOfKey<float>("prob_infection_upon_death");
 
-  p.resolution = from_config.getValueOfKey<int>("resolution");
+  p.sq_num_cells = from_config.getValueOfKey<size_t>("sq_num_cells");
 
   p.infection_type = random_infection;
   auto infection_string = from_config.getValueOfKey<std::string>("infection_type");
@@ -260,6 +260,12 @@ void read_parameters_from_ini(Param& p, const std::string file_name) {
     p.start_setup = grow;
   if(start_string == "Full")
     p.start_setup = full;
+
+  auto grid_string = from_config.getValueOfKey<std::string>("grid_type");
+  if(grid_string == "regular")
+    p.use_voronoi_grid = false;
+  if(grid_string == "voronoi")
+    p.use_voronoi_grid = true;
 
   return;
 }

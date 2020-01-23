@@ -43,7 +43,6 @@ public:
   std::array<int, 5> num_cell_types;
   std::array<int, 5> count_cell_types();
 
-  std::array<int, 5> count_cell_types(); // this is very heavy, should not be ran often
   void add_cells(const cell_type& focal_cell_type);
 private:
   int num_cells;
