@@ -18,9 +18,10 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    update_parameters(all_parameters);
-    Simulation = simulation(all_parameters);
+    // put the simulation as a unique_ptr
 
+
+    update_parameters(all_parameters);
 
     ui->line_plot->addGraph(); // normal
     ui->line_plot->addGraph(); // cancer
@@ -77,6 +78,9 @@ MainWindow::MainWindow(QWidget *parent)
     colorz.push_back(QColor(0, 255, 0));
     colorz.push_back(QColor(128, 0, 128));
     colorz.push_back(QColor(0, 0, 0));
+
+    factor_x = 1.f;
+    factor_y = 1.f;
 }
 
 
@@ -96,7 +100,7 @@ void MainWindow::set_pixel(int x, int y, const QColor& col) {
     image_.setPixel(x, y, col.rgb());
 }
 
-void MainWindow::display_regular(const std::vector< node >& world) {
+void MainWindow::display_regular() {
   int line_size = row_size;
   int num_lines = col_size;
 
@@ -108,43 +112,36 @@ void MainWindow::display_regular(const std::vector< node >& world) {
 
       for(size_t index = start; index < end; ++index) {
           size_t local_index = index - start;
-          row[local_index] = colorz[ world[index].node_type ].rgb();
+          row[local_index] = colorz[ sim->world[index].node_type ].rgb();
       }
   }
 }
 
-void MainWindow::display_voronoi(const std::vector< node >& world,
-                                 size_t sq_size) {
+void MainWindow::display_voronoi(size_t sq_size) {
   image_.fill(Qt::gray);
 
   QPainter painter(&image_);
 
-  for(const auto& i: world) {
-      float factor_x = row_size / sq_size;
-      float factor_y = col_size / sq_size;
-
-      QPolygonF polygon;
-      for(auto j : i.outer_points) {
-           polygon << QPointF(j.x_ * factor_x, j.y_ * factor_y);
-      }
-      QBrush brush(colorz[i.node_type]); // Qt::SolidPattern by default.
+  //for(const auto& i: sim->world) {
+  for(int i = 0; i < sim->num_cells; ++i) {
+      QBrush brush(colorz[sim->world[i].node_type]); // Qt::SolidPattern by default.
 
       QPainterPath path;
-      path.addPolygon(polygon);
+      path.addPolygon(polygons[i]);
 
       painter.fillPath(path, brush);
-      painter.drawPolygon(polygon);
+      painter.drawPolygon(polygons[i]);
   }
 }
 
 
 
-void MainWindow::update_image(const std::vector< node >& world, size_t sq_size) {
+void MainWindow::update_image(size_t sq_size) {
     if(grid_type == regular) {
-        display_regular(world);
+        display_regular();
     }
     if(grid_type == voronoi) {
-        display_voronoi(world, sq_size);
+        display_voronoi(sq_size);
     }
 
     int w = ui->q_label->width();
@@ -236,51 +233,32 @@ void MainWindow::display_regular(const std::array< binned_distribution, 4 > & gr
   }
 }
 
-void MainWindow::display_voronoi(const std::vector< node >& world,
-                                 const binned_distribution& growth_rate,
+void MainWindow::display_voronoi(const binned_distribution& growth_rate,
                                  cell_type focal_cell_type,
                                  size_t sq_size) {
   image_.fill(Qt::gray);
 
   QPainter painter(&image_);
 
-  for(size_t i = 0; i < world.size(); ++i) {
-      float factor_x = static_cast<float>(1.f * row_size / sq_size);
-      float factor_y = static_cast<float>(1.f * col_size / sq_size);
-
-      QPolygonF polygon;
-      for(auto j : world[i].outer_points) {
-           polygon << QPointF(static_cast<qreal>(j.x_ * factor_x),
-                              static_cast<qreal>(j.y_ * factor_y));
-      }
+  for(size_t i = 0; i < sim->world.size(); ++i) {
 
       QBrush brush(get_color(focal_cell_type,
-                             growth_rate.get_value(world[i].pos)));
+                             growth_rate.get_value(sim->world[i].pos)));
       QPainterPath path;
-      path.addPolygon(polygon);
+      path.addPolygon(polygons[i]);
 
       painter.fillPath(path, brush);
-      painter.drawPolygon(polygon);
+      painter.drawPolygon(polygons[i]);
   }
 }
 
-void MainWindow::display_voronoi(const std::vector< node >& world,
-                                 const std::array< binned_distribution, 4 > & growth_rate,
+void MainWindow::display_voronoi(const std::array< binned_distribution, 4 > & growth_rate,
                                  size_t sq_size) {
   image_.fill(Qt::gray);
 
   QPainter painter(&image_);
 
-  for(size_t i = 0; i < world.size(); ++i) {
-      float factor_x = static_cast<float>(1.f * row_size / sq_size);
-      float factor_y = static_cast<float>(1.f * col_size / sq_size);
-
-      QPolygonF polygon;
-      for(auto j : world[i].outer_points) {
-          polygon << QPointF(static_cast<qreal>(j.x_ * factor_x),
-                             static_cast<qreal>(j.y_ * factor_y));
-      }
-
+  for(size_t i = 0; i < sim->world.size(); ++i) {
       std::vector<float> probs = {0.0, 0.0, 0.0, 0.0};
       for(size_t k = 0; k < 4; ++k) {
           probs[k] = growth_rate[k].get_value(i);
@@ -290,15 +268,14 @@ void MainWindow::display_voronoi(const std::vector< node >& world,
       QBrush brush(get_color(focal_cell_type,
                              probs[focal_cell_type]));
       QPainterPath path;
-      path.addPolygon(polygon);
+      path.addPolygon(polygons[i]);
 
       painter.fillPath(path, brush);
-      painter.drawPolygon(polygon);
+      painter.drawPolygon(polygons[i]);
   }
 }
 
 void MainWindow::update_image(size_t sq_size,
-                              const std::vector< node >& world,
                               const std::array< binned_distribution, 4 > & growth_rate) {
 
     cell_type focal_cell_type = normal;
@@ -317,9 +294,9 @@ void MainWindow::update_image(size_t sq_size,
 
     if(grid_type == voronoi) {
         if(focal_display_type != dominant_rate) {
-          display_voronoi(world, growth_rate[focal_cell_type], focal_cell_type, sq_size);
+          display_voronoi(growth_rate[focal_cell_type], focal_cell_type, sq_size);
         } else {
-          display_voronoi(world, growth_rate, sq_size);
+          display_voronoi(growth_rate, sq_size);
         }
     }
 
@@ -451,6 +428,22 @@ void MainWindow::update_parameters(Param& p) {
    return;
 }
 
+void MainWindow::update_polygons(const std::vector< std::vector< voronoi_point > >& all_edges) {
+
+  factor_x = static_cast<float>(1.f * row_size / sim->sq_size);
+  factor_y = static_cast<float>(1.f * col_size / sim->sq_size);
+
+  polygons.clear();
+  for(const auto& i : all_edges) {
+      QPolygonF polygon;
+      for(auto j : i) {
+          polygon << QPointF(static_cast<qreal>(j.x_ * factor_x),
+                             static_cast<qreal>(j.y_ * factor_y));
+      }
+      polygons.push_back(polygon);
+  }
+}
+
 void MainWindow::setup_simulation() {
     if(is_running) {
         QMessageBox::warning(this,
@@ -467,24 +460,33 @@ void MainWindow::setup_simulation() {
 
     update_parameters(all_parameters);
 
-    Simulation = simulation(all_parameters);
+    sim = std::make_unique<simulation>(all_parameters);   //simulation(all_parameters);
 
-    Simulation.initialize_network();
+    //Simulation.initialize_network();
+    std::vector< std::vector< voronoi_point > > all_polys;
+    sim->initialize_network(all_polys);
 
-    set_resolution(static_cast<int>(all_parameters.sq_num_pixels),
+    if(all_parameters.use_voronoi_grid == true) {
+      update_polygons(all_polys);
+      set_resolution(static_cast<int>(all_parameters.sq_num_pixels),
                    static_cast<int>(all_parameters.sq_num_pixels));
+    }
+    if(all_parameters.use_voronoi_grid == false) {
+        set_resolution(static_cast<int>(all_parameters.sq_num_cells),
+                     static_cast<int>(all_parameters.sq_num_cells));
+    }
 
-    Simulation.t = 0.0;
+    sim->t = 0.0;
 
     ui->btn_start->setText("Start");
 
-    if(focal_display_type == cells) update_image(Simulation.world, all_parameters.sq_num_cells);
+    if(focal_display_type == cells) update_image(all_parameters.sq_num_cells);
     if(focal_display_type != cells)  {
-        update_image(all_parameters.sq_num_cells, Simulation.world, Simulation.growth_prob);
+        update_image(all_parameters.sq_num_cells, sim->growth_prob);
     }
 
-    update_plot(static_cast<double>(Simulation.t),
-                Simulation.count_cell_types());
+    update_plot(static_cast<double>(sim->t),
+                sim->count_cell_types());
 
     is_paused = true;
 
@@ -506,26 +508,26 @@ void MainWindow::on_btn_start_clicked()
 
     is_running = true;
     int counter = 0;
-    while(Simulation.t < all_parameters.maximum_time) {
-        Simulation.update_one_step();
+    while(sim->t < all_parameters.maximum_time) {
+        sim->update_one_step();
         counter++;
 
-        int progress = static_cast<int>(100.f * Simulation.t / all_parameters.maximum_time);
+        int progress = static_cast<int>(100.f * sim->t / all_parameters.maximum_time);
         ui->progressBar->setValue(progress);
 
         // update speed is in 1 - 100
-        const static size_t range = 1 * Simulation.world.size();
+        const static size_t range = 1 * sim->world.size();
 
         int update_step = 1 + static_cast<int>((update_speed - 1) * 0.01f * range);
 
         if(counter % update_step == 0) {
-            if(focal_display_type == cells) update_image(Simulation.world, all_parameters.sq_num_cells);
+            if(focal_display_type == cells) update_image(all_parameters.sq_num_cells);
             if(focal_display_type != cells)  {
-                update_image(all_parameters.sq_num_cells, Simulation.world, Simulation.growth_prob);
+                update_image(all_parameters.sq_num_cells, sim->growth_prob);
             }
 
-            update_plot(static_cast<double>(Simulation.t),
-                        Simulation.count_cell_types());
+            update_plot(static_cast<double>(sim->t),
+                        sim->count_cell_types());
             QApplication::processEvents();
         }
         if(!is_running) break;
@@ -606,11 +608,11 @@ void MainWindow::on_btn_add_virus_clicked()
 {
    auto infection_string = ui->box_infection_routine->currentText();
    if(infection_string == "Random")
-       Simulation.set_infection_type(random_infection);
+       sim->set_infection_type(random_infection);
    if(infection_string == "Center")
-       Simulation.set_infection_type(center_infection);
+       sim->set_infection_type(center_infection);
 
-   Simulation.set_percent_infected(static_cast<float>(ui->box_percent_infected->value()));
+   sim->set_percent_infected(static_cast<float>(ui->box_percent_infected->value()));
 
-   Simulation.add_infected();
+   sim->add_infected();
 }

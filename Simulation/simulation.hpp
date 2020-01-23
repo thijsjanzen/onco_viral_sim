@@ -23,9 +23,12 @@ class simulation {
 public:
   simulation(const Param& param);
   void run();
-  void initialize_network();
+  void initialize_network(std::vector< std::vector< voronoi_point > >& all_polys);
 
   float t;
+  int num_cells;
+  int sq_size;
+
   void update_one_step();
 
   std::vector< node > world;
@@ -43,8 +46,8 @@ public:
   std::array<int, 5> count_cell_types();
 
 private:
-  int num_cells;
-  int sq_size;
+
+
 
   Param parameters;
 
@@ -77,6 +80,8 @@ private:
   void update_growth_cdf(size_t pos);
   void update_death_cdf_all();
 
+  size_t find_central_cell(const cell_type& focal_cell_type);
+
 
   void infect_random();
   void infect_center();
@@ -86,7 +91,7 @@ private:
 
   void infect_long_distance(size_t pos);
 
-  void setup_voronoi();
+  void setup_voronoi(std::vector< std::vector< voronoi_point > >& all_polys);
 
 
   void change_cell_type(const size_t& pos, const cell_type& focal_cell_type);

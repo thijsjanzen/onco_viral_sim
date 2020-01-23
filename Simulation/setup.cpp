@@ -38,7 +38,7 @@ world(param.sq_num_cells * param.sq_num_cells)
 }
 
 
-size_t find_central_cell(const std::vector< node > world, const cell_type& focal_cell_type) {
+size_t simulation::find_central_cell(const cell_type& focal_cell_type) {
     // first calculate average x and y of cell type:
     float x = 0.f;
     float y = 0.f;
@@ -65,7 +65,7 @@ size_t find_central_cell(const std::vector< node > world, const cell_type& focal
 }
 
 
-void simulation::initialize_network() {
+void simulation::initialize_network(std::vector< std::vector< voronoi_point > >& all_polys) {
    // initialize default.
   for(size_t i = 0; i < 4; ++i) {
        growth_prob[i] = binned_distribution(sq_size, num_cells);
@@ -83,14 +83,15 @@ void simulation::initialize_network() {
     }
   }
   if(parameters.use_voronoi_grid == true) {
-      setup_voronoi();
+      setup_voronoi(all_polys);
   }
 
   if(parameters.start_setup == grow) {
     add_cells(normal);
-    for(auto& i : world) {
-        update_growth_prob(i.pos);
-        update_death_prob(i.pos);
+    //for(auto& i : world) {
+    for(size_t i = 0; i < num_cells; ++i) {
+        update_growth_prob(i);
+        update_death_prob(i);
     }
   }
 
@@ -107,7 +108,7 @@ void simulation::initialize_network() {
 // initialization routines:
 void simulation::update_growth_probabilities() {
 
-  for(auto& i : world) {
+  for(const auto& i : world) {
     std::array<float, 4> probs = i.calc_prob_of_growth();
 
     size_t pos = i.pos;
@@ -131,7 +132,7 @@ void simulation::add_cells(const cell_type& focal_cell_type) {
   if (focal_cell_type == cancer  ) to_be_replaced = normal;
   if (focal_cell_type == infected) to_be_replaced = cancer;
 
-  size_t focal_pos = find_central_cell(world, to_be_replaced);
+  size_t focal_pos = find_central_cell(to_be_replaced);
 
   std::vector<size_t> cells_turned(1, focal_pos);
 
@@ -155,11 +156,10 @@ void simulation::add_cells(const cell_type& focal_cell_type) {
     counter++;
   }
 
-  for(auto& i : world) {
-      update_growth_prob(i.pos);
-      update_death_prob(i.pos);
+  for(size_t i = 0; i < num_cells; ++i) {
+      update_growth_prob(i);
+      update_death_prob(i);
   }
-
 }
 
 void simulation::infect_random() {
@@ -192,9 +192,9 @@ void simulation::infect_random() {
         cancer_pos.pop_back();
     }
 
-    for(const auto& i : world) {
-        update_growth_prob(i.pos);
-        update_death_prob(i.pos);
+    for(size_t i = 0; i < num_cells; ++i) {
+        update_growth_prob(i);
+        update_death_prob(i);
     }
 }
 
@@ -206,7 +206,7 @@ void simulation::infect_center() {
     if(to_be_infected == 0) return;
 
     //now find starting cell to infect
-    size_t starting_pos = find_central_cell(world, cancer);
+    size_t starting_pos = find_central_cell(cancer);
     while(world[starting_pos].node_type != cancer) {
         for(size_t i = 0; i < world[starting_pos].neighbors.size(); ++i) {
             if( world[starting_pos].neighbors[i]->node_type == cancer) {
@@ -238,7 +238,7 @@ void simulation::infect_center() {
       if(counter > cells_turned.size()) break;
     }
 
-    for(auto i : cells_turned) {
+    for(const auto& i : cells_turned) {
        update_cell(i);
     }
 }
@@ -299,11 +299,10 @@ void simulation::initialize_full() {
     }
 }
 
-void simulation::setup_voronoi() {
+void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_polys) {
    using namespace cinekine;
 
    voronoi::Sites sites;
-   world.clear();
 
    std::vector< voronoi_point > v(num_cells);
 
@@ -321,27 +320,29 @@ void simulation::setup_voronoi() {
 
    voronoi::Graph graph = voronoi::build(std::move(sites), sq_size, sq_size);
 
-   for(auto cell : graph.cells()) {
+   std::vector< std::vector< voronoi_edge > > all_edges(world.size());
+
+   for(const auto& cell : graph.cells()) {
 
        size_t site_index = static_cast<size_t>(cell.site);
 
        voronoi::Site focal_site = graph.sites()[site_index];
 
-       node temp_node(site_index, parameters.prob_normal_infection,
-                      focal_site.x, focal_site.y);
+       world[site_index].x_ = focal_site.x;
+       world[site_index].y_ = focal_site.y;
 
-       for(auto edge : cell.halfEdges) {
+       for(const auto& edge : cell.halfEdges) {
            voronoi::Edge focal_edge = graph.edges()[edge.edge];
            voronoi_point start(focal_edge.p0.x, focal_edge.p0.y);
            voronoi_point end(  focal_edge.p1.x, focal_edge.p1.y);
+
            voronoi_edge local_edge(start, end, focal_edge.leftSite, focal_edge.rightSite);
-           temp_node.edges.push_back(local_edge);
+           all_edges[site_index].push_back(local_edge);
        }
-       world[site_index] = temp_node;
    }
 
-   for(auto& i : world) {
-       for(auto edge : i.edges) {
+   for(auto& i : all_edges) {
+       for(const auto& edge : i) {
            int left = edge.left;
            int right = edge.right;
 
@@ -353,13 +354,17 @@ void simulation::setup_voronoi() {
        }
    }
 
-   for(auto& i : world) {
-       i.clean_edges();
-       update_growth_prob(i.pos);
-       update_death_prob(i.pos);
+   for(size_t i = 0; i < num_cells; ++i) {
+       std::vector< voronoi_point > poly = clean_edges(all_edges[i], i);
+       all_polys.push_back(poly);
+     }
+
+   for(size_t i = 0; i < num_cells; ++i) {
+       world[i].inv_num_neighbors = 1.f / world[i].neighbors.size();
+       update_growth_prob(i);
+       update_death_prob(i);
    }
 }
-
 
 
 void simulation::set_infection_type(const infection_routine& infect_type) {

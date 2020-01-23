@@ -50,7 +50,6 @@ struct voronoi_point {
 };
 
 struct voronoi_edge {
-
     voronoi_edge(voronoi_point s, voronoi_point e,
                  int l, int r) : start(s), end(e), left(l), right(r) {}
 
@@ -78,7 +77,9 @@ struct voronoi_edge {
     }
 };
 
-
+std::vector< voronoi_point> clean_edges(const std::vector< voronoi_edge >& input_edges,
+                                        size_t pos);
+void invert_edges(std::vector< voronoi_edge>& edges, size_t pos);
 
 
 struct node {
@@ -96,13 +97,11 @@ struct node {
   float x_;
   float y_;
 
+  float inv_num_neighbors;
+
   float prob_normal_infected;
   std::vector< node* > neighbors;
 
-  std::vector< voronoi_edge > edges;
-  std::vector< voronoi_point > outer_points;
-  void clean_edges();
-  void invert_edges();
   void check_distances(float max_val);
   float calc_distance(const node& other);
 
@@ -116,8 +115,8 @@ struct node {
   void add_neighbor(std::vector< node >& world,
                     size_t other_pos);
 
-  std::array<float, 4> calc_prob_of_growth();
-  float freq_type_neighbours(const cell_type& ref_type);
+  std::array<float, 4> calc_prob_of_growth() const;
+  float freq_type_neighbours(const cell_type& ref_type) const;
 
   void die();
 };

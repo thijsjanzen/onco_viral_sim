@@ -24,24 +24,20 @@ public:
     MainWindow(QWidget *parent = nullptr);
      ~MainWindow();
 
-    void update_image(const std::vector< node >& world, size_t sq_size);
+    void update_image(size_t sq_size);
 
     void update_image(size_t sq_size,
-                      const std::vector< node >& world,
                       const std::array< binned_distribution, 4 > & growth_rate);
 
 
-    void display_voronoi(const std::vector< node >& world,
-                         size_t sq_size); // cell coloring
-    void display_voronoi(const std::vector< node >& world,
-                         const binned_distribution& growth_rate,
+    void display_voronoi(size_t sq_size); // cell coloring
+    void display_voronoi(const binned_distribution& growth_rate,
                          cell_type focal_cell_type,
                          size_t sq_size); // growth rate coloring
-    void display_voronoi(const std::vector< node >& world,
-                         const std::array< binned_distribution, 4 > & growth_rate,
+    void display_voronoi(const std::array< binned_distribution, 4 > & growth_rate,
                          size_t sq_size); // dominant growth rate coloring
 
-    void display_regular(const std::vector< node >& world); // cell type coloring
+    void display_regular(); // cell type coloring
     void display_regular(const binned_distribution& growth_rate,
                          cell_type focal_cell_type); // growth rate coloring
     void display_regular(const std::array< binned_distribution, 4 > & growth_rate); // dominant growth rate coloring
@@ -52,6 +48,7 @@ public:
 
     void set_resolution(int width, int height);
     void set_pixel(int x, int y, const QColor& col);
+    void update_polygons(const std::vector< std::vector< voronoi_point > >& all_edges);
 
     void update_plot(double t, const std::array<int, 5>& cell_numbers);
     void setup_simulation();
@@ -75,6 +72,8 @@ private:
 
     int row_size;
     int col_size;
+    float factor_x;
+    float factor_y;
 
     display_color focal_display_type;
 
@@ -84,6 +83,8 @@ private:
     QVector<double> y_i;
     QVector<double> y_r;
 
+    std::vector< QPolygonF > polygons;
+
     bool is_running;
     bool is_paused;
     int update_speed;
@@ -91,7 +92,8 @@ private:
     grid_type grid_type;
 
     Param all_parameters;
-    simulation Simulation;
+   // simulation Simulation;
+    std::unique_ptr<simulation> sim;
 
     std::vector< QColor > colorz;
 };

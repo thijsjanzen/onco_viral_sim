@@ -144,7 +144,7 @@ void simulation::ask_infect_neighbours(int depth, float p, size_t pos) {
     if(p < 1e-6f) return;
     if(depth > 1) {
         depth--;
-        for(auto& n : world[pos].neighbors) {
+        for(const auto& n : world[pos].neighbors) {
             ask_infect_neighbours(depth, p, n->pos);
         }
 
@@ -172,7 +172,7 @@ void simulation::infect_long_distance(size_t pos) {
 
 void simulation::update_growth_prob(size_t pos) {
   std::array<float, 4> probs = world[pos].calc_prob_of_growth();
-  for (size_t i = 0; i < growth_prob.size(); ++i) {
+  for (size_t i = 0; i < 4; ++i) {
       growth_prob[i].update_entry(pos, probs[i]);
   }
 }
