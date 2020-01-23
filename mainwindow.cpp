@@ -11,7 +11,7 @@
 #include "Simulation/parameters.hpp"
 #include "Simulation/simulation.hpp"
 #include "Simulation/rndutils.hpp"
-#include "Simulation/random_thijs.hpp"
+
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -63,11 +63,19 @@ MainWindow::MainWindow(QWidget *parent)
     ui->drpdwnbox_display->addItem("Resistant Growth Rate");
     ui->drpdwnbox_display->addItem("Dominant Growth Rate");
 
+    ui->box_grid_type->addItem("regular");
+    ui->box_grid_type->addItem("voronoi");
+
     is_paused = false;
     is_running = false;
 
-    Simulation = simulation();
+    colorz.push_back(QColor(0, 0, 255));
+    colorz.push_back(QColor(255, 0, 0));
+    colorz.push_back(QColor(0, 255, 0));
+    colorz.push_back(QColor(128, 0, 128));
+    colorz.push_back(QColor(0, 0, 0));
 }
+
 
 MainWindow::~MainWindow()
 {
@@ -75,37 +83,65 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::set_resolution(int width, int height) {
-    image_ = QImage(width,height, QImage::Format_RGB32);
+    row_size = width;
+    col_size = height;
+
+    image_ = QImage(row_size, col_size, QImage::Format_RGB32);
 }
 
 void MainWindow::set_pixel(int x, int y, const QColor& col) {
     image_.setPixel(x, y, col.rgb());
 }
 
-void MainWindow::update_image(const std::vector< node >& world,
-                              size_t sq_size) {
+void MainWindow::display_regular(const std::vector< node >& world) {
+  int line_size = row_size;
+  int num_lines = col_size;
 
-  static const std::vector< QColor > colorz = {
-        {0, 0, 255},    // blue, normal
-        {255, 0, 0},    // red,  cancer
-        {0, 255, 0},    // green, infected
-        {128, 0, 128},   // purple, resistant
-        {0, 0, 0}      // black, empty
-    };
+  for(size_t i = 0; i < num_lines; ++i) {
+      QRgb* row = (QRgb*) image_.scanLine(i);
 
-    size_t line_size = sq_size;
-    size_t num_lines = sq_size;
+      size_t start = i * line_size;
+      size_t end = start + line_size;
 
-    for(size_t i = 0; i < num_lines; ++i) {
-        QRgb* row = (QRgb*) image_.scanLine(i);
+      for(size_t index = start; index < end; ++index) {
+          size_t local_index = index - start;
+          row[local_index] = colorz[ world[index].node_type ].rgb();
+      }
+  }
+}
 
-        size_t start = i * line_size;
-        size_t end = start + line_size;
+void MainWindow::display_voronoi(const std::vector< node >& world,
+                                 size_t sq_size) {
+  image_.fill(Qt::gray);
 
-        for(size_t index = start; index < end; ++index) {
-            size_t local_index = index - start;
-            row[local_index] = colorz[ world[index].get_node_type() ].rgb();
-        }
+  QPainter painter(&image_);
+
+  for(auto i: world) {
+      float factor_x = row_size / sq_size;
+      float factor_y = col_size / sq_size;
+
+      QPolygonF polygon;
+      for(auto j : i.outer_points) {
+           polygon << QPointF(j.x_ * factor_x, j.y_ * factor_y);
+      }
+      QBrush brush(colorz[i.node_type]); // Qt::SolidPattern by default.
+
+      QPainterPath path;
+      path.addPolygon(polygon);
+
+      painter.fillPath(path, brush);
+      painter.drawPolygon(polygon);
+  }
+}
+
+
+
+void MainWindow::update_image(const std::vector< node >& world, size_t sq_size) {
+    if(grid_type == regular) {
+        display_regular(world);
+    }
+    if(grid_type == voronoi) {
+        display_voronoi(world, sq_size);
     }
 
     int w = ui->q_label->width();
@@ -121,7 +157,6 @@ QRgb get_color(const cell_type focal_cell_type, float rate) {
         QColor col = {0, 0, 0, 255};
         return col.rgba();
     }
-
 
     if(focal_cell_type == normal) {
         QColor col = {0, 0, 255, static_cast<int>(rate * 255)};
@@ -141,10 +176,10 @@ QRgb get_color(const cell_type focal_cell_type, float rate) {
     }
 }
 
-int which_max(const std::vector<float>& v) {
-    int max_index = 0;
+size_t which_max(const std::vector<float>& v) {
+    size_t max_index = 0;
     float max_val = v[max_index];
-    for(int i = 1; i < v.size(); ++i) {
+    for(size_t i = 1; i < v.size(); ++i) {
         if(v[i] > max_val) {
             max_index = i;
             max_val = v[i];
@@ -153,41 +188,135 @@ int which_max(const std::vector<float>& v) {
     return max_index;
 }
 
+
+void MainWindow::display_regular(const binned_distribution& growth_rate,
+                                 cell_type focal_cell_type) {
+  int line_size = row_size;
+  int num_lines = col_size;
+
+  for(size_t i = 0; i < num_lines; ++i) {
+      QRgb* row = (QRgb*) image_.scanLine(i);
+
+      size_t start = i * line_size;
+      size_t end = start + line_size;
+
+      for(size_t index = start; index < end; ++index) {
+          size_t local_index = index - start;
+
+          row[local_index] = get_color(focal_cell_type, growth_rate.get_value(index));
+      }
+  }
+}
+
+void MainWindow::display_regular(const std::array< binned_distribution, 4 > & growth_rate) {
+  size_t line_size = static_cast<size_t>(row_size);
+  size_t num_lines = static_cast<size_t>(col_size);
+
+  for(size_t i = 0; i < num_lines; ++i) {
+      QRgb* row = (QRgb*) image_.scanLine(i);
+
+      size_t start = i * line_size;
+      size_t end = start + line_size;
+
+      for(size_t index = start; index < end; ++index) {
+          size_t local_index = index - start;
+
+          std::vector<float> probs = {0.0, 0.0, 0.0, 0.0};
+          for(size_t i = 0; i < 4; ++i) {
+              probs[i] = growth_rate[i].get_value(index);
+          }
+          cell_type focal_cell_type = static_cast<cell_type>(which_max(probs));
+
+          row[local_index] = get_color(focal_cell_type,
+                                       growth_rate[ focal_cell_type ].get_value(index));
+      }
+  }
+}
+
+void MainWindow::display_voronoi(const std::vector< node >& world,
+                                 const binned_distribution& growth_rate,
+                                 cell_type focal_cell_type,
+                                 size_t sq_size) {
+  image_.fill(Qt::gray);
+
+  QPainter painter(&image_);
+
+  for(size_t i = 0; i < world.size(); ++i) {
+      float factor_x = static_cast<float>(1.f * row_size / sq_size);
+      float factor_y = static_cast<float>(1.f * col_size / sq_size);
+
+      QPolygonF polygon;
+      for(auto j : world[i].outer_points) {
+           polygon << QPointF(static_cast<qreal>(j.x_ * factor_x),
+                              static_cast<qreal>(j.y_ * factor_y));
+      }
+
+      QBrush brush(get_color(focal_cell_type,
+                             growth_rate.get_value(world[i].pos)));
+      QPainterPath path;
+      path.addPolygon(polygon);
+
+      painter.fillPath(path, brush);
+      painter.drawPolygon(polygon);
+  }
+}
+
+void MainWindow::display_voronoi(const std::vector< node >& world,
+                                 const std::array< binned_distribution, 4 > & growth_rate,
+                                 size_t sq_size) {
+  image_.fill(Qt::gray);
+
+  QPainter painter(&image_);
+
+  for(size_t i = 0; i < world.size(); ++i) {
+      float factor_x = static_cast<float>(1.f * row_size / sq_size);
+      float factor_y = static_cast<float>(1.f * col_size / sq_size);
+
+      QPolygonF polygon;
+      for(auto j : world[i].outer_points) {
+          polygon << QPointF(static_cast<qreal>(j.x_ * factor_x),
+                             static_cast<qreal>(j.y_ * factor_y));
+      }
+
+      std::vector<float> probs = {0.0, 0.0, 0.0, 0.0};
+      for(size_t k = 0; k < 4; ++k) {
+          probs[k] = growth_rate[k].get_value(i);
+      }
+      cell_type focal_cell_type = static_cast<cell_type>(which_max(probs));
+
+      QBrush brush(get_color(focal_cell_type,
+                             probs[focal_cell_type]));
+      QPainterPath path;
+      path.addPolygon(polygon);
+
+      painter.fillPath(path, brush);
+      painter.drawPolygon(polygon);
+  }
+}
+
 void MainWindow::update_image(size_t sq_size,
+                              const std::vector< node >& world,
                               const std::array< binned_distribution, 4 > & growth_rate) {
 
     cell_type focal_cell_type = normal;
-    if( focal_display_type == normal_rate) focal_cell_type = normal;
-    if( focal_display_type == cancer_rate) focal_cell_type = cancer;
-    if( focal_display_type == infected_rate) focal_cell_type = infected;
+    if( focal_display_type == normal_rate)    focal_cell_type = normal;
+    if( focal_display_type == cancer_rate)    focal_cell_type = cancer;
+    if( focal_display_type == infected_rate)  focal_cell_type = infected;
     if( focal_display_type == resistant_rate) focal_cell_type = resistant;
 
-    size_t line_size = sq_size;
-    size_t num_lines = sq_size;
+    if(grid_type == regular) {
+      if(focal_display_type != dominant_rate) {
+        display_regular(growth_rate[focal_cell_type], focal_cell_type);
+      } else {
+        display_regular(growth_rate);
+      }
+    }
 
-    for(size_t i = 0; i < num_lines; ++i) {
-        QRgb* row = (QRgb*) image_.scanLine(i);
-
-        size_t start = i * line_size;
-        size_t end = start + line_size;
-
-        for(size_t index = start; index < end; ++index) {
-            size_t local_index = index - start;
-            if( focal_display_type == dominant_rate) {
-                std::vector<float> probs = {0.0, 0.0, 0.0, 0.0};
-
-                for(size_t i = 0; i < 4; ++i) {
-                    probs[i] = growth_rate[i].get_value(index);
-                }
-                focal_cell_type = static_cast<cell_type>(which_max(probs));
-
-                row[local_index] = get_color(focal_cell_type,
-                                         growth_rate[ focal_cell_type ].get_value(index));
-            } else {
-                row[local_index] = get_color(focal_cell_type,
-                                         growth_rate[ focal_cell_type ].get_value(index));
-
-            }
+    if(grid_type == voronoi) {
+        if(focal_display_type != dominant_rate) {
+          display_voronoi(world, growth_rate[focal_cell_type], focal_cell_type, sq_size);
+        } else {
+          display_voronoi(world, growth_rate, sq_size);
         }
     }
 
@@ -240,8 +369,8 @@ void MainWindow::update_parameters(Param& p) {
    p.time_adding_cancer = static_cast<int>(ui->box_cancer_time->value());
    p.time_adding_virus = static_cast<int>(ui->box_virus_time->value());
 
-   p.initial_number_cancer_cells = static_cast<int>(ui->box_cancer_cells->value());
-   p.initial_number_normal_cells = static_cast<int>(ui->box_normal_cells->value());
+   p.initial_number_cancer_cells = static_cast<size_t>(ui->box_cancer_cells->value());
+   p.initial_number_normal_cells = static_cast<size_t>(ui->box_normal_cells->value());
 
    p.birth_normal = static_cast<float>(ui->box_birth_normal->value());
    p.death_normal = static_cast<float>(ui->box_death_normal->value());
@@ -293,8 +422,27 @@ void MainWindow::update_parameters(Param& p) {
    if(display_string == "Dominant Growth Rate")
        focal_display_type = dominant_rate;
 
-   p.sq_num_pixels = static_cast<int>(ui->box_sq_num_pixels->value());
-   set_resolution(p.sq_num_pixels, p.sq_num_pixels);
+   auto grid_string = ui->box_grid_type->currentText();
+   if(grid_string == "regular") {
+       grid_type = regular;        // plotting flag
+       p.use_voronoi_grid = false; // simulation flag
+   }
+   if(grid_string == "voronoi") {
+       grid_type = voronoi;       // plotting flag
+       p.use_voronoi_grid = true; // simulation flag
+   }
+
+   p.sq_num_pixels = static_cast<size_t>(ui->box_sq_num_pixels->value());
+
+   if(p.use_voronoi_grid && p.sq_num_pixels <= p.sq_num_cells) {
+       QMessageBox::warning(this,
+                            tr("Oncolytic Virus Simulator"),
+                            tr("Displaying Voronoi only works when\n"
+                               "using more pixels than cells!"));
+   }
+
+   set_resolution(static_cast<int>(p.sq_num_pixels),
+                  static_cast<int>(p.sq_num_pixels));
 
    print_params(p);
    return;
@@ -327,15 +475,20 @@ void MainWindow::setup_simulation() {
 
     ui->btn_start->setText("Start");
 
-    if(focal_display_type == cells) update_image(Simulation.world, Simulation.sq_size);
+    if(focal_display_type == cells) update_image(Simulation.world, all_parameters.sq_num_cells);
     if(focal_display_type != cells)  {
-        update_image(Simulation.sq_size, Simulation.growth_probs);
+        update_image(all_parameters.sq_num_cells, Simulation.world, Simulation.growth_prob);
     }
 
     update_plot(static_cast<double>(Simulation.t),
-                Simulation.get_cell_numbers());
+                Simulation.count_cell_types());
+
+    is_paused = true;
+
     QApplication::processEvents();
 }
+
+
 
 void MainWindow::on_btn_start_clicked()
 {
@@ -353,25 +506,26 @@ void MainWindow::on_btn_start_clicked()
     while(Simulation.t < all_parameters.maximum_time) {
         Simulation.update_one_step();
         counter++;
+        if(Simulation.t > 15) {
+            int a = 5;
+          }
 
         int progress = static_cast<int>(100.f * Simulation.t / all_parameters.maximum_time);
         ui->progressBar->setValue(progress);
 
-
         // update speed is in 1 - 100
-        const static size_t range = 2 * Simulation.world.size();
+        const static size_t range = 1 * Simulation.world.size();
 
-        int update_step = 1 + (update_speed - 1) * 0.01f * range;
+        int update_step = 1 + static_cast<int>((update_speed - 1) * 0.01f * range);
 
         if(counter % update_step == 0) {
             if(focal_display_type == cells) update_image(Simulation.world, all_parameters.sq_num_cells);
             if(focal_display_type != cells)  {
-                update_image(all_parameters.sq_num_cells, Simulation.growth_prob);
-
+                update_image(all_parameters.sq_num_cells, Simulation.world, Simulation.growth_prob);
             }
 
             update_plot(static_cast<double>(Simulation.t),
-                        Simulation.get_cell_numbers());
+                        Simulation.count_cell_types());
             QApplication::processEvents();
         }
         if(!is_running) break;
@@ -391,7 +545,7 @@ void MainWindow::on_btn_start_clicked()
     std::cout << time_taken<< "\n";
 }
 
-void MainWindow::update_plot(double t, const std::vector<int>& cell_numbers) {
+void MainWindow::update_plot(double t, const std::array<int, 5>& cell_numbers) {
     x_t.append(t);
     y_n.append(cell_numbers[0]);
     y_c.append(cell_numbers[1]);
@@ -442,7 +596,8 @@ void MainWindow::on_drpdwnbox_display_activated(int index)
         focal_display_type = dominant_rate;
 }
 
-void MainWindow::on_btn_setup_clicked() {
+void MainWindow::on_btn_setup_clicked()
+{
   ui->progressBar->setValue(0);
   setup_simulation();
 }

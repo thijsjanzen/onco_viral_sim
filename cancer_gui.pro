@@ -4,8 +4,6 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 CONFIG += c++17
 
-QMAKE_CXXFLAGS+= -ffast-math -fno-strict-aliasing
-
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -19,6 +17,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     Simulation/node.cpp \
+    Simulation/setup.cpp \
     Simulation/simulation.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -30,6 +29,7 @@ HEADERS += \
     Simulation/random_thijs.hpp \
     Simulation/rndutils.hpp \
     Simulation/simulation.hpp \
+    Simulation/voronoi.hpp \
     mainwindow.h \
     qcustomplot.h
 

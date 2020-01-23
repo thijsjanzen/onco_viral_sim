@@ -6,63 +6,50 @@
 //  Copyright © 2019 Thijs Janzen. All rights reserved.
 //
 #include <cassert>
-#include "node.hpp"
 #include <iostream>
 #include <array>
 #include <cmath>
 #include <array>
+
+#include "node.hpp"
 #include "random_thijs.hpp"
 
 node::node() {
   node_type = empty;
-  prob_of_growth_ = std::vector<float>(4, 0.f);
-  neighbor_freqs = std::vector<float>(5, 0.f);
-  neighbor_freq = 0.25;
 }
 
 node::node(size_t p, float norm_infected) :
     pos(p),
     prob_normal_infected(norm_infected) {
     node_type = empty;
-    prob_of_growth_ = std::vector<float>(4, 0.f);
-    neighbor_freqs = std::vector<float>(5, 0.f);
-    neighbor_freq = 0.25;
 }
 
-node::node(const node& other) {
-    node_type = other.node_type;
-    pos = other.pos;
-    x_ = other.x_;
-    y_ = other.y_;
-
-    prob_normal_infected = other.prob_normal_infected;
-    freq_type_neighbours = other.freq_type_neighbours;
-    prob_of_growth = other.prob_of_growth;
-
-    neighbors = other.neighbors;
-    neighbor_freq = other.neighbor_freq;
-    neighbor_freqs = other.neighbor_freqs;
+node::node(size_t p, float norm_infected, float x, float y) :
+    pos(p),
+    prob_normal_infected(norm_infected),
+    x_(x), y_(y){
+    node_type = empty;
 }
 
-void node::operator=(const node& other) {
-    node_type = other.node_type;
-    pos = other.pos;
-    x_ = other.x_;
-    y_ = other.y_;
+void node::add_neighbor(std::vector< node >& world,
+                        size_t other_pos) {
 
-    prob_normal_infected = other.prob_normal_infected;
-    freq_type_neighbours = other.freq_type_neighbours;
-    prob_of_growth = other.prob_of_growth;
+    if(!neighbors.empty()) {
+        for(auto i : neighbors) {
+            if(i->pos == other_pos) {
+                return; // if the neighbor is already added, don't add again.
+            }
+        }
+    }
 
-    neighbors = other.neighbors;
-    neighbor_freq = other.neighbor_freq;
-    neighbor_freqs = other.neighbor_freqs;
+    node* neighbor = &world[static_cast<size_t>(other_pos)];
+    neighbors.push_back(neighbor);
 }
+
 
 void node::update_neighbors(std::vector< node >& world,
                             size_t world_size) {
 
-    neighbors.clear();
 
     static int relative_points[4][2] = { {-1, 0},
                                         {1, 0},
@@ -86,34 +73,34 @@ void node::update_neighbors(std::vector< node >& world,
             }
         }
     }
-    neighbor_freq = 1.0f / neighbors.size();
 }
 
-void node::calc_prob_of_growth() {
-  std::fill(prob_of_growth_.begin(), prob_of_growth_.end(), 0.f);
+std::array<float, 4> node::calc_prob_of_growth() {
+  std::array<float, 4> prob_of_growth = {0.f, 0.f, 0.f, 0.f};
 
   if(node_type == normal) {
     // infected can grow into this, but at lower frequency:
-    prob_of_growth_[infected]  =  prob_normal_infected * neighbor_freqs[infected];
+    prob_of_growth[infected]  =  prob_normal_infected * freq_type_neighbours(infected);
   }
   if(node_type == cancer) {
     // infected nodes can grow into this
-    prob_of_growth_[infected]  = neighbor_freqs[infected];
+    prob_of_growth[infected]  = freq_type_neighbours(infected);
   }
   if(node_type == empty) {
-    prob_of_growth_[normal]    = neighbor_freqs[normal];
-    prob_of_growth_[cancer]    = neighbor_freqs[cancer];
-    prob_of_growth_[resistant] = neighbor_freqs[resistant];
+    prob_of_growth[normal]    = freq_type_neighbours(normal);
+    prob_of_growth[cancer]    = freq_type_neighbours(cancer);
+    prob_of_growth[resistant] = freq_type_neighbours(resistant);
   }
 
-  return;
+  return prob_of_growth;
 }
 
-float node::freq_type_neighbors(const cell_type& ref_type) {
+float node::freq_type_neighbours(const cell_type& ref_type) {
   int count = 0;
   for(auto i : neighbors) {
     if(i->node_type == ref_type) count++;
   }
+  return 1.f * count / neighbors.size();
 }
 
 void node::set_coordinates(size_t row_size) {
@@ -121,44 +108,70 @@ void node::set_coordinates(size_t row_size) {
     y_ = pos % row_size;
 }
 
-void node::update_neighbor_freq(const cell_type& old_type,
-                                const cell_type& new_type)  {
-    if(new_type == old_type) return;
-
-    neighbor_freqs[old_type] -= neighbor_freq;
-    neighbor_freqs[new_type] += neighbor_freq;
-
-    assert(neighbor_freqs[old_type] > -1e-6f);
-    assert((neighbor_freqs[0] + neighbor_freqs[1] + neighbor_freqs[2] +
-           neighbor_freqs[3] + neighbor_freqs[4]) >= (1.f - 1e-6f));
-
-    if(neighbor_freqs[old_type] < 0.f)  neighbor_freqs[old_type] = 0.f;
-}
-
-void node::set_node_type(const cell_type& new_type){
-    cell_type old_type = node_type;
-    node_type = new_type;
-    for(auto i: neighbors) {
-        i->update_neighbor_freq(old_type, new_type);
+void node::invert_edges() {
+    // check for inverted edges.
+    for(auto& i : edges) {
+        if(i.right != pos) {
+            std::swap(i.left, i.right);
+            std::swap(i.start, i.end);
+        }
     }
 }
 
-void node::initialize_node_type(const cell_type& new_type) {
-    node_type = new_type;
+void node::clean_edges() {
+    // the goal is to connect all edges, and then provide
+    // all the outer points
+    if(edges.empty()) return;
+
+    invert_edges();
+
+    std::vector< voronoi_edge > old_edges = edges; // for debugging only
+
+    std::sort(edges.begin(), edges.end());
+
+    std::vector< voronoi_edge > new_edges;
+
+    voronoi_edge focal_edge = edges.back();
+    new_edges.push_back(focal_edge);
+    edges.pop_back();
+
+    while(!edges.empty()) {
+        size_t match = 1e6; // should give out of bounds access if failure.
+        for(size_t i = 0; i < edges.size(); ++i) {
+            if(edges[i].start == focal_edge.end) {
+                match = i;
+                break;
+            }
+        }
+        focal_edge = edges[match];
+        edges[match] = edges.back();
+        edges.pop_back();
+        new_edges.push_back(focal_edge);
+    }
+    // allright, we have connected them now
+    // now we collect the starting points
+    for(auto i : new_edges) {
+        voronoi_point temp_point = i.start;
+        outer_points.push_back(temp_point);
+    }
+    edges = new_edges;
+    // done!
 }
 
-
-
-cell_type node::get_node_type() const {
-    return node_type;
+float node::calc_distance(const node& other) {
+    float squared_distance = (x_ - other.x_) * (x_ - other.x_) +
+                             (y_ - other.y_) * (y_ - other.y_);
+    float dist = sqrtf(squared_distance);
+    return dist;
 }
 
-void node::set_all_neighbor_freqs() {
-   // std::fill(neighbor_freqs.begin(), neighbor_freqs.end(), 0);
-    neighbor_freqs.assign(5, 0.f); // 5 types, although #5 is never used
+void node::check_distances(float max_dist) {
+
     for(auto i : neighbors) {
-        neighbor_freqs[ i->node_type]+= neighbor_freq;
+      float dist = calc_distance(*i);
+      if(dist > max_dist) {
+          std::cout << "distance between neighbors is way too far!\n";
+          return;
+      }
     }
-    assert((neighbor_freqs[0] + neighbor_freqs[1] + neighbor_freqs[2] +
-          neighbor_freqs[3] + neighbor_freqs[4]) >= (1.f - 1e-6f));
 }
