@@ -90,8 +90,8 @@ private:
 
     grid_type grid_type;
 
-    simulation Simulation;
     Param all_parameters;
+    simulation Simulation;
 
     std::vector< QColor > colorz;
 };

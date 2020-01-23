@@ -93,7 +93,7 @@ void simulation::do_event(size_t event) {
 void simulation::update_cell(size_t pos) {
   update_death_prob(pos);
   update_growth_prob(pos);
-  for(auto i : world[pos].neighbors) {
+  for(const auto& i : world[pos].neighbors) {
     update_growth_prob(i->pos);
   }
 }
@@ -108,7 +108,7 @@ void simulation::implement_death(const cell_type& parent) {
   //update_cell(position_of_dying_cell);
   update_death_prob(position_of_dying_cell, previous_type, empty);
   update_growth_prob(position_of_dying_cell);
-  for(auto i : world[position_of_dying_cell].neighbors) {
+  for(const auto& i : world[position_of_dying_cell].neighbors) {
     update_growth_prob(i->pos);
   }
 
@@ -135,7 +135,7 @@ void simulation::implement_growth(const cell_type& parent) {
   update_death_prob(position_of_grown_cell, previous_type, parent);
 
   update_growth_prob(position_of_grown_cell);
-  for(auto i : world[position_of_grown_cell].neighbors) {
+  for(const auto& i : world[position_of_grown_cell].neighbors) {
     update_growth_prob(i->pos);
   }
 }
@@ -222,7 +222,7 @@ size_t simulation::pick_event(const std::array< float, 8>& rates, float sum) {
 
 std::array<int, 5> simulation::count_cell_types() {
   std::array<int, 5> total_num_cell_types = {0, 0, 0, 0, 0};
-  for(auto i : world) {
+  for(const auto& i : world) {
       total_num_cell_types[i.node_type]++;
   }
   num_cell_types = total_num_cell_types;

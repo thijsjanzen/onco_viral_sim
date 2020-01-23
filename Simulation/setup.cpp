@@ -7,42 +7,13 @@
 
 #include "simulation.hpp"
 
-simulation::simulation() {
-
-  num_cells = 1000;
-  sq_size = 100;
-
-  parameters = Param(); // use default parameters
-  world.resize(num_cells);
-
-  for (size_t i = 0; i < world.size(); ++i) {
-    world[i].pos = i;
-    world[i].set_coordinates(sq_size);
-    world[i].prob_normal_infected = parameters.prob_normal_infection;
-  }
-
-  binned_distribution temp(sq_size, num_cells);
-  for(size_t i = 0; i < 4; ++i) {
-      growth_prob[i] = temp;
-      death_prob[i] = temp;
-  }
-
-  long_distance_infection_probability = std::vector<double>(1, 0);
-  float lambda = 1.0f / parameters.distance_infection_upon_death;
-  for(size_t d = 1; d < sq_size; ++d) {
-      double local_prob = parameters.prob_infection_upon_death * lambda * expf(-lambda * d);
-      long_distance_infection_probability.push_back(local_prob);
-      if(local_prob < 1e-3) break;
-  }
-}
-
-simulation::simulation(const Param& param) {
+simulation::simulation(const Param& param) :
+world(param.sq_num_cells * param.sq_num_cells)
+{
   parameters = param;
 
   sq_size = parameters.sq_num_cells;
   num_cells = sq_size * sq_size;
-
-  world.resize(num_cells);
 
   for (size_t i = 0; i < world.size(); ++i) {
     world[i].pos = i;
@@ -72,7 +43,7 @@ size_t find_central_cell(const std::vector< node > world, const cell_type& focal
     float x = 0.f;
     float y = 0.f;
     int counter = 0;
-    for(auto i : world) {
+    for(const auto& i : world) {
         if(i.node_type == focal_cell_type) {
             x += i.x_;
             y += i.y_;
@@ -136,7 +107,7 @@ void simulation::initialize_network() {
 // initialization routines:
 void simulation::update_growth_probabilities() {
 
-  for(auto i : world) {
+  for(auto& i : world) {
     std::array<float, 4> probs = i.calc_prob_of_growth();
 
     size_t pos = i.pos;
@@ -201,7 +172,7 @@ void simulation::infect_random() {
 
     std::vector< size_t > cancer_pos(num_cancer_cells);
     int j = 0;
-    for(auto i : world) {
+    for(const auto& i : world) {
         if(i.node_type == cancer) {
             cancer_pos[j] = static_cast<size_t>(i.pos);
             j++;
@@ -221,7 +192,7 @@ void simulation::infect_random() {
         cancer_pos.pop_back();
     }
 
-    for(auto i : world) {
+    for(const auto& i : world) {
         update_growth_prob(i.pos);
         update_death_prob(i.pos);
     }
@@ -279,7 +250,7 @@ void simulation::infect_all_cancer() {
         }
     }
 
-    for(auto i : world) {
+    for(const auto& i : world) {
         update_growth_prob(i.pos);
         update_death_prob(i.pos);
     }
@@ -349,8 +320,6 @@ void simulation::setup_voronoi() {
    }
 
    voronoi::Graph graph = voronoi::build(std::move(sites), sq_size, sq_size);
-
-   world.resize(num_cells);
 
    for(auto cell : graph.cells()) {
 

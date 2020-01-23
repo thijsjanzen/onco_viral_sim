@@ -32,11 +32,6 @@ struct voronoi_point {
 
     voronoi_point(float x, float y) : x_(x), y_(y) {}
 
-    bool operator=(const voronoi_point& other) {
-        x_ = other.x_;
-        y_ = other.y_;
-    }
-
     bool operator==(const voronoi_point& other) const {
         // explicitly, this doesn't keep track of left and right!
         if(fabs(x_ - other.x_) > 1e-4f) return false;
@@ -87,6 +82,11 @@ struct voronoi_edge {
 
 
 struct node {
+  node(node&&) = delete;
+  const node& operator=(node&&) = delete;
+  node(const node&) = delete;
+  const node& operator=(const node&) = delete;
+
   node();
   node(size_t p, float norm_infection_rate);
   node(size_t p, float norm_infected, float x_, float y_);

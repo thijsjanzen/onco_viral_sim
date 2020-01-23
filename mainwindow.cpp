@@ -12,13 +12,16 @@
 #include "Simulation/simulation.hpp"
 #include "Simulation/rndutils.hpp"
 
-
-
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    update_parameters(all_parameters);
+    Simulation = simulation(all_parameters);
+
+
     ui->line_plot->addGraph(); // normal
     ui->line_plot->addGraph(); // cancer
     ui->line_plot->addGraph(); // infected
@@ -116,7 +119,7 @@ void MainWindow::display_voronoi(const std::vector< node >& world,
 
   QPainter painter(&image_);
 
-  for(auto i: world) {
+  for(const auto& i: world) {
       float factor_x = row_size / sq_size;
       float factor_y = col_size / sq_size;
 

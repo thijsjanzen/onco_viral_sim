@@ -21,7 +21,6 @@
 
 class simulation {
 public:
-  simulation();
   simulation(const Param& param);
   void run();
   void initialize_network();
