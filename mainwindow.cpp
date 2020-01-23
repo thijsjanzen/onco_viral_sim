@@ -506,9 +506,6 @@ void MainWindow::on_btn_start_clicked()
     while(Simulation.t < all_parameters.maximum_time) {
         Simulation.update_one_step();
         counter++;
-        if(Simulation.t > 15) {
-            int a = 5;
-          }
 
         int progress = static_cast<int>(100.f * Simulation.t / all_parameters.maximum_time);
         ui->progressBar->setValue(progress);

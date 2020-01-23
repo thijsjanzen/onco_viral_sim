@@ -65,21 +65,6 @@ struct rnd_t {
   int binomial(int n, double p) {
     return std::binomial_distribution<>(n, p)(rndgen_);
   }
-
- /* template< typename it>
-  size_t draw_from_dist(it begin, it end, float max) {
-    size_t max_index = end - begin;
-    float mult = 1.f / max;
-
-    size_t index = static_cast<size_t>(random_number(max_index));
-    if (max == 0.f) return index; // uniform drawing
-    float prob = *(begin + index) * mult;
-    while (uniform() < prob) {
-      index = static_cast<size_t>(random_number(max_index));
-      prob = *(begin + index) * mult;
-    }
-    return index;
-  }*/
 };
 
 struct binned_distribution {
@@ -111,7 +96,7 @@ public:
 
     for(size_t i = 0; i < num_bins; ++i) {
       auto start_it = values.begin() + i * bin_size;
-      auto end_it = start_it + bin_size - 1;
+      auto end_it = start_it + bin_size;
       row_sum[i] = std::accumulate(start_it, end_it, 0.f);
     }
   }
@@ -133,7 +118,8 @@ public:
     size_t col;
     float frac = row_sum[row] * 1.f / bin_size;
     auto start = values.begin() + row * bin_size;
-    auto end = start + bin_size - 1;
+    auto end = start + bin_size;
+
     if(frac < 0.1f) {
       col = draw_cdf(start, end, r);
     } else {
@@ -151,17 +137,7 @@ public:
     return(static_cast<size_t>(draw_dist(r.rndgen_)));
   }
 
-  /* template< typename It>
-   void update_row_sum(It first, size_t pos) {
-   size_t row = pos / bin_size;
-   It start = first + row * bin_size;
-   It end = start + bin_size - 1;
-   row_sum[row] = std::accumulate(start, end, 0.0f);
-   }*/
-
   void update_entry(size_t pos, float new_val) {
-      //  if(new_val == old_val) return;
-      //  update_row_sum(first, pos);
     float old_val = values[pos];
     if(old_val == new_val) return;
     values[pos] = new_val;
@@ -178,7 +154,7 @@ public:
   void update_all() {
     for(size_t row = 0; row < num_bins; ++row) {
       auto start = values.begin() + row * bin_size;
-      auto end = start + bin_size - 1;
+      auto end = start + bin_size;
       row_sum[row] = std::accumulate(start, end, 0.f);
     }
   }
@@ -193,7 +169,5 @@ private:
   std::vector<float> row_sum;
   std::vector<float> values;
 };
-
-
 
 #endif  // RANDOM_THIJS_H

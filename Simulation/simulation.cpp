@@ -16,6 +16,7 @@
 void simulation::update_one_step() {
     update_rates();
     float lambda = std::accumulate(rates.begin(), rates.end(), 0.0f);
+
     float dt = rndgen.Expon(lambda);
     while(std::isinf(dt)) {
         static int counter = 0;
@@ -227,5 +228,3 @@ std::array<int, 5> simulation::count_cell_types() {
   num_cell_types = total_num_cell_types;
   return total_num_cell_types;
 }
-
-

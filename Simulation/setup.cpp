@@ -101,6 +101,10 @@ void simulation::initialize_network() {
        death_prob[i] = binned_distribution(sq_size, num_cells);
   }
 
+  for(auto& i : world) {
+       i.prob_normal_infected = parameters.prob_normal_infection;
+  }
+
   if(parameters.use_voronoi_grid == false) {
     for(auto& i : world) {
       i.update_neighbors(world, sq_size);
@@ -111,11 +115,9 @@ void simulation::initialize_network() {
       setup_voronoi();
   }
 
-
   if(parameters.start_setup == grow) {
-
     add_cells(normal);
-    for(auto i : world) {
+    for(auto& i : world) {
         update_growth_prob(i.pos);
         update_death_prob(i.pos);
     }
@@ -123,6 +125,11 @@ void simulation::initialize_network() {
 
   if(parameters.start_setup == full) {
     initialize_full();
+  }
+
+  for(size_t i = 0; i < growth_prob.size(); ++i) {
+      growth_prob[i].update_all();
+      death_prob[i].update_all();
   }
 }
 
@@ -147,8 +154,8 @@ void simulation::update_growth_probabilities() {
 }
 
 void simulation::add_cells(const cell_type& focal_cell_type) {
-  // pick center node:
 
+  // pick center node:
   cell_type to_be_replaced = empty;
   if (focal_cell_type == cancer  ) to_be_replaced = normal;
   if (focal_cell_type == infected) to_be_replaced = cancer;
@@ -177,13 +184,11 @@ void simulation::add_cells(const cell_type& focal_cell_type) {
     counter++;
   }
 
-  for (auto& i : cells_turned) {
-    update_growth_prob(i);
-    update_death_prob(i);
-    for (auto& j : world[i].neighbors) {
-      update_growth_prob(j->pos);
-    }
+  for(auto& i : world) {
+      update_growth_prob(i.pos);
+      update_death_prob(i.pos);
   }
+
 }
 
 void simulation::infect_random() {
@@ -300,10 +305,8 @@ void simulation::add_infected() {
 
 
 void simulation::initialize_full() {
-
     for(auto& i : world) {
         i.node_type = normal;
-        i.prob_normal_infected = parameters.prob_normal_infection;
     }
 
     parameters.initial_number_cancer_cells = static_cast<int>(0.1f * world.size());
@@ -322,11 +325,6 @@ void simulation::initialize_full() {
     for(auto& i : world) {
         update_growth_prob(i.pos);
         update_death_prob(i.pos);
-    }
-
-    for(size_t i = 0; i < growth_prob.size(); ++i) {
-        growth_prob[i].update_all();
-        death_prob[i].update_all();
     }
 }
 
