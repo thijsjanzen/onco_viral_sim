@@ -32,8 +32,8 @@ struct Param {
   int time_adding_virus;
   int time_adding_cancer;
 
-  int initial_number_cancer_cells;
-  int initial_number_normal_cells;
+  size_t initial_number_cancer_cells;
+  size_t initial_number_normal_cells;
 
   float percent_infected;
   infection_routine infection_type;
@@ -43,11 +43,11 @@ struct Param {
   float distance_infection_upon_death;
   float prob_infection_upon_death;
 
-  int resolution;
-
+  size_t sq_num_cells;
+  size_t sq_num_pixels;
+  bool use_voronoi_grid;
 
   start_type start_setup;
-
 
   Param(const Param& other) {
       maximum_time = other.maximum_time;
@@ -78,10 +78,14 @@ struct Param {
       resolution = other.resolution;
 
       start_setup = other.start_setup;
-  }
+
+      sq_num_cells = other.sq_num_cells;
+      sq_num_pixels = other.sq_num_pixels;
+    }
+
 
   Param() {
-	  // default values, these don't necessarily make sense!
+    // default values, these don't necessarily make sense!
     maximum_time = 500; // default from Berg et al 2019
     time_adding_virus = 3000; // default from Berg et al 2019
     time_adding_cancer = 1000; // normally the population is first allowed to stabilize
@@ -110,9 +114,11 @@ struct Param {
     resolution = 100;
 
     start_setup = converge;
+
+    sq_num_cells = 100;
+    sq_num_pixels = 100;
+    use_voronoi_grid = false;
   }
-
-
 };
 
 #endif /* parameters_h */

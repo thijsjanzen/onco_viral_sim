@@ -6,11 +6,12 @@
 //  Copyright © 2019 Thijs Janzen. All rights reserved.
 //
 #include <cassert>
-#include "node.hpp"
 #include <iostream>
 #include <array>
 #include <cmath>
 #include <array>
+
+#include "node.hpp"
 #include "random_thijs.hpp"
 
 node::node() {
@@ -22,6 +23,29 @@ node::node(size_t p, float norm_infected) :
     prob_normal_infected(norm_infected) {
     node_type = empty;
 }
+
+node::node(size_t p, float norm_infected, float x, float y) :
+    pos(p),
+    prob_normal_infected(norm_infected),
+    x_(x), y_(y){
+    node_type = empty;
+}
+
+void node::add_neighbor(std::vector< node >& world,
+                        size_t other_pos) {
+
+    if(!neighbors.empty()) {
+        for(auto i : neighbors) {
+            if(i->pos == other_pos) {
+                return; // if the neighbor is already added, don't add again.
+            }
+        }
+    }
+
+    node* neighbor = &world[static_cast<size_t>(other_pos)];
+    neighbors.push_back(neighbor);
+}
+
 
 void node::update_neighbors(std::vector< node >& world,
                             size_t world_size) {
@@ -82,4 +106,72 @@ float node::freq_type_neighbours(const cell_type& ref_type) {
 void node::set_coordinates(size_t row_size) {
     x_ = pos / row_size;
     y_ = pos % row_size;
+}
+
+void node::invert_edges() {
+    // check for inverted edges.
+    for(auto& i : edges) {
+        if(i.right != pos) {
+            std::swap(i.left, i.right);
+            std::swap(i.start, i.end);
+        }
+    }
+}
+
+void node::clean_edges() {
+    // the goal is to connect all edges, and then provide
+    // all the outer points
+    if(edges.empty()) return;
+
+    invert_edges();
+
+    std::vector< voronoi_edge > old_edges = edges; // for debugging only
+
+    std::sort(edges.begin(), edges.end());
+
+    std::vector< voronoi_edge > new_edges;
+
+    voronoi_edge focal_edge = edges.back();
+    new_edges.push_back(focal_edge);
+    edges.pop_back();
+
+    while(!edges.empty()) {
+        size_t match = 1e6; // should give out of bounds access if failure.
+        for(size_t i = 0; i < edges.size(); ++i) {
+            if(edges[i].start == focal_edge.end) {
+                match = i;
+                break;
+            }
+        }
+        focal_edge = edges[match];
+        edges[match] = edges.back();
+        edges.pop_back();
+        new_edges.push_back(focal_edge);
+    }
+    // allright, we have connected them now
+    // now we collect the starting points
+    for(auto i : new_edges) {
+        voronoi_point temp_point = i.start;
+        outer_points.push_back(temp_point);
+    }
+    edges = new_edges;
+    // done!
+}
+
+float node::calc_distance(const node& other) {
+    float squared_distance = (x_ - other.x_) * (x_ - other.x_) +
+                             (y_ - other.y_) * (y_ - other.y_);
+    float dist = sqrtf(squared_distance);
+    return dist;
+}
+
+void node::check_distances(float max_dist) {
+
+    for(auto i : neighbors) {
+      float dist = calc_distance(*i);
+      if(dist > max_dist) {
+          std::cout << "distance between neighbors is way too far!\n";
+          return;
+      }
+    }
 }
