@@ -99,6 +99,7 @@ public:
       auto end_it = start_it + bin_size;
       row_sum[i] = std::accumulate(start_it, end_it, 0.f);
     }
+    total_sum = std::accumulate(row_sum.begin(), row_sum.end(), 0.f);
   }
 
   template <typename It>
@@ -143,12 +144,13 @@ public:
     values[pos] = new_val;
     size_t row = pos / bin_size;
     row_sum[row] += new_val - old_val;
+    total_sum += new_val - old_val;
     if(row_sum[row] < 0.f) row_sum[row] = 0.f;
     assert(row_sum[row] >= 0.f);
   }
 
   float get_total_sum() const {
-    return std::accumulate(row_sum.begin(), row_sum.end(), 0.f);
+    return total_sum; //std::accumulate(row_sum.begin(), row_sum.end(), 0.f);
   }
 
   void update_all() {
@@ -164,6 +166,7 @@ public:
   }
 
 private:
+  float total_sum;
   size_t bin_size;
   size_t num_bins;
   std::vector<float> row_sum;

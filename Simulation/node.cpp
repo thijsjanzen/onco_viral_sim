@@ -27,7 +27,7 @@ node::node(size_t p, float norm_infected) :
 node::node(size_t p, float norm_infected, float x, float y) :
     pos(p),
     prob_normal_infected(norm_infected),
-    x_(x), y_(y){
+    x_(x), y_(y) {
     node_type = empty;
 }
 
@@ -73,9 +73,10 @@ void node::update_neighbors(std::vector< node >& world,
             }
         }
     }
+    inv_num_neighbors = 1.f / neighbors.size();
 }
 
-std::array<float, 4> node::calc_prob_of_growth() {
+std::array<float, 4> node::calc_prob_of_growth() const {
   std::array<float, 4> prob_of_growth = {0.f, 0.f, 0.f, 0.f};
 
   if(node_type == normal) {
@@ -95,12 +96,12 @@ std::array<float, 4> node::calc_prob_of_growth() {
   return prob_of_growth;
 }
 
-float node::freq_type_neighbours(const cell_type& ref_type) {
+float node::freq_type_neighbours(const cell_type& ref_type) const {
   int count = 0;
   for(auto i : neighbors) {
     if(i->node_type == ref_type) count++;
   }
-  return 1.f * count / neighbors.size();
+  return static_cast<float>(count * inv_num_neighbors);
 }
 
 void node::set_coordinates(size_t row_size) {
@@ -108,7 +109,7 @@ void node::set_coordinates(size_t row_size) {
     y_ = pos % row_size;
 }
 
-void node::invert_edges() {
+void invert_edges(std::vector< voronoi_edge>& edges, size_t pos) {
     // check for inverted edges.
     for(auto& i : edges) {
         if(i.right != pos) {
@@ -118,14 +119,13 @@ void node::invert_edges() {
     }
 }
 
-void node::clean_edges() {
+std::vector< voronoi_point> clean_edges(const std::vector< voronoi_edge >& input_edges,
+                                        size_t pos) {
     // the goal is to connect all edges, and then provide
     // all the outer points
-    if(edges.empty()) return;
+    std::vector< voronoi_edge > edges = input_edges;
 
-    invert_edges();
-
-    std::vector< voronoi_edge > old_edges = edges; // for debugging only
+    invert_edges(edges, pos);
 
     std::sort(edges.begin(), edges.end());
 
@@ -150,28 +150,10 @@ void node::clean_edges() {
     }
     // allright, we have connected them now
     // now we collect the starting points
+    std::vector< voronoi_point > outer_points;
     for(auto i : new_edges) {
         voronoi_point temp_point = i.start;
         outer_points.push_back(temp_point);
     }
-    edges = new_edges;
-    // done!
-}
-
-float node::calc_distance(const node& other) {
-    float squared_distance = (x_ - other.x_) * (x_ - other.x_) +
-                             (y_ - other.y_) * (y_ - other.y_);
-    float dist = sqrtf(squared_distance);
-    return dist;
-}
-
-void node::check_distances(float max_dist) {
-
-    for(auto i : neighbors) {
-      float dist = calc_distance(*i);
-      if(dist > max_dist) {
-          std::cout << "distance between neighbors is way too far!\n";
-          return;
-      }
-    }
+    return outer_points;
 }
