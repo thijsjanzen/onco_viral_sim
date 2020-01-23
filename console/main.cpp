@@ -94,7 +94,10 @@ std::string do_analysis(Param all_parameters) {
 
   std::cout << "initializing grid\n";
   simulation Simulation(all_parameters);
-  Simulation.initialize_network();
+
+  std::vector< std::vector< voronoi_point > > filler;
+
+  Simulation.initialize_network(filler);
   std::cout << "starting simulation\n";
   Simulation.t = 0.f;
   float prev_t = Simulation.t;
