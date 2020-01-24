@@ -18,9 +18,13 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    std::stringstream s;
+    s << "Welcome to this In Silico Simulation of oncolytic tumor virotherapy\n";
+    s << "Copyright 2019 - 2020 D. Bhatt, T. Janzen & F.J. Weissing\n";
+    s << "This is version: 0.5\n";
+    ui->text->appendPlainText(QString::fromStdString(s.str()));
+
     // put the simulation as a unique_ptr
-
-
     update_parameters(all_parameters);
 
     ui->line_plot->addGraph(); // normal
@@ -313,7 +317,6 @@ std::string get_string(std::string s, float v) {
 }
 
 void MainWindow::print_params(const Param& p) {
-    // TODO
     std::stringstream s;
     s << get_string("Maximum Time", p.maximum_time);
     s << get_string("Cancer time", p.time_adding_cancer);
