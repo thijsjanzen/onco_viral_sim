@@ -14,9 +14,7 @@ std::string do_analysis(Param all_parameters);
 int main(int argc, char *argv[]) {
 
     std::cout << "Welcome to this In Silico Simulation of oncolytic tumor virotherapy\n";
-    std::cout << "Copyright D. Bhatt\n";
-    std::cout << "Coding by Dr. T. Janzen\n";
-    std::cout << "Supervision: Prof. Dr. F.J. Weissing\n";
+    std::cout << "Copyright 2019 - 2020, D. Bhatt, T. Janzen & F.J. Weissing\n";
     std::cout << "This is version: 0.5\n";
 
 
