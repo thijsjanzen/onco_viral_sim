@@ -150,7 +150,7 @@ public:
   }
 
   float get_total_sum() const {
-    return total_sum; //std::accumulate(row_sum.begin(), row_sum.end(), 0.f);
+    return total_sum;
   }
 
   void update_all() {
@@ -158,7 +158,9 @@ public:
       auto start = values.begin() + row * bin_size;
       auto end = start + bin_size;
       row_sum[row] = std::accumulate(start, end, 0.f);
+      if(row_sum[row] < 0.f) row_sum[row] = 0.f;
     }
+    total_sum = std::accumulate(row_sum.begin(), row_sum.end(), 0.f);
   }
 
   float get_value(size_t pos) const {
