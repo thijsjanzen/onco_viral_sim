@@ -17,8 +17,6 @@ int main(int argc, char *argv[]) {
     std::cout << "Copyright 2019 - 2020, D. Bhatt, T. Janzen & F.J. Weissing\n";
     std::cout << "This is version: 0.5\n";
 
-
-
     std::cout << "All files are to be found in this folder: \n";
     std::cout << argv[0] << "\n";
 
@@ -74,13 +72,25 @@ int main(int argc, char *argv[]) {
    //           << outcome << "\n";
 
 
-   std::string outcome = do_analysis(all_parameters);
+  /*std::string outcome = do_analysis(all_parameters);
    std::ofstream outfile("output.txt", std::ios::app);
    outfile << all_parameters.birth_infected << "\t"
            << all_parameters.death_infected << "\t"
            << outcome << "\n";
-   outfile.close();
+   outfile.close();*/
 
+
+    for(double lambda = 0.1; lambda < 1; lambda += 0.1) {
+             for(double delta = 0.1; delta < 1;  delta += 0.1) {
+                   all_parameters.birth_infected = static_cast<float>(lambda);
+                   all_parameters.death_infected = static_cast<float>(delta);
+                   std::string outcome = do_analysis(all_parameters);
+                   std::ofstream outfile("output.txt", std::ios::app);
+                   outfile << all_parameters.birth_infected << "\t" <<
+                              all_parameters.death_infected << "\t" << outcome << "\n";
+                   outfile.close();
+         }
+    }
 
     return 0;
 }
@@ -111,12 +121,13 @@ std::string do_analysis(Param all_parameters) {
 
   if(all_parameters.start_setup == converge) {
       std::cout << "simulating until having reached equilibrium with normal cells\n";
-      obtain_equilibrium(Simulation, all_parameters); // this obtains a fully grown grid, with normal cells
+      Simulation.obtain_equilibrium(); // this obtains a fully grown grid, with normal cells
   }
 
   Simulation.t = 0.f;
   bool cancer_added = false;
   bool virus_added = false;
+  int update_freq  = 1;
   while(Simulation.t < all_parameters.maximum_time) {
           Simulation.update_one_step();
 
@@ -137,17 +148,24 @@ std::string do_analysis(Param all_parameters) {
              virus_added = true;
           }
 
-          if(static_cast<int>(Simulation.t) - static_cast<int>(prev_t) == 1) {
-            std::cout << Simulation.t << "\t" << cell_counts[normal] << "\t" << cell_counts[cancer] << "\t" << cell_counts[infected] << "\n";
-            cell_counts = Simulation.count_cell_types();
-            if(cell_counts[cancer] < 1 && cancer_added == true && cell_counts[infected] < 1) {
-                std::cout << "Simulation stopped because the cancer is gone\n";
-                break; // stop if cancer is extinct
+          if(static_cast<int>(Simulation.t) - static_cast<int>(prev_t) == 1) { // the simulation passed the full hour mark
+            int check_t = static_cast<int>(Simulation.t);
+            if(check_t % update_freq == 0) {
+
+              std::cout << static_cast<int>(Simulation.t) << "\t" << cell_counts[normal] << "\t" << cell_counts[cancer] << "\t" << cell_counts[infected] << "\n";
+              cell_counts = Simulation.count_cell_types();
+              if(cell_counts[cancer] < 1 && cancer_added == true && cell_counts[infected] < 1) {
+                  std::cout << "Simulation stopped because the cancer is gone\n";
+                  break; // stop if cancer is extinct
+              }
+              if(cell_counts[normal] < 1 && cell_counts[infected] < 1 && virus_added == true) {
+                  std::cout << "Simulation stopped because cancer has taken over\n";
+                  break; // stop if normal and virus are extinct
+              }
             }
-            if(cell_counts[normal] < 1 && cell_counts[infected] < 1 && virus_added == true) {
-                std::cout << "Simulation stopped because cancer has taken over\n";
-                break; // stop if normal and virus are extinct
-            }
+            if(Simulation.t > 100) update_freq = 10;
+            if(Simulation.t > 1000) update_freq = 100;
+            if(Simulation.t > 5000) update_freq = 1000;
           }
           prev_t = Simulation.t;
   }
@@ -162,37 +180,7 @@ std::string do_analysis(Param all_parameters) {
   return outcome;
 }
 
-void obtain_equilibrium(simulation& Simulation, const Param& all_parameters) {
 
-  std::vector< float > densities(10, 0);
-  float prev_t = Simulation.t;
-  std::array<int, 5> cell_counts = Simulation.count_cell_types();
-  int count = 0;
-  while(Simulation.t < all_parameters.maximum_time) {
-      Simulation.update_one_step();
-
-      if(static_cast<int>(Simulation.t) - static_cast<int>(prev_t) == 10) {
-           cell_counts = Simulation.count_cell_types();
-           densities[count % 10] = cell_counts[normal];
-           count++;
-           if(count / 10 > 1) {
-               float sum_first_half = 0.f;
-               float sum_second_half = 0.f;
-               for(size_t i = 0; i < 5; ++i) {
-                   sum_first_half  += densities[i ];
-                   sum_second_half += densities[i + 5];
-               }
-               std::cout << Simulation.t << "\t" << sum_first_half * 0.2f
-                         << "\t" << sum_second_half * 0.2f << "\n";
-               if(sum_first_half >= sum_second_half) {
-                   break;
-               }
-           }
-           prev_t = Simulation.t;
-      }
-  }
-  return;
-}
 
 
 
@@ -214,7 +202,7 @@ std::string get_outcome(const std::array<int, 5>& cell_counts) {
       return "A";
   }
 
-  if(freq[normal] <= 1e-6f && freq[cancer] >= (1-1e-6f) && freq[infected] <= 1e-6f) {
+  if(freq[normal] <= 1e-6f     && freq[cancer] >= (1-1e-6f) && freq[infected] <= 1e-6f) {
       return "B";
   }
 
@@ -228,13 +216,12 @@ void read_parameters_from_ini(Param& p, const std::string file_name) {
 
   ConfigFile from_config(file_name);
 
-
   p.maximum_time = from_config.getValueOfKey<int>("maximum_time");
   p.time_adding_cancer = from_config.getValueOfKey<int>("time_adding_cancer");
   p.time_adding_virus = from_config.getValueOfKey<int>("time_adding_virus");
 
-  p.initial_number_cancer_cells = from_config.getValueOfKey<int>("initial_number_cancer_cells");
-  p.initial_number_normal_cells = from_config.getValueOfKey<int>("initial_number_normal_cells");
+  p.initial_number_cancer_cells = from_config.getValueOfKey<size_t>("initial_number_cancer_cells");
+  p.initial_number_normal_cells = from_config.getValueOfKey<size_t>("initial_number_normal_cells");
 
   p.birth_normal = from_config.getValueOfKey<float>("birth_normal");
   p.death_normal = from_config.getValueOfKey<float>("death_normal");

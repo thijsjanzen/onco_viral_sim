@@ -28,6 +28,12 @@ void simulation::update_one_step() {
         }
     }
 
+    if(dt < 0.f) {
+        int a = 5;
+    }
+
+   // assert(dt > 0.f);
+
     size_t event = pick_event(rates, lambda);
     do_event(event);
 
@@ -228,4 +234,36 @@ std::array<int, 5> simulation::count_cell_types() {
   }
   num_cell_types = total_num_cell_types;
   return total_num_cell_types;
+}
+
+void simulation::obtain_equilibrium() {
+
+  std::vector< float > densities(10, 0);
+  float prev_t = t;
+  std::array<int, 5> cell_counts = count_cell_types();
+  int count = 0;
+  while(t < parameters.maximum_time) {
+      update_one_step();
+
+      if(static_cast<int>(t) - static_cast<int>(prev_t) == 10) {
+           cell_counts = count_cell_types();
+           densities[count % 10] = cell_counts[normal];
+           count++;
+           if(count / 10 > 1) {
+               float sum_first_half = 0.f;
+               float sum_second_half = 0.f;
+               for(size_t i = 0; i < 5; ++i) {
+                   sum_first_half  += densities[i ];
+                   sum_second_half += densities[i + 5];
+               }
+               std::cout << t << "\t" << sum_first_half * 0.2f
+                         << "\t" << sum_second_half * 0.2f << "\n";
+               if(sum_first_half >= sum_second_half) {
+                   break;
+               }
+           }
+           prev_t = t;
+      }
+  }
+  return;
 }

@@ -86,7 +86,7 @@ void simulation::initialize_network(std::vector< std::vector< voronoi_point > >&
       setup_voronoi(all_polys);
   }
 
-  if(parameters.start_setup == grow) {
+  if(parameters.start_setup == grow || parameters.start_setup == converge) {
     add_cells(normal);
     //for(auto& i : world) {
     for(size_t i = 0; i < num_cells; ++i) {

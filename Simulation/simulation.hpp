@@ -46,6 +46,8 @@ public:
   std::array<int, 5> count_cell_types();
 
   void add_cells(const cell_type& focal_cell_type);
+
+  void obtain_equilibrium();
 private:
 
 
