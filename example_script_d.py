@@ -8,11 +8,11 @@ for virus_birth in numpy.arange(0.1, 0.5, 0.1): # from 1 to 5, in steps of 1, pl
 			DIRNAME = "data_b_" + str(virus_birth) + "_d_" + str(virus_death)
 			os.mkdir(DIRNAME)
 
-			source = 'testmodel.out'
-			destination = './' + DIRNAME + '/testmodel.out'
+			source = 'onco_model'
+			destination = './' + DIRNAME + '/onco_model'
 			shutil.copyfile(source, destination)
 			os.chdir(DIRNAME)
-			os.popen('chmod 777 testmodel.out')    										# this gives administrator rights
+			os.popen('chmod 777 onco_model')    										# this gives administrator rights
 
 			c=open("config.ini",'w')													# the config file!!
 			c.write('maximum_time = 1000\n')
@@ -61,5 +61,5 @@ for virus_birth in numpy.arange(0.1, 0.5, 0.1): # from 1 to 5, in steps of 1, pl
 			f.write('#SBATCH -e slurm.%j.err # STDERR\n')
 			f.write('module load GCC/8.3.0\n')
 			f.write('cd ' + DIRNAME + '\n')
-			f.write('./testmodel.out')
+			f.write('./onco_model')
 			f.close();
