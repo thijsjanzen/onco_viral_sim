@@ -16,7 +16,8 @@ for virus_birth in numpy.arange(0.1, 0.5, 0.1): # from 1 to 5, in steps of 1, pl
 
 			c=open("config.ini",'w')													# the config file!!
 			c.write('maximum_time = 1000\n')
-			c.write('time_adding_virus = 168\n')										# 7 days of 24 hours = 168 hours, following Berg et al.
+      c.write('time_adding_cancer = 1000\n')                    # this parameter is not used
+			c.write('time_adding_virus = 1000\n')										# 7 days of 24 hours = 168 hours, following Berg et al.
 			c.write('initial_number_cancer_cells = 500\n')								# following Berg et al.
 			c.write('initial_number_normal_cells = 500\n')
 			
@@ -41,8 +42,7 @@ for virus_birth in numpy.arange(0.1, 0.5, 0.1): # from 1 to 5, in steps of 1, pl
 			c.write('freq_resistant = 0.0\n')											# This is our own addition, not used by Berg et al.
 			c.write('distance_infection_upon_death = 0\n')								# This is our own addition, not used by Berg et al.
 			c.write('prob_infection_upon_death = 0\n')									# This is our own addition, not used by Berg et al.
-			c.write('time_adding_cancer = 1000\n')										# this parameter is not used
-			
+
 			
 			os.chdir('../')
 

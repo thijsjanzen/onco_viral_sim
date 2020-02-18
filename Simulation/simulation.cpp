@@ -118,7 +118,7 @@ void simulation::implement_death(const cell_type& parent) {
     update_growth_prob(i->pos);
   }
 
-  if(parent == infected) {
+  if(parent == infected && parameters.prob_infection_upon_death > 0.f) {
       infect_long_distance(position_of_dying_cell);
   }
 }
@@ -148,6 +148,7 @@ void simulation::implement_growth(const cell_type& parent) {
 
 void simulation::ask_infect_neighbours(int depth, float p, size_t pos) {
     if(p < 1e-6f) return;
+    if(std::isnan(p)) return;
     if(depth > 1) {
         depth--;
         for(const auto& n : world[pos].neighbors) {

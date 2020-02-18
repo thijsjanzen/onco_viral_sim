@@ -132,6 +132,11 @@ void simulation::add_cells(const cell_type& focal_cell_type) {
   if (focal_cell_type == cancer  ) to_be_replaced = normal;
   if (focal_cell_type == infected) to_be_replaced = cancer;
 
+  count_cell_types();
+  if(num_cell_types[to_be_replaced] == 0) {
+      return;
+  }
+
   size_t focal_pos = find_central_cell(to_be_replaced);
 
   std::vector<size_t> cells_turned(1, focal_pos);
