@@ -31,7 +31,7 @@ for virus_birth in numpy.arange(0.1, 0.5, 0.1): # from 1 to 5, in steps of 1, pl
 			c.write('death_infected = ' + str(virus_death) + '\n')
 
 			c.write('percent_infected = 0.1\n')											# please verify if Berg et al. also used this value!
-			c.write('sq_num_cells = 1000\n')												# for testing purposes, 100 should be better
+			c.write('sq_num_cells = 250\n')												# for testing purposes, 100 should be better
 			c.write('infection_type = center_infection\n')								# please verify with Berg et al that they used this (I think so)
 			c.write('start_setup = converge\n')											# this is a new start setup, that follows Berg et al's approach more closely
 
