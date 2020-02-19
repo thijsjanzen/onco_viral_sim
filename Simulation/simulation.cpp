@@ -248,6 +248,7 @@ void simulation::obtain_equilibrium() {
 
       if(static_cast<int>(t) - static_cast<int>(prev_t) == 10) {
            cell_counts = count_cell_types();
+           auto density_normal = 1.f * cell_counts[normal] / (sq_size * sq_size);
            densities[count % 10] = cell_counts[normal];
            count++;
            if(count / 10 > 1) {
@@ -258,8 +259,14 @@ void simulation::obtain_equilibrium() {
                    sum_second_half += densities[i + 5];
                }
                std::cout << t << "\t" << sum_first_half * 0.2f
-                         << "\t" << sum_second_half * 0.2f << "\n";
-               if(sum_first_half >= sum_second_half) {
+                         << "\t"      << sum_second_half * 0.2f << "\n";
+
+               std::ofstream logfile("equilibrium_log.txt", std::ios::app);
+               logfile << t << "\t" << sum_first_half * 0.2f
+                             << "\t"      << sum_second_half * 0.2f << "\n";
+               logfile.close();
+
+               if(sum_first_half >= sum_second_half && density_normal > 0.5) {
                    break;
                }
            }

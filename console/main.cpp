@@ -1,5 +1,5 @@
 #include <cstring>
-
+#include <chrono>
 
 #include "../Simulation/node.hpp"
 #include "../Simulation/simulation.hpp"
@@ -72,14 +72,14 @@ int main(int argc, char *argv[]) {
    //           << outcome << "\n";
 
 
-  /*std::string outcome = do_analysis(all_parameters);
-   std::ofstream outfile("output.txt", std::ios::app);
-   outfile << all_parameters.birth_infected << "\t"
+  std::string outcome = do_analysis(all_parameters);
+  std::ofstream outfile("output.txt", std::ios::app);
+  outfile << all_parameters.birth_infected << "\t"
            << all_parameters.death_infected << "\t"
            << outcome << "\n";
-   outfile.close();*/
+  outfile.close();
 
-
+/*
     for(double lambda = 0.1; lambda < 1; lambda += 0.1) {
              for(double delta = 0.1; delta < 1;  delta += 0.1) {
                    all_parameters.birth_infected = static_cast<float>(lambda);
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
                               all_parameters.death_infected << "\t" << outcome << "\n";
                    outfile.close();
          }
-    }
+    }*/
 
     return 0;
 }
@@ -128,6 +128,10 @@ std::string do_analysis(Param all_parameters) {
   bool cancer_added = false;
   bool virus_added = false;
   int update_freq  = 1;
+
+  auto prev_timepoint = std::chrono::steady_clock::now();
+  auto start_t = prev_timepoint;
+
   while(Simulation.t < all_parameters.maximum_time) {
           Simulation.update_one_step();
 
@@ -141,18 +145,35 @@ std::string do_analysis(Param all_parameters) {
           }
           if(prev_t < all_parameters.time_adding_virus &&
              Simulation.t >= all_parameters.time_adding_virus &&
-             virus_added == false) {
+             virus_added == false &&
+             cancer_added  == true) {
               std::cout << "adding virus!\n";
              Simulation.add_cells(infected);
              Simulation.t = 0.f;
              virus_added = true;
           }
 
-          if(static_cast<int>(Simulation.t) - static_cast<int>(prev_t) == 1) { // the simulation passed the full hour mark
-            int check_t = static_cast<int>(Simulation.t);
-            if(check_t % update_freq == 0) {
+          auto next_t = std::chrono::steady_clock::now();
 
-              std::cout << static_cast<int>(Simulation.t) << "\t" << cell_counts[normal] << "\t" << cell_counts[cancer] << "\t" << cell_counts[infected] << "\n";
+          auto diff_t = std::chrono::duration_cast<std::chrono::seconds>(next_t - prev_timepoint).count();
+
+          if(diff_t > 10) {
+         // if(static_cast<int>(Simulation.t) - static_cast<int>(prev_t) == 1) { // the simulation passed the full hour mark
+            int check_t = static_cast<int>(Simulation.t);
+           // if(check_t % update_freq == 0) {
+
+            auto total_t = std::chrono::duration_cast<std::chrono::seconds>(next_t - start_t).count();
+
+              std::cout << static_cast<int>(Simulation.t) << "\t" << cell_counts[normal] << "\t"
+                        << cell_counts[cancer] << "\t" << cell_counts[infected] << "\t" <<
+                           "total time spent: " << total_t << " seconds\n";
+
+              std::ofstream logfile("logfile.txt", std::ios::app);
+              logfile << static_cast<int>(Simulation.t) << "\t" << cell_counts[normal] << "\t"
+                                 << cell_counts[cancer] << "\t" << cell_counts[infected] << "\t" <<
+                                    "total time spent: " << total_t << " seconds\n";
+              logfile.close();
+
               cell_counts = Simulation.count_cell_types();
               if(cell_counts[cancer] < 1 && cancer_added == true && cell_counts[infected] < 1) {
                   std::cout << "Simulation stopped because the cancer is gone\n";
@@ -162,11 +183,13 @@ std::string do_analysis(Param all_parameters) {
                   std::cout << "Simulation stopped because cancer has taken over\n";
                   break; // stop if normal and virus are extinct
               }
+
+              prev_timepoint = next_t;
             }
-            if(Simulation.t > 100) update_freq = 10;
-            if(Simulation.t > 1000) update_freq = 100;
-            if(Simulation.t > 5000) update_freq = 1000;
-          }
+          //  if(Simulation.t > 100) update_freq = 10;
+           // if(Simulation.t > 1000) update_freq = 100;
+           // if(Simulation.t > 5000) update_freq = 1000;
+
           prev_t = Simulation.t;
   }
 
@@ -179,11 +202,6 @@ std::string do_analysis(Param all_parameters) {
 
   return outcome;
 }
-
-
-
-
-
 
 
 std::string get_outcome(const std::array<int, 5>& cell_counts) {
