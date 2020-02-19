@@ -146,6 +146,11 @@ void simulation::add_cells(const cell_type& focal_cell_type) {
   auto max_number_of_cells = static_cast<size_t>(parameters.initial_number_cancer_cells);
   if (focal_cell_type == normal) max_number_of_cells = parameters.initial_number_normal_cells;
   if (max_number_of_cells > world.size()) max_number_of_cells = world.size();
+
+  if(parameters.start_setup == converge) {
+      max_number_of_cells = world.size() * 0.9;
+  }
+
   size_t counter = 0;
   while (cells_turned.size() < max_number_of_cells) {
     focal_pos = cells_turned[counter];
