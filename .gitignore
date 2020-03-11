@@ -8,3 +8,6 @@
 *.o
 *.stash
 *.out
+cancer_gui.pro
+build_mac/Makefile
+build_mac/console
