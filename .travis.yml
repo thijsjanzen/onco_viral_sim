@@ -9,6 +9,9 @@ install:
  # Codecov
  - sudo pip install codecov
  
+ # cppcheck
+ - sudo apt-get install -qq cppcheck
+ 
  # OCLint
  # - chmod +x ci/install_oclint 
  # - ./ci/install_oclint
