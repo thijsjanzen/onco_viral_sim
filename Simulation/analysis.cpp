@@ -50,7 +50,7 @@ std::string do_analysis(Param all_parameters) {
              virus_added == false &&
              cancer_added  == true) {
               std::cout << "adding virus!\n";
-             Simulation.add_cells(infected);
+             Simulation.add_infected();
              Simulation.t = 0.f;
              virus_added = true;
           }
@@ -61,7 +61,7 @@ std::string do_analysis(Param all_parameters) {
 
           int cast_t = static_cast<int>(Simulation.t);
 
-          if((cast_t - prev_cast_t) >= 100) {
+          if((cast_t - prev_cast_t) >= 1) {
               prev_cast_t = cast_t;
 
             cell_counts = Simulation.num_cell_types;

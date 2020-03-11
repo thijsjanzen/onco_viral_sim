@@ -6,6 +6,63 @@
 #include "../Simulation/analysis.hpp"
 
 
+
+BOOST_AUTO_TEST_CASE( infect_all )
+{
+  std::cout << "simulation with growth\n";
+  std::cout << "testing INFECT ALL\n";
+  std::cout << "using random infection\n";
+
+  Param all_parameters;
+  all_parameters.sq_num_cells = 100;
+  all_parameters.use_voronoi_grid = false;
+  all_parameters.infection_type = random_infection;
+  all_parameters.percent_infected = 1.f;
+
+  // GROW SETUP
+  all_parameters.start_setup = grow;
+  all_parameters.maximum_time = 2000;
+  all_parameters.time_adding_cancer = 500;
+  all_parameters.time_adding_virus = 2;
+
+  all_parameters.initial_number_normal_cells = 5000;
+  all_parameters.initial_number_cancer_cells = 100;
+  all_parameters.birth_cancer = 0.6f;
+
+  std::string outcome = do_analysis(all_parameters);
+  BOOST_CHECK_EQUAL(outcome, "A");
+
+  all_parameters.use_voronoi_grid = true;
+  outcome = do_analysis(all_parameters);
+  BOOST_CHECK_EQUAL(outcome, "A");
+}
+
+BOOST_AUTO_TEST_CASE( infect_center )
+{
+  std::cout << "simulation with growth\n";
+  std::cout << "testing INFECT CENTER\n";
+
+  Param all_parameters;
+  all_parameters.sq_num_cells = 100;
+  all_parameters.use_voronoi_grid = false;
+  all_parameters.infection_type = center_infection;
+
+  // GROW SETUP
+  all_parameters.start_setup = grow;
+  all_parameters.maximum_time = 2000;
+  all_parameters.time_adding_cancer = 500;
+  all_parameters.time_adding_virus = 2;
+
+  std::string outcome = do_analysis(all_parameters);
+  BOOST_CHECK_EQUAL(outcome, "C");
+
+  all_parameters.use_voronoi_grid = true;
+  outcome = do_analysis(all_parameters);
+  BOOST_CHECK_EQUAL(outcome, "C");
+}
+
+
+
 BOOST_AUTO_TEST_CASE( test_converge )
 {
   std::cout << "simulation with convergence\n";
@@ -22,7 +79,7 @@ BOOST_AUTO_TEST_CASE( test_converge )
 
   all_parameters.maximum_time = 10000;
   all_parameters.time_adding_cancer = 1000;
-  all_parameters.time_adding_virus = 2000;
+  all_parameters.time_adding_virus = 500;
 
 
   all_parameters.use_voronoi_grid = true;
@@ -50,7 +107,7 @@ BOOST_AUTO_TEST_CASE( infect_random )
   all_parameters.start_setup = grow;
   all_parameters.maximum_time = 2000;
   all_parameters.time_adding_cancer = 500;
-  all_parameters.time_adding_virus = 100;
+  all_parameters.time_adding_virus = 600;
 
   std::string outcome = do_analysis(all_parameters);
   BOOST_CHECK_EQUAL(outcome, "C");

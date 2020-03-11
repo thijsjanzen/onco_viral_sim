@@ -31,7 +31,7 @@ void simulation::update_one_step() {
     size_t event = pick_event(rates, lambda);
     do_event(event);
 
-    if(parameters.start_setup == grow) {
+    /*if(parameters.start_setup == grow) {
         if(t < parameters.time_adding_cancer &&
            t+dt >= parameters.time_adding_cancer) {
           add_cells(cancer);
@@ -41,14 +41,14 @@ void simulation::update_one_step() {
            t+dt >= parameters.time_adding_virus) {
           add_infected();
         }
-    }
+    }*/
 
     // check if the distributions are not getting close to zero,
     // in that case, some numerical irregularities might pop up
     // check only every hour:
     int delta_t = static_cast<int>(t + dt) - static_cast<int>(t);
     if (delta_t > 0) {
-      for(int i = 0; i < 4; ++i) {
+      for(size_t i = 0; i < 4; ++i) {
         if (num_cell_types[i] < 100 &&
             growth_prob[i].get_total_sum() != 0.f) {
           growth_prob[i].update_all();
@@ -279,14 +279,6 @@ void simulation::obtain_equilibrium() {
 }
 
 void simulation::update_count(cell_type old_type, cell_type new_type) {
-
-  if(old_type == empty && new_type == normal) {
-      if(num_cell_types[normal] == 0) {
-          int a = 5;
-        }
-    }
-
-
   num_cell_types[old_type]--;
   num_cell_types[new_type]++;
 }
