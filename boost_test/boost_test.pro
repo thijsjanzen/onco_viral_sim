@@ -2,8 +2,11 @@ TEMPLATE = app
 CONFIG -= qt
 CONFIG -= app_bundle
 CONFIG += console
-CONFIG += c++17
 
+
+
+CONFIG += c++17
+QMAKE_CXXFLAGS += -std=c++17
 
 BOOST_INCLUDE_DIR="/usr/local/Cellar/boost/1.70.0/include"
 !isEmpty(BOOST_INCLUDE_DIR): INCLUDEPATH *= $${BOOST_INCLUDE_DIR}
