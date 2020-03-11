@@ -1,12 +1,12 @@
 language: cpp
 dist: xenial
 compiler: gcc
- 
-# addons:
-# apt:
-#  packages:
-#   - libboost-all-dev 
- 
+
+addons:
+ apt:
+  packages:
+   - libboost-all-dev
+
 install:
  # Qt5
  # - sudo apt-get install -qq qt5-qmake qt5-default
@@ -22,7 +22,7 @@ install:
  # - ./ci/install_oclint
  
 script:
- - make
+ # - make
   
   # Build and run and profile normal program
  # - qmake ./console/console.pro
