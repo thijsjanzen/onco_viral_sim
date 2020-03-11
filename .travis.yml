@@ -2,36 +2,29 @@ language: cpp
 dist: bionic
 compiler: gcc
  
-addons:
- apt:
-  packages:
-   - libboost-all-dev
-
 install:
-
  # Qt5
- - sudo apt-get install -qq qt5-qmake qt5-default
-  
- # cppcheck
- - sudo apt-get install -qq cppcheck
-  
+ # - sudo apt-get install -qq qt5-qmake qt5-default
+    
  # Codecov
  - sudo pip install codecov
  
- # OCLint
- - chmod +x ci/install_oclint 
- - ./ci/install_oclint
+ # cppcheck
+ - sudo apt-get install -qq cppcheck
  
+ # OCLint
+  - chmod +x ci/install_oclint 
+  - ./ci/install_oclint
  
 script:
-  - make
+ - make
   
   # Build and run and profile normal program
- - qmake ./console/console.pro
- - make --silent release
- - time ./console
- - gprof ./console > gprof.log
- - head gprof.log -n 1000
+ # - qmake ./console/console.pro
+#  - make --silent release
+ # - time ./console
+ # - gprof ./console > gprof.log
+ # - head gprof.log -n 1000
   
   # Get code coverage
  - chmod +x ci/get_code_cov 
@@ -39,16 +32,13 @@ script:
  - codecov
   
  # cppcheck
- - cppcheck --quiet --error-exitcode=0 . 
+  # - cppcheck --quiet --error-exitcode=0 . 
   
  # Call OCLint
- - chmod +x ci/do_oclint 
- - ./ci/do_oclint
+ # - chmod +x ci/do_oclint 
+ # - ./ci/do_oclint
  
- after_success:
+after_success:
  
  # Codecov
  - bash <(curl -s https://codecov.io/bash)
- 
- 
-  
