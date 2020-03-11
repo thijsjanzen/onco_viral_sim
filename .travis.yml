@@ -1,6 +1,11 @@
 language: cpp
-dist: bionic
+dist: xenial
 compiler: gcc
+ 
+# addons:
+# apt:
+#  packages:
+#   - libboost-all-dev 
  
 install:
  # Qt5
@@ -10,11 +15,11 @@ install:
  - sudo pip install codecov
  
  # cppcheck
- - sudo apt-get install -qq cppcheck
+ # - sudo apt-get install -qq cppcheck
  
  # OCLint
-  - chmod +x ci/install_oclint 
-  - ./ci/install_oclint
+ # - chmod +x ci/install_oclint 
+ # - ./ci/install_oclint
  
 script:
  - make
