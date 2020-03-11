@@ -16,21 +16,33 @@ BOOST_AUTO_TEST_CASE( check_if_dead )
   all_parameters.use_voronoi_grid = false;
   all_parameters.birth_infected = 0.f;
   all_parameters.birth_cancer = 0.f;
+
+  // FULL SETUP
   all_parameters.start_setup = full;
 
   std::string outcome = do_analysis(all_parameters);
   BOOST_CHECK_EQUAL(outcome, "A");
+
+  all_parameters.use_voronoi_grid = true;
+  outcome = do_analysis(all_parameters);
+  BOOST_CHECK_EQUAL(outcome, "A");
 }
 
-BOOST_AUTO_TEST_CASE( check_if_dead_voronoi )
+BOOST_AUTO_TEST_CASE( check_grow )
 {
   Param all_parameters;
   all_parameters.sq_num_cells = 100;
-  all_parameters.use_voronoi_grid = true;
+  all_parameters.use_voronoi_grid = false;
   all_parameters.birth_infected = 0.f;
   all_parameters.birth_cancer = 0.f;
-  all_parameters.start_setup = full;
+
+  // GROW SETUP
+  all_parameters.start_setup = grow;
 
   std::string outcome = do_analysis(all_parameters);
+  BOOST_CHECK_EQUAL(outcome, "A");
+
+  all_parameters.use_voronoi_grid = true;
+  outcome = do_analysis(all_parameters);
   BOOST_CHECK_EQUAL(outcome, "A");
 }

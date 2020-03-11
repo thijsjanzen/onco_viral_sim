@@ -77,6 +77,8 @@ struct Param {
 
       start_setup = other.start_setup;
 
+      use_voronoi_grid = other.use_voronoi_grid;
+
       sq_num_cells = other.sq_num_cells;
       sq_num_pixels = other.sq_num_pixels;
     }
@@ -113,6 +115,7 @@ struct Param {
 
     sq_num_cells = 100;
     sq_num_pixels = 100;
+
     use_voronoi_grid = false;
   }
 };

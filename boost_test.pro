@@ -39,10 +39,8 @@ QMAKE_LFLAGS += --coverage
 
 
 CONFIG(debug, debug|release) {
-
   # gcov
   QMAKE_CXXFLAGS += -fprofile-arcs -ftest-coverage
- # LIBS += -lgcov
 }
 
 
