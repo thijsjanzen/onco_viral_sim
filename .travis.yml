@@ -3,7 +3,6 @@ dist: bionic
 compiler: gcc
  
 install:
-
  # Qt5
  - sudo apt-get install -qq qt5-qmake qt5-default
     
@@ -14,13 +13,12 @@ install:
  - chmod +x ci/install_oclint 
  - ./ci/install_oclint
  
- 
 script:
   # - make
   
   # Build and run and profile normal program
- - qmake ./console/console.pro
- - make --silent release
+ # - qmake ./console/console.pro
+ # - make --silent release
  # - time ./console
  # - gprof ./console > gprof.log
  # - head gprof.log -n 1000
