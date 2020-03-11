@@ -9,6 +9,7 @@ addons:
 
 install:
  # Qt5
+ # is this necessary?
  # - sudo apt-get install -qq qt5-qmake qt5-default
     
  # Codecov
