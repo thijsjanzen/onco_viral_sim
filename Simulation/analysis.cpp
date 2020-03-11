@@ -1,8 +1,5 @@
 #include "analysis.hpp"
-
 #include <fstream>
-
-
 
 std::string do_analysis(Param all_parameters) {
 
@@ -35,6 +32,8 @@ std::string do_analysis(Param all_parameters) {
   auto prev_timepoint = std::chrono::steady_clock::now();
   auto start_t = prev_timepoint;
 
+  float prev_cast_t = static_cast<int>(Simulation.t);
+
   while(Simulation.t < all_parameters.maximum_time) {
           Simulation.update_one_step();
 
@@ -60,43 +59,64 @@ std::string do_analysis(Param all_parameters) {
 
           auto diff_t = std::chrono::duration_cast<std::chrono::seconds>(next_t - prev_timepoint).count();
 
-          if(diff_t > 3) {
+          int cast_t = static_cast<int>(Simulation.t);
+
+          if((cast_t - prev_cast_t) >= 100) {
+              prev_cast_t = cast_t;
+
             cell_counts = Simulation.num_cell_types;
 
             auto total_t = std::chrono::duration_cast<std::chrono::seconds>(next_t - start_t).count();
 
-              std::cout << static_cast<int>(Simulation.t) << "\t" << cell_counts[normal] << "\t"
-                        << cell_counts[cancer] << "\t" << cell_counts[infected] << "\t" <<
+              std::cout << static_cast<int>(Simulation.t) << "\t" <<
+                           Simulation.num_cell_types[normal] << "\t" <<
+                           Simulation.num_cell_types[cancer] << "\t" <<
+                           Simulation.num_cell_types[infected] << "\t" <<
+                           Simulation.num_cell_types[resistant] << "\t" <<
                            "total time spent: " << total_t << " seconds\n";
 
               std::ofstream logfile("logfile.txt", std::ios::app);
-              logfile << static_cast<int>(Simulation.t) << "\t" << cell_counts[normal] << "\t"
-                                 << cell_counts[cancer] << "\t" << cell_counts[infected] << "\t" <<
-                                    "total time spent: " << total_t << " seconds\n";
+              logfile << static_cast<int>(Simulation.t) << "\t" <<
+                         Simulation.num_cell_types[normal] << "\t" <<
+                         Simulation.num_cell_types[cancer] << "\t" <<
+                         Simulation.num_cell_types[infected] << "\t" <<
+                         Simulation.num_cell_types[resistant] << "\t" <<
+                         "total time spent: " << total_t << " seconds\n";
               logfile.close();
 
-             // cell_counts = Simulation.count_cell_types();
-
-              for(int i = 0; i < 5; ++i) {
-                if(Simulation.num_cell_types[i] != cell_counts[i]) {
-                    std::cout << "wrong count!\n";
-                  }
-              }
-
-              if(cell_counts[cancer] < 1 && cancer_added == true && cell_counts[infected] < 1) {
+          /*    if(cell_counts[cancer] < 1 && cancer_added == true && cell_counts[infected] < 1) {
                   std::cout << "Simulation stopped because the cancer is gone\n";
                   break; // stop if cancer is extinct
               }
               if(cell_counts[normal] < 1 && cell_counts[infected] < 1 && virus_added == true) {
                   std::cout << "Simulation stopped because cancer has taken over\n";
                   break; // stop if normal and virus are extinct
+              }*/
+
+              if(all_parameters.start_setup == grow) {
+
+                if(Simulation.num_cell_types[cancer] < 1 && virus_added == true) {
+                    std::cout << "cancer eradicated\n";
+                    break;
+                }
+                if(Simulation.num_cell_types[normal] < 1) {
+                    std::cout << "normal tissue gone\n";
+                    break;
+                }
               }
+              if(all_parameters.start_setup == full) {
+                  if(Simulation.num_cell_types[cancer] < 1) {
+                      std::cout << "cancer eradicated";
+                      break;
+                  }
+                  if(Simulation.num_cell_types[normal] < 1) {
+                      std::cout << "normal tissue gone\n";
+                      break;
+                  }
+               }
 
               prev_timepoint = next_t;
             }
-          //  if(Simulation.t > 100) update_freq = 10;
-           // if(Simulation.t > 1000) update_freq = 100;
-           // if(Simulation.t > 5000) update_freq = 1000;
 
           prev_t = Simulation.t;
   }
@@ -116,20 +136,31 @@ std::string get_outcome(const std::array<size_t, 5>& cell_counts) {
   freq[normal] = cell_counts[normal];
   freq[cancer] = cell_counts[cancer];
   freq[infected] = cell_counts[infected];
-  float total_num_cells = cell_counts[normal] + cell_counts[cancer] + cell_counts[infected];
+  freq[resistant] = cell_counts[resistant];
+  float total_num_cells = cell_counts[normal] + cell_counts[cancer] + cell_counts[infected] + cell_counts[resistant];
   // we want to know:
   // A: tumor eradication, e.g. only normal cells remain
   // B: tumor victory, e.g. only tumor cells remain
   // C: co-existence of the three populations
-  for(size_t i = 0; i < 3; ++i) freq[i] *= 1.0f / total_num_cells;
+  for(size_t i = 0; i < 4; ++i) freq[i] *= 1.0f / total_num_cells;
 
-  if(freq[normal] >= (1-1e-6f) && freq[cancer] <= 1e-6f && freq[infected] <= 1e-6f) {
-      return "A";
+  if(freq[resistant] < 1e-6f) {
+
+   /* if(freq[normal] >= (1-1e-6f) && freq[cancer] <= 1e-6f && freq[infected] <= 1e-6f) {
+        return "A";
+    }*/
+    if(freq[cancer] <= 1e-6f) {
+        return "A";
+    }
+
+    if(freq[normal] <= 1e-6f     && freq[cancer] >= (1-1e-6f) && freq[infected] <= 1e-6f) {
+        return "B";
+    }
+
+    return "C";
   }
 
-  if(freq[normal] <= 1e-6f     && freq[cancer] >= (1-1e-6f) && freq[infected] <= 1e-6f) {
-      return "B";
-  }
+  return "D";
 
-  return "C";
+
 }
