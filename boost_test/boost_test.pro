@@ -28,4 +28,14 @@ HEADERS += \
     ../Simulation/simulation.hpp \
     ../Simulation/voronoi.hpp
 
+CONFIG += debug_and_release
+
+CONFIG(debug, debug|release) {
+
+  # gcov
+  QMAKE_CXXFLAGS += -fprofile-arcs -ftest-coverage
+  LIBS += -lgcov
+}
+
+
 #  LIBS += -lboost_unit_test_framework
