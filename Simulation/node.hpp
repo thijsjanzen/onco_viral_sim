@@ -96,8 +96,8 @@ struct node {
   float y_;
 
   float inv_num_neighbors;
-
   float prob_normal_infected;
+
   std::vector< node* > neighbors;
 
   void check_distances(float max_val);

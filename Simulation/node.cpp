@@ -26,8 +26,8 @@ node::node(size_t p, float norm_infected) :
 
 node::node(size_t p, float norm_infected, float x, float y) :
     pos(p),
-    prob_normal_infected(norm_infected),
-    x_(x), y_(y) {
+    x_(x), y_(y),
+    prob_normal_infected(norm_infected) {
     node_type = empty;
 }
 

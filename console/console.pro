@@ -20,6 +20,7 @@ HEADERS += \
     ../Simulation/random_thijs.hpp \
     ../Simulation/rndutils.hpp \
     ../Simulation/simulation.hpp \
+    ../Simulation/voronoi.hpp \
     config_parser.h
 
 DISTFILES += \
