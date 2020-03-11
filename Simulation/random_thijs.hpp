@@ -148,7 +148,7 @@ public:
     if(total_sum < 0.f) total_sum = 0.f;
 
     if(row_sum[row] < 0.f) row_sum[row] = 0.f;
-    assert(row_sum[row] >= 0.f);
+   // assert(row_sum[row] >= 0.f);
     assert(total_sum >= 0.f);
   }
 
