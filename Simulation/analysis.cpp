@@ -61,7 +61,7 @@ std::string do_analysis(Param all_parameters) {
 
           int cast_t = static_cast<int>(Simulation.t);
 
-          if((cast_t - prev_cast_t) >= 1) {
+          if((cast_t - prev_cast_t) >= 100) {
               prev_cast_t = cast_t;
 
             cell_counts = Simulation.num_cell_types;
