@@ -88,8 +88,6 @@ struct node {
   const node& operator=(const node&) = delete;
 
   node();
-  node(size_t p, float norm_infection_rate);
-  node(size_t p, float norm_infected, float x_, float y_);
 
   size_t pos;
   float x_;

@@ -299,6 +299,7 @@ std::array<size_t, 5> simulation::count_cell_types() const {
   return total_num_cell_types;
 }
 
+/*
 void simulation::check_cell_type_counts() {
   std::array<size_t, 5> manual_count = count_cell_types();
   std::array<size_t, 5> book_keep_count = num_cell_types;
@@ -308,5 +309,6 @@ void simulation::check_cell_type_counts() {
   }
   return;
 }
+*/
 
 
