@@ -32,13 +32,28 @@ void simulation::update_one_step() {
     do_event(event);
 
     if(parameters.start_setup == grow) {
-        if(t < parameters.time_adding_cancer && t+dt >= parameters.time_adding_cancer) {
+        if(t < parameters.time_adding_cancer &&
+           t+dt >= parameters.time_adding_cancer) {
           add_cells(cancer);
         }
 
-        if(t < parameters.time_adding_virus && t+dt >= parameters.time_adding_virus) {
+        if(t < parameters.time_adding_virus &&
+           t+dt >= parameters.time_adding_virus) {
           add_infected();
         }
+    }
+
+    // check if the distributions are not getting close to zero,
+    // in that case, some numerical irregularities might pop up
+    // check only every hour:
+    int delta_t = static_cast<int>(t + dt) - static_cast<int>(t);
+    if (delta_t > 0) {
+      for(int i = 0; i < 4; ++i) {
+        if (num_cell_types[i] < 100 &&
+            growth_prob[i].get_total_sum() != 0.f) {
+          growth_prob[i].update_all();
+        }
+      }
     }
 
     t += dt;
@@ -181,15 +196,22 @@ void simulation::update_death_prob(size_t pos,
 void simulation::update_rates() {
   rates[0] = parameters.birth_normal   * growth_prob[normal].get_total_sum();
   rates[1] = parameters.death_normal   * death_prob[normal].get_total_sum();
+  assert(rates[1] == num_cell_types[normal] * parameters.death_normal);
 
   rates[2] = parameters.birth_cancer   * growth_prob[cancer].get_total_sum();
   rates[3] = parameters.death_cancer   * death_prob[cancer].get_total_sum();
+  assert(rates[3] == num_cell_types[cancer] * parameters.death_cancer);
+
 
   rates[4] = parameters.birth_infected * growth_prob[infected].get_total_sum();
   rates[5] = parameters.death_infected * death_prob[infected].get_total_sum();
+  assert(rates[5] == num_cell_types[infected] * parameters.death_infected);
+
 
   rates[6] = parameters.birth_cancer_resistant * growth_prob[resistant].get_total_sum();
   rates[7] = parameters.death_cancer_resistant * death_prob[resistant].get_total_sum();
+  assert(rates[7] == num_cell_types[resistant] * parameters.death_cancer_resistant);
+
 }
 
 size_t simulation::pick_event(const std::array< float, 8>& rates, float sum) {
@@ -257,6 +279,14 @@ void simulation::obtain_equilibrium() {
 }
 
 void simulation::update_count(cell_type old_type, cell_type new_type) {
+
+  if(old_type == empty && new_type == normal) {
+      if(num_cell_types[normal] == 0) {
+          int a = 5;
+        }
+    }
+
+
   num_cell_types[old_type]--;
   num_cell_types[new_type]++;
 }

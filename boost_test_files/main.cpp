@@ -6,6 +6,36 @@
 #include "../Simulation/analysis.hpp"
 
 
+BOOST_AUTO_TEST_CASE( test_converge )
+{
+  std::cout << "simulation with convergence\n";
+  std::cout << "Using weakened virus, expected tumor win\n";
+
+  Param all_parameters;
+  all_parameters.sq_num_cells = 100;
+  all_parameters.use_voronoi_grid = false;
+  all_parameters.birth_infected = 0.2f;
+  all_parameters.death_infected = 2.0f;
+
+  // GROW SETUP
+  all_parameters.start_setup = converge;
+
+  all_parameters.maximum_time = 10000;
+  all_parameters.time_adding_cancer = 1000;
+  all_parameters.time_adding_virus = 2000;
+
+
+  all_parameters.use_voronoi_grid = true;
+  std::string outcome = do_analysis(all_parameters);
+  BOOST_CHECK_EQUAL(outcome, "B");
+
+  all_parameters.use_voronoi_grid = false;
+  outcome = do_analysis(all_parameters);
+  BOOST_CHECK_EQUAL(outcome, "B");
+}
+
+
+
 BOOST_AUTO_TEST_CASE( infect_random )
 {
   std::cout << "simulation allowing growth from the start\n";
@@ -30,31 +60,7 @@ BOOST_AUTO_TEST_CASE( infect_random )
   BOOST_CHECK_EQUAL(outcome, "C");
 }
 
-BOOST_AUTO_TEST_CASE( test_converge )
-{
-  std::cout << "simulation with convergence\n";
-  std::cout << "Using weakened virus, expected tumor win\n";
 
-  Param all_parameters;
-  all_parameters.sq_num_cells = 100;
-  all_parameters.use_voronoi_grid = false;
-  all_parameters.birth_infected = 0.2f;
-  all_parameters.death_infected = 2.0f;
-
-  // GROW SETUP
-  all_parameters.start_setup = converge;
-
-  all_parameters.maximum_time = 10000;
-  all_parameters.time_adding_cancer = 1000;
-  all_parameters.time_adding_virus = 2000;
-
-  std::string outcome = do_analysis(all_parameters);
-  BOOST_CHECK_EQUAL(outcome, "B");
-
-  all_parameters.use_voronoi_grid = true;
-  outcome = do_analysis(all_parameters);
-  BOOST_CHECK_EQUAL(outcome, "B");
-}
 
 
 // TODO: add tests with long distance infection

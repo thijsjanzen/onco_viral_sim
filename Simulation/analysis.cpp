@@ -84,18 +84,11 @@ std::string do_analysis(Param all_parameters) {
                          "total time spent: " << total_t << " seconds\n";
               logfile.close();
 
-          /*    if(cell_counts[cancer] < 1 && cancer_added == true && cell_counts[infected] < 1) {
-                  std::cout << "Simulation stopped because the cancer is gone\n";
-                  break; // stop if cancer is extinct
-              }
-              if(cell_counts[normal] < 1 && cell_counts[infected] < 1 && virus_added == true) {
-                  std::cout << "Simulation stopped because cancer has taken over\n";
-                  break; // stop if normal and virus are extinct
-              }*/
+              if(all_parameters.start_setup == grow ||
+                 all_parameters.start_setup == converge) {
 
-              if(all_parameters.start_setup == grow) {
-
-                if(Simulation.num_cell_types[cancer] < 1 && virus_added == true) {
+                if(Simulation.num_cell_types[cancer] < 1 &&
+                   virus_added == true) {
                     std::cout << "cancer eradicated\n";
                     break;
                 }
