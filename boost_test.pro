@@ -34,10 +34,14 @@ CONFIG += debug_and_release
 
 TARGET=BOOST_TEST.app
 
+QMAKE_CXXFLAGS += --coverage
+QMAKE_LFLAGS += --coverage
+
+
 CONFIG(debug, debug|release) {
 
   # gcov
- # QMAKE_CXXFLAGS += -fprofile-arcs -ftest-coverage
+  QMAKE_CXXFLAGS += -fprofile-arcs -ftest-coverage
  # LIBS += -lgcov
 }
 

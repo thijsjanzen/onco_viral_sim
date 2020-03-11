@@ -17,3 +17,5 @@ boost_test
 Makefile
 Makefile.Debug
 *.Release
+*.gcda
+*.gcno
