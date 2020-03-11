@@ -99,7 +99,7 @@ std::array<float, 4> node::calc_prob_of_growth() const {
 float node::freq_type_neighbours(const cell_type& ref_type) const {
   int count = 0;
   for(auto i : neighbors) {
-    if(i->node_type == ref_type) count++;
+    if(i->get_cell_type() == ref_type) count++;
   }
   return static_cast<float>(count * inv_num_neighbors);
 }

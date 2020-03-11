@@ -8,7 +8,7 @@
 // forward declaration
 void read_parameters_from_ini(Param& p, const std::string file_name);
 void obtain_equilibrium(simulation& Simulation, const Param& all_parameters);
-std::string get_outcome(const std::array<int, 5>& cell_counts);
+std::string get_outcome(const std::array<size_t, 5>& cell_counts);
 std::string do_analysis(Param all_parameters);
 
 int main(int argc, char *argv[]) {
@@ -75,24 +75,10 @@ int main(int argc, char *argv[]) {
   std::string outcome = do_analysis(all_parameters);
   std::ofstream outfile("output.txt", std::ios::app);
   outfile << all_parameters.birth_infected << "\t"
-           << all_parameters.death_infected << "\t"
-           << outcome << "\n";
+          << all_parameters.death_infected << "\t"
+          << outcome                       << "\n";
   outfile.close();
-
-/*
-    for(double lambda = 0.1; lambda < 1; lambda += 0.1) {
-             for(double delta = 0.1; delta < 1;  delta += 0.1) {
-                   all_parameters.birth_infected = static_cast<float>(lambda);
-                   all_parameters.death_infected = static_cast<float>(delta);
-                   std::string outcome = do_analysis(all_parameters);
-                   std::ofstream outfile("output.txt", std::ios::app);
-                   outfile << all_parameters.birth_infected << "\t" <<
-                              all_parameters.death_infected << "\t" << outcome << "\n";
-                   outfile.close();
-         }
-    }*/
-
-    return 0;
+  return 0;
 }
 
 std::string do_analysis(Param all_parameters) {
@@ -117,7 +103,7 @@ std::string do_analysis(Param all_parameters) {
   std::cout << "starting simulation\n";
   Simulation.t = 0.f;
   float prev_t = Simulation.t;
-  std::array<int, 5> cell_counts;
+  std::array<size_t, 5> cell_counts;
 
   if(all_parameters.start_setup == converge) {
       std::cout << "simulating until having reached equilibrium with normal cells\n";
@@ -127,7 +113,6 @@ std::string do_analysis(Param all_parameters) {
   Simulation.t = 0.f;
   bool cancer_added = false;
   bool virus_added = false;
-  int update_freq  = 1;
 
   auto prev_timepoint = std::chrono::steady_clock::now();
   auto start_t = prev_timepoint;
@@ -157,10 +142,8 @@ std::string do_analysis(Param all_parameters) {
 
           auto diff_t = std::chrono::duration_cast<std::chrono::seconds>(next_t - prev_timepoint).count();
 
-          if(diff_t > 10) {
-         // if(static_cast<int>(Simulation.t) - static_cast<int>(prev_t) == 1) { // the simulation passed the full hour mark
-            int check_t = static_cast<int>(Simulation.t);
-           // if(check_t % update_freq == 0) {
+          if(diff_t > 3) {
+            cell_counts = Simulation.num_cell_types;
 
             auto total_t = std::chrono::duration_cast<std::chrono::seconds>(next_t - start_t).count();
 
@@ -174,7 +157,14 @@ std::string do_analysis(Param all_parameters) {
                                     "total time spent: " << total_t << " seconds\n";
               logfile.close();
 
-              cell_counts = Simulation.count_cell_types();
+             // cell_counts = Simulation.count_cell_types();
+
+              for(int i = 0; i < 5; ++i) {
+                if(Simulation.num_cell_types[i] != cell_counts[i]) {
+                    std::cout << "wrong count!\n";
+                  }
+              }
+
               if(cell_counts[cancer] < 1 && cancer_added == true && cell_counts[infected] < 1) {
                   std::cout << "Simulation stopped because the cancer is gone\n";
                   break; // stop if cancer is extinct
@@ -204,7 +194,7 @@ std::string do_analysis(Param all_parameters) {
 }
 
 
-std::string get_outcome(const std::array<int, 5>& cell_counts) {
+std::string get_outcome(const std::array<size_t, 5>& cell_counts) {
   std::array<float, 4> freq = {0.f, 0.f, 0.f, 0.f};
   freq[normal] = cell_counts[normal];
   freq[cancer] = cell_counts[cancer];
