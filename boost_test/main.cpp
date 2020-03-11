@@ -9,16 +9,27 @@
 
 
 
-BOOST_AUTO_TEST_CASE( Verification_of_function )
+BOOST_AUTO_TEST_CASE( check_if_dead )
 {
-  //BOOST_TEST( true /* test assertion */ );
   Param all_parameters;
   all_parameters.sq_num_cells = 100;
   all_parameters.use_voronoi_grid = false;
   all_parameters.birth_infected = 0.f;
   all_parameters.birth_cancer = 0.f;
+  all_parameters.start_setup = full;
 
+  std::string outcome = do_analysis(all_parameters);
+  BOOST_CHECK_EQUAL(outcome, "A");
+}
 
+BOOST_AUTO_TEST_CASE( check_if_dead_voronoi )
+{
+  Param all_parameters;
+  all_parameters.sq_num_cells = 100;
+  all_parameters.use_voronoi_grid = true;
+  all_parameters.birth_infected = 0.f;
+  all_parameters.birth_cancer = 0.f;
+  all_parameters.start_setup = full;
 
   std::string outcome = do_analysis(all_parameters);
   BOOST_CHECK_EQUAL(outcome, "A");

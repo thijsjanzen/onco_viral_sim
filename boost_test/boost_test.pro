@@ -27,3 +27,5 @@ HEADERS += \
     ../Simulation/rndutils.hpp \
     ../Simulation/simulation.hpp \
     ../Simulation/voronoi.hpp
+
+#  LIBS += -lboost_unit_test_framework

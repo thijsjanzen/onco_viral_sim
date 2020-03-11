@@ -12,11 +12,6 @@ std::string do_analysis(Param all_parameters) {
   // Seven days later, five percent of cancer cells at the center of the tumor were infected.
   // Simulations were allowed to run until either the tumor populations died out or a time of 1,000 days was reached, which ever occurred first
 
-  all_parameters.initial_number_cancer_cells = 500;
-  all_parameters.percent_infected = 0.05f;
-  all_parameters.time_adding_virus = 7 * 24; // 7 days of 24 hours after adding cancer
-  all_parameters.maximum_time = 1000 * 24; // 1000 days of 24 hours.
-
   std::cout << "initializing grid\n";
   simulation Simulation(all_parameters);
 
