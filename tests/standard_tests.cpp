@@ -7,9 +7,6 @@
 #include <cassert>
 
   // Test the analysis module
-
-
-
 BOOST_AUTO_TEST_CASE(virus_no_birth)
 {
   std::clog << "Testing zero variance partitioning...\n";
