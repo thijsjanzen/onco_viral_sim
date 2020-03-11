@@ -40,8 +40,6 @@ public:
   void add_infected(); // has to be public to allow for interaction by pressing
                        // a button
 
-  void set_infection_type(const infection_routine& infect_type);
-  void set_percent_infected(const float& percent);
   std::array<size_t, 5> num_cell_types;
   std::array<size_t, 5> count_cell_types() const;
   void check_cell_type_counts();
@@ -63,7 +61,6 @@ private:
 
   size_t pick_event(const std::array< float, 8>& rates, float sum);
   void do_event(size_t event);
-  void update_growth_probabilities();
   void implement_death(const cell_type& parent);
   void implement_growth(const cell_type& parent);
   void update_growth_prob(size_t pos);
@@ -100,7 +97,6 @@ private:
 
   void ask_infect_neighbours(size_t depth, float p, size_t pos);
   void update_count(cell_type old_type, cell_type new_type);
-
 };
 
 

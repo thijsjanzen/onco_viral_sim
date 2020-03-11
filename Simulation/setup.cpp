@@ -108,26 +108,6 @@ void simulation::initialize_network(std::vector< std::vector< voronoi_point > >&
   }
 }
 
-// initialization routines:
-void simulation::update_growth_probabilities() {
-
-  for(const auto& i : world) {
-    std::array<float, 4> probs = i.calc_prob_of_growth();
-
-    size_t pos = i.pos;
-
-    growth_prob[normal].update_entry(pos, probs[normal]);
-    growth_prob[cancer].update_entry(pos, probs[cancer]);
-    growth_prob[infected].update_entry(pos, probs[infected]);
-    growth_prob[resistant].update_entry(pos, probs[resistant]);
-
-    if(i.get_cell_type() != empty) {
-        death_prob[i.get_cell_type()].update_entry(pos, 1.f);
-    }
-
-  }
-}
-
 void simulation::add_cells(const cell_type& focal_cell_type) {
 
   // pick center node:
@@ -379,13 +359,4 @@ void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_
        update_growth_prob(i);
        update_death_prob(i);
    }
-}
-
-
-void simulation::set_infection_type(const infection_routine& infect_type) {
-    parameters.infection_type = infect_type;
-}
-
-void simulation::set_percent_infected(const float& percent) {
-    parameters.percent_infected = percent;
 }
