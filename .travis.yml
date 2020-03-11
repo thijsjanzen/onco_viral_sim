@@ -25,9 +25,9 @@ script:
  # - make
  
  # Build and run the tests
- - qmake ./boost_test/boost_test.pro
+ - qmake ./boost_test.pro
  - make --silent debug
- - travis_wait 60 ./boost_test/boost_test
+ - travis_wait 60 ./BOOST_TEST.app 
   
   # Build and run and profile normal program
  # - qmake ./console/console.pro
