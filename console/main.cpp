@@ -3,6 +3,7 @@
 
 #include "../Simulation/node.hpp"
 #include "../Simulation/simulation.hpp"
+#include "../Simulation/analysis.hpp"
 #include "config_parser.h"
 
 // forward declaration
