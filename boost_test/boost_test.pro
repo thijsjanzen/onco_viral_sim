@@ -3,8 +3,6 @@ CONFIG -= qt
 CONFIG -= app_bundle
 CONFIG += console
 
-
-
 CONFIG += c++17
 QMAKE_CXXFLAGS += -std=c++17
 
