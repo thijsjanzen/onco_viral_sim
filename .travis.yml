@@ -31,11 +31,11 @@ script:
  - travis_wait 60 ./BOOST_TEST.app 
   
   # Build and run and profile normal program
- # - qmake ./console/console.pro
-#  - make --silent release
- # - time ./console
- # - gprof ./console > gprof.log
- # - head gprof.log -n 1000
+  - qmake ./console/console.pro
+  - make --silent release
+  # - time ./console
+  # - gprof ./console > gprof.log
+  # - head gprof.log -n 1000
   
   # Get code coverage
  - chmod +x ci/get_code_cov 
