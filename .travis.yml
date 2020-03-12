@@ -30,7 +30,7 @@ script:
   
   # Build and run and profile normal program
  - qmake ./console/console.pro
- # - make --silent release
+ - make --silent release
  # - time ./console
  # - gprof ./console > gprof.log
  # - head gprof.log -n 1000
