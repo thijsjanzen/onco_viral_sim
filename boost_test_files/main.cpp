@@ -5,6 +5,30 @@
 #include "../Simulation/simulation.hpp"
 #include "../Simulation/analysis.hpp"
 
+BOOST_AUTO_TEST_CASE( infect_random )
+{
+  std::cout << "simulation allowing growth from the start\n";
+  std::cout << "using random infection\n";
+
+  Param all_parameters;
+  all_parameters.sq_num_cells = 100;
+  all_parameters.use_voronoi_grid = false;
+  all_parameters.infection_type = random_infection;
+
+  // GROW SETUP
+  all_parameters.start_setup = grow;
+  all_parameters.maximum_time = 2000;
+  all_parameters.time_adding_cancer = 500;
+  all_parameters.time_adding_virus = 100;
+
+  std::string outcome = do_analysis(all_parameters);
+  BOOST_CHECK_EQUAL(outcome, "C");
+
+  all_parameters.use_voronoi_grid = true;
+  outcome = do_analysis(all_parameters);
+  BOOST_CHECK_EQUAL(outcome, "C");
+}
+
 
 
 BOOST_AUTO_TEST_CASE( infect_all )
@@ -90,35 +114,6 @@ BOOST_AUTO_TEST_CASE( test_converge )
   outcome = do_analysis(all_parameters);
   BOOST_CHECK_EQUAL(outcome, "B");
 }
-
-
-
-BOOST_AUTO_TEST_CASE( infect_random )
-{
-  std::cout << "simulation allowing growth from the start\n";
-  std::cout << "using random infection\n";
-
-  Param all_parameters;
-  all_parameters.sq_num_cells = 100;
-  all_parameters.use_voronoi_grid = false;
-  all_parameters.infection_type = random_infection;
-
-  // GROW SETUP
-  all_parameters.start_setup = grow;
-  all_parameters.maximum_time = 2000;
-  all_parameters.time_adding_cancer = 500;
-  all_parameters.time_adding_virus = 600;
-
-  std::string outcome = do_analysis(all_parameters);
-  BOOST_CHECK_EQUAL(outcome, "C");
-
-  all_parameters.use_voronoi_grid = true;
-  outcome = do_analysis(all_parameters);
-  BOOST_CHECK_EQUAL(outcome, "C");
-}
-
-
-
 
 // TODO: add tests with long distance infection
 BOOST_AUTO_TEST_CASE( long_distance_infection )
