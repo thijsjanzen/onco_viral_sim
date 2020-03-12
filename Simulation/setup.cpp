@@ -197,19 +197,7 @@ void simulation::infect_center() {
     if(to_be_infected == 0) return;
 
     //now find starting cell to infect
-    size_t starting_pos = find_central_cell(cancer);
-    while(world[starting_pos].get_cell_type() != cancer) {
-        for(size_t i = 0; i < world[starting_pos].neighbors.size(); ++i) {
-            if( world[starting_pos].neighbors[i]->get_cell_type() == cancer) {
-                starting_pos = world[starting_pos].neighbors[i]->pos;
-                break;
-            }
-        }
-        size_t rand_index = rndgen.random_number(world[starting_pos].neighbors.size());
-        starting_pos = world[starting_pos].neighbors[rand_index]->pos;
-    }
-
-    size_t focal_pos = starting_pos;
+    size_t focal_pos = find_central_cell(cancer);
     std::vector<size_t> cells_turned(1, focal_pos);
 
     change_cell_type(focal_pos, infected);

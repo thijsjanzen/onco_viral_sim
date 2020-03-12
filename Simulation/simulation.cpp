@@ -23,7 +23,6 @@ void simulation::update_one_step() {
         dt = rndgen.Expon(lambda);
         counter++;
         if(counter > 100) {
-            std::cout << "could not generate non infinite dt\n";
             exit(1);
         }
     }
