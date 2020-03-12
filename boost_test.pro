@@ -19,7 +19,7 @@ SOURCES += \
     ./Simulation/node.cpp \
     ./Simulation/setup.cpp \
     ./Simulation/simulation.cpp \
-    ./boost_test_files/main.cpp
+    ./boost_test_files/test.cpp
 
 HEADERS += \
     ./Simulation/analysis.hpp \
