@@ -16,40 +16,37 @@ install:
  - sudo pip install codecov
  
  # cppcheck
- # - sudo apt-get install -qq cppcheck
+ - sudo apt-get install -qq cppcheck
  
  # OCLint
- # - chmod +x ci/install_oclint 
- # - ./ci/install_oclint
+ - chmod +x ci/install_oclint 
+ - ./ci/install_oclint
  
 script:
- # - make
- 
  # Build and run the tests
  - qmake ./boost_test.pro
  - make --silent debug
  - travis_wait 60 ./BOOST_TEST.app 
   
   # Build and run and profile normal program
- # - qmake ./console/console.pro
-#  - make --silent release
- # - time ./console
- # - gprof ./console > gprof.log
- # - head gprof.log -n 1000
+ - qmake ./console/console.pro
+ - make --silent release
+ - time ./CONSOLE.app
+ - gprof ./CONSOLE.app > gprof.log
+ - head gprof.log -n 1000
   
-  # Get code coverage
+ # Get code coverage
  - chmod +x ci/get_code_cov 
  - ./ci/get_code_cov
  - codecov
   
  # cppcheck
-  # - cppcheck --quiet --error-exitcode=0 . 
+ - cppcheck --quiet --error-exitcode=0 . 
   
  # Call OCLint
- # - chmod +x ci/do_oclint 
- # - ./ci/do_oclint
+ - chmod +x ci/do_oclint 
+ - ./ci/do_oclint
  
-after_success:
- 
- # Codecov
- - bash <(curl -s https://codecov.io/bash)
+after_success: 
+# Codecov
+- bash <(curl -s https://codecov.io/bash)
