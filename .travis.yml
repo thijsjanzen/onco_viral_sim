@@ -31,7 +31,7 @@ script:
  - travis_wait 60 ./BOOST_TEST.app 
   
   # Build and run and profile normal program
-  # - qmake ./console/console.pro
+   - qmake ./console/console.pro
   # - make --silent release
   # - time ./console
   # - gprof ./console > gprof.log
