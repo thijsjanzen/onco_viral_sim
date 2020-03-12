@@ -33,9 +33,9 @@ script:
   # Build and run and profile normal program
   - qmake ./console/console.pro
   - make --silent release
-  # - time ./console
-  # - gprof ./console > gprof.log
-  # - head gprof.log -n 1000
+   - time ./console
+   - gprof ./console > gprof.log
+   - head gprof.log -n 1000
   
   # Get code coverage
  - chmod +x ci/get_code_cov 
