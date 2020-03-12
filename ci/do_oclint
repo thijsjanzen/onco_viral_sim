@@ -3,7 +3,7 @@
 cpp_files=`find . | egrep '\.cpp'`
 h_files=`find . | egrep '\.hpp'`
 
-./oclint-0.10.3/bin/oclint -o oclint.log \
+./oclint-0.13.1/bin/oclint -o oclint.log \
   -disable-rule ShortVariableName \
   $cpp_files \
   $h_files \
