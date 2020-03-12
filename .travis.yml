@@ -19,8 +19,8 @@ install:
   - sudo apt-get install -qq cppcheck
  
  # OCLint
-  - chmod +x ci/install_oclint 
-  - ./ci/install_oclint
+ # - chmod +x ci/install_oclint 
+ # - ./ci/install_oclint
  
 script:
  # - make
@@ -46,8 +46,8 @@ script:
  - cppcheck --quiet --error-exitcode=0 . 
   
  # Call OCLint
-  - chmod +x ci/do_oclint 
-  - ./ci/do_oclint
+ # - chmod +x ci/do_oclint 
+ # - ./ci/do_oclint
  
 after_success:
  
