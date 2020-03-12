@@ -1,14 +1,14 @@
 #!/bin/bash
 
-cpp_files=`ls *.cpp | egrep -v "^.*_test\.cpp$"`
-h_files=`ls *.h`
+cpp_files=`ls *.cpp | egrep -v "^.*\.cpp$"`
+h_files=`ls *.hpp`
 
 ./oclint-0.10.3/bin/oclint -o oclint.log \
   -disable-rule ShortVariableName \
   $cpp_files \
   $h_files \
   -- \
-  -c -std=c++14 \
+  -c -std=c++17 \
   -I/usr/include/c++/5 \
   -I/usr/include/x86_64-linux-gnu/c++/5
 
