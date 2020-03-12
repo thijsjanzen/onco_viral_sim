@@ -154,6 +154,4 @@ std::string get_outcome(const std::array<size_t, 5>& cell_counts) {
   }
 
   return "D";
-
-
 }

@@ -24,7 +24,6 @@ struct ERROR {
     }
 };
 
-
 struct Convert {
     // Convert T, which should be a primitive, to a std::string.
     template <typename T>

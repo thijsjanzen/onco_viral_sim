@@ -4,13 +4,15 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 QMAKE_CXXFLAGS_RELEASE += -O3
+QMAKE_CXXFLAGS += -std=c++17
+
+TARGET=CONSOLE.app
 
 SOURCES += \
         ../Simulation/analysis.cpp \
         ../Simulation/node.cpp \
         ../Simulation/setup.cpp \
         ../Simulation/simulation.cpp \
-        ../tests/standard_tests.cpp \
         main.cpp
 
 HEADERS += \
@@ -26,6 +28,8 @@ HEADERS += \
 DISTFILES += \
     config.ini
 
+
+CONFIG += debug_and_release
 
 # Boost.Test
 LIBS += -lboost_unit_test_framework

@@ -23,7 +23,10 @@ int main(int argc, char *argv[]) {
 
     Param all_parameters;
 
-    read_parameters_from_ini(all_parameters, file_name);
+
+   read_parameters_from_ini(all_parameters, file_name);
+
+
     // Berg et al. varied two parameters:
     // lambda: speed of virus replication
     // varied in [0, 100]
