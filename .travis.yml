@@ -16,7 +16,7 @@ install:
  - sudo pip install codecov
  
  # cppcheck
- # - sudo apt-get install -qq cppcheck
+  - sudo apt-get install -qq cppcheck
  
  # OCLint
   - chmod +x ci/install_oclint 
@@ -43,7 +43,7 @@ script:
  - codecov
   
  # cppcheck
-  # - cppcheck --quiet --error-exitcode=0 . 
+ - cppcheck --quiet --error-exitcode=0 . 
   
  # Call OCLint
   - chmod +x ci/do_oclint 
