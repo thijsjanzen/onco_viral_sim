@@ -1,0 +1,12 @@
+#!/bin/bash
+
+exlude_file="voronoi.cpp"
+
+for filename in $(find . | egrep '\.cpp'); 
+do 
+  if [ $filename == exclude_file]; then
+  	echo "skipping voronoi.cpp"
+  else
+  	gcov -n -o . $filename > /dev/null; 
+  fi
+done

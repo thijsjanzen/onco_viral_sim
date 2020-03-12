@@ -11,7 +11,7 @@
 #include <cmath>
 
 enum infection_routine {random_infection, center_infection};
-enum start_type {full, grow};
+enum start_type {full, grow, converge};
 
 struct Param {
 
@@ -49,8 +49,7 @@ struct Param {
 
   start_type start_setup;
 
-
-    Param(const Param& other) {
+  Param(const Param& other) {
       maximum_time = other.maximum_time;
       time_adding_virus = other.time_adding_virus; // default from Berg et al 2019
       time_adding_cancer = other.time_adding_cancer; // normally the population is first allowed to stabilize
@@ -78,9 +77,12 @@ struct Param {
 
       start_setup = other.start_setup;
 
+      use_voronoi_grid = other.use_voronoi_grid;
+
       sq_num_cells = other.sq_num_cells;
       sq_num_pixels = other.sq_num_pixels;
     }
+
 
   Param() {
     // default values, these don't necessarily make sense!
@@ -88,7 +90,8 @@ struct Param {
     time_adding_virus = 3000; // default from Berg et al 2019
     time_adding_cancer = 1000; // normally the population is first allowed to stabilize
 
-    initial_number_cancer_cells = 5;
+    initial_number_cancer_cells = 500;
+    initial_number_normal_cells = 1000;
 
     birth_normal = 0.5f;
     birth_cancer = 1.0f;
@@ -103,13 +106,16 @@ struct Param {
     infection_type = random_infection;
     percent_infected = 0.1f;
 
-    prob_normal_infection = 0.01f;
-    freq_resistant = 0.01f;
+    prob_normal_infection = 0.0f;
+    freq_resistant = 0.0f;
     distance_infection_upon_death = 1;
     prob_infection_upon_death = 0.f;
 
+    start_setup = converge;
+
     sq_num_cells = 100;
     sq_num_pixels = 100;
+
     use_voronoi_grid = false;
   }
 };

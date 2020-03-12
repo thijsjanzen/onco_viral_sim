@@ -15,6 +15,8 @@ world(param.sq_num_cells * param.sq_num_cells)
   sq_size = parameters.sq_num_cells;
   num_cells = sq_size * sq_size;
 
+  num_cell_types = {0, 0, 0, 0, num_cells}; // all cells are empty
+
   for (size_t i = 0; i < world.size(); ++i) {
     world[i].pos = i;
     world[i].set_coordinates(sq_size);
@@ -35,6 +37,7 @@ world(param.sq_num_cells * param.sq_num_cells)
       long_distance_infection_probability.push_back(local_prob);
       if(local_prob < 1e-3) break;
   }
+
 }
 
 
@@ -44,7 +47,7 @@ size_t simulation::find_central_cell(const cell_type& focal_cell_type) {
     float y = 0.f;
     int counter = 0;
     for(const auto& i : world) {
-        if(i.node_type == focal_cell_type) {
+        if(i.get_cell_type() == focal_cell_type) {
             x += i.x_;
             y += i.y_;
             counter++;
@@ -55,7 +58,7 @@ size_t simulation::find_central_cell(const cell_type& focal_cell_type) {
 
     std::vector< float > dist(world.size(), 1e9);
     for(size_t i = 0; i < world.size(); ++i) {
-        if(world[i].node_type == focal_cell_type) {
+        if(world[i].get_cell_type() == focal_cell_type) {
             dist[i] = (world[i].x_ - x) * (world[i].x_ - x) + (world[i].y_ - y) * (world[i].y_ - y);
         }
     }
@@ -79,14 +82,14 @@ void simulation::initialize_network(std::vector< std::vector< voronoi_point > >&
   if(parameters.use_voronoi_grid == false) {
     for(auto& i : world) {
       i.update_neighbors(world, sq_size);
-      i.node_type = empty;
+      change_cell_type(i.pos, empty);
     }
   }
   if(parameters.use_voronoi_grid == true) {
       setup_voronoi(all_polys);
   }
 
-  if(parameters.start_setup == grow) {
+  if(parameters.start_setup == grow || parameters.start_setup == converge) {
     add_cells(normal);
     //for(auto& i : world) {
     for(size_t i = 0; i < num_cells; ++i) {
@@ -105,26 +108,6 @@ void simulation::initialize_network(std::vector< std::vector< voronoi_point > >&
   }
 }
 
-// initialization routines:
-void simulation::update_growth_probabilities() {
-
-  for(const auto& i : world) {
-    std::array<float, 4> probs = i.calc_prob_of_growth();
-
-    size_t pos = i.pos;
-
-    growth_prob[normal].update_entry(pos, probs[normal]);
-    growth_prob[cancer].update_entry(pos, probs[cancer]);
-    growth_prob[infected].update_entry(pos, probs[infected]);
-    growth_prob[resistant].update_entry(pos, probs[resistant]);
-
-    if(i.node_type != empty) {
-        death_prob[i.node_type].update_entry(pos, 1.f);
-    }
-
-  }
-}
-
 void simulation::add_cells(const cell_type& focal_cell_type) {
 
   // pick center node:
@@ -132,23 +115,33 @@ void simulation::add_cells(const cell_type& focal_cell_type) {
   if (focal_cell_type == cancer  ) to_be_replaced = normal;
   if (focal_cell_type == infected) to_be_replaced = cancer;
 
+  if(num_cell_types[to_be_replaced] == 0) {
+      return;
+  }
+
   size_t focal_pos = find_central_cell(to_be_replaced);
 
   std::vector<size_t> cells_turned(1, focal_pos);
 
-  world[focal_pos].node_type = focal_cell_type;
+  change_cell_type(focal_pos, focal_cell_type);
 
   auto max_number_of_cells = static_cast<size_t>(parameters.initial_number_cancer_cells);
+
   if (focal_cell_type == normal) max_number_of_cells = parameters.initial_number_normal_cells;
+
   if (max_number_of_cells > world.size()) max_number_of_cells = world.size();
+
+  if(parameters.start_setup == converge) {
+      max_number_of_cells = world.size() * 0.9f;
+  }
+
   size_t counter = 0;
   while (cells_turned.size() < max_number_of_cells) {
     focal_pos = cells_turned[counter];
     for (size_t i = 0; i < world[focal_pos].neighbors.size(); ++i) {
       size_t other_pos = world[focal_pos].neighbors[i]->pos;
-      if (world[other_pos].node_type != focal_cell_type) {
-
-        world[other_pos].node_type = focal_cell_type;
+      if (world[other_pos].get_cell_type() != focal_cell_type) {
+        change_cell_type(other_pos, focal_cell_type);
         cells_turned.push_back(other_pos);
         if (cells_turned.size() >= max_number_of_cells) break;
       }
@@ -163,7 +156,6 @@ void simulation::add_cells(const cell_type& focal_cell_type) {
 }
 
 void simulation::infect_random() {
-    count_cell_types();
     int num_cancer_cells = num_cell_types[cancer];
 
     int infected_cells = 0;
@@ -173,7 +165,7 @@ void simulation::infect_random() {
     std::vector< size_t > cancer_pos(num_cancer_cells);
     int j = 0;
     for(const auto& i : world) {
-        if(i.node_type == cancer) {
+        if(i.get_cell_type() == cancer) {
             cancer_pos[j] = static_cast<size_t>(i.pos);
             j++;
         }
@@ -184,7 +176,7 @@ void simulation::infect_random() {
         size_t index = static_cast<size_t>(rndgen.random_number(cancer_pos.size()));
         size_t position_of_infected_cell = cancer_pos[ index ];
 
-        world[position_of_infected_cell].node_type = infected;
+        change_cell_type(position_of_infected_cell, infected);
 
         num_cancer_cells--; // easy count for now.
         infected_cells++;
@@ -199,35 +191,25 @@ void simulation::infect_random() {
 }
 
 void simulation::infect_center() {
-    count_cell_types();
     int num_cancer_cells = num_cell_types[cancer];
 
     size_t to_be_infected = static_cast<size_t>(parameters.percent_infected * num_cancer_cells);
     if(to_be_infected == 0) return;
 
     //now find starting cell to infect
-    size_t starting_pos = find_central_cell(cancer);
-    while(world[starting_pos].node_type != cancer) {
-        for(size_t i = 0; i < world[starting_pos].neighbors.size(); ++i) {
-            if( world[starting_pos].neighbors[i]->node_type == cancer) {
-                starting_pos = world[starting_pos].neighbors[i]->pos;
-                break;
-            }
-        }
-        size_t rand_index = rndgen.random_number(world[starting_pos].neighbors.size());
-        starting_pos = world[starting_pos].neighbors[rand_index]->pos;
-    }
-
-    size_t focal_pos = starting_pos;
+    size_t focal_pos = find_central_cell(cancer);
     std::vector<size_t> cells_turned(1, focal_pos);
-    world[focal_pos].node_type = infected;
+
+    change_cell_type(focal_pos, infected);
+
     size_t counter = 0;
     while(cells_turned.size() < to_be_infected && num_cancer_cells > 0) {
       focal_pos = cells_turned[counter];
       for(size_t i = 0; i < world[focal_pos].neighbors.size(); ++i) {
         size_t other_pos = world[focal_pos].neighbors[i]->pos;
-        if(world[other_pos].node_type == cancer) {
-           world[other_pos].node_type = infected;
+        if(world[other_pos].get_cell_type() == cancer) {
+
+           change_cell_type(other_pos, infected);
            cells_turned.push_back(other_pos);
            num_cancer_cells--;
 
@@ -239,14 +221,15 @@ void simulation::infect_center() {
     }
 
     for(const auto& i : cells_turned) {
-       update_cell(i);
+       update_growth_prob(i);
+       update_death_prob(i);
     }
 }
 
 void simulation::infect_all_cancer() {
     for(auto& i : world) {
-        if(i.node_type == cancer) {
-               i.node_type = infected;
+        if(i.get_cell_type() == cancer) {
+              change_cell_type(i.pos, infected);
         }
     }
 
@@ -277,7 +260,7 @@ void simulation::add_infected() {
 
 void simulation::initialize_full() {
     for(auto& i : world) {
-        i.node_type = normal;
+       change_cell_type(i.pos, normal);
     }
 
     parameters.initial_number_cancer_cells = static_cast<int>(0.1f * world.size());
@@ -343,8 +326,8 @@ void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_
 
    for(auto& i : all_edges) {
        for(const auto& edge : i) {
-           int left = edge.left;
-           int right = edge.right;
+           size_t left  = edge.left;
+           size_t right = edge.right;
 
            if(left >= 0 && right >= 0 &&
               left < world.size() && right < world.size()){
@@ -364,13 +347,4 @@ void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_
        update_growth_prob(i);
        update_death_prob(i);
    }
-}
-
-
-void simulation::set_infection_type(const infection_routine& infect_type) {
-    parameters.infection_type = infect_type;
-}
-
-void simulation::set_percent_infected(const float& percent) {
-    parameters.percent_infected = percent;
 }

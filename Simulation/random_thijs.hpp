@@ -145,8 +145,12 @@ public:
     size_t row = pos / bin_size;
     row_sum[row] += new_val - old_val;
     total_sum += new_val - old_val;
+    if(total_sum < 0.f) total_sum = 0.f;
+
     if(row_sum[row] < 0.f) row_sum[row] = 0.f;
-    assert(row_sum[row] >= 0.f);
+    // the entries below go wrong, once the last cell in the simulation is dead?
+   // assert(row_sum[row] >= 0.f);
+  //  assert(total_sum >= 0.f);
   }
 
   float get_total_sum() const {

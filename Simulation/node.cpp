@@ -16,19 +16,11 @@
 
 node::node() {
   node_type = empty;
-}
-
-node::node(size_t p, float norm_infected) :
-    pos(p),
-    prob_normal_infected(norm_infected) {
-    node_type = empty;
-}
-
-node::node(size_t p, float norm_infected, float x, float y) :
-    pos(p),
-    prob_normal_infected(norm_infected),
-    x_(x), y_(y) {
-    node_type = empty;
+  pos = 0;
+  x_ = 0;
+  y_ = 0;
+  inv_num_neighbors = 0.f;
+  prob_normal_infected = 0.f;
 }
 
 void node::add_neighbor(std::vector< node >& world,
@@ -99,7 +91,7 @@ std::array<float, 4> node::calc_prob_of_growth() const {
 float node::freq_type_neighbours(const cell_type& ref_type) const {
   int count = 0;
   for(auto i : neighbors) {
-    if(i->node_type == ref_type) count++;
+    if(i->get_cell_type() == ref_type) count++;
   }
   return static_cast<float>(count * inv_num_neighbors);
 }

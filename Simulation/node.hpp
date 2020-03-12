@@ -55,8 +55,8 @@ struct voronoi_edge {
 
     voronoi_point start;
     voronoi_point end;
-    int left;
-    int right;
+    size_t left;
+    size_t right;
 
     bool operator<(const voronoi_edge& other) const {
         if(start.x_ == other.start.x_) return start.y_ < other.start.y_;
@@ -81,7 +81,6 @@ std::vector< voronoi_point> clean_edges(const std::vector< voronoi_edge >& input
                                         size_t pos);
 void invert_edges(std::vector< voronoi_edge>& edges, size_t pos);
 
-
 struct node {
   node(node&&) = delete;
   const node& operator=(node&&) = delete;
@@ -89,17 +88,14 @@ struct node {
   const node& operator=(const node&) = delete;
 
   node();
-  node(size_t p, float norm_infection_rate);
-  node(size_t p, float norm_infected, float x_, float y_);
 
-  cell_type node_type;
   size_t pos;
   float x_;
   float y_;
 
   float inv_num_neighbors;
-
   float prob_normal_infected;
+
   std::vector< node* > neighbors;
 
   void check_distances(float max_val);
@@ -119,6 +115,17 @@ struct node {
   float freq_type_neighbours(const cell_type& ref_type) const;
 
   void die();
+
+  cell_type get_cell_type() const {
+    return node_type;
+  }
+
+  void set_cell_type(cell_type new_type) {
+    node_type = new_type;
+  }
+
+private:
+    cell_type node_type;
 };
 
 #endif /* node_hpp */
