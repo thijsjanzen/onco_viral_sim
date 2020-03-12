@@ -19,3 +19,4 @@ Makefile.Debug
 *.Release
 *.gcda
 *.gcno
+*.tmp
