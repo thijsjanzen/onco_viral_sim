@@ -35,7 +35,7 @@ CONFIG(release, debug|release) {
   QMAKE_LFLAGS += -pg
 }
 
-
+TARGET = CONSOLE.app
 
 # Boost.Test
 LIBS += -lboost_unit_test_framework
