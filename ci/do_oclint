@@ -1,7 +1,7 @@
 #!/bin/bash
 
-cpp_files=`ls *.cpp | egrep -v "^.*\.cpp$"`
-h_files=`ls *.hpp`
+cpp_files=`find . | egrep '\.cpp'`
+h_files=`find . | egrep '\.hpp'`
 
 ./oclint-0.10.3/bin/oclint -o oclint.log \
   -disable-rule ShortVariableName \
