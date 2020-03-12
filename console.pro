@@ -6,20 +6,20 @@ CONFIG -= qt
 QMAKE_CXXFLAGS_RELEASE += -O3
 
 SOURCES += \
-        ../Simulation/analysis.cpp \
-        ../Simulation/node.cpp \
-        ../Simulation/setup.cpp \
-        ../Simulation/simulation.cpp \
-        main.cpp
+        ./Simulation/analysis.cpp \
+        ./Simulation/node.cpp \
+        ./Simulation/setup.cpp \
+        ./Simulation/simulation.cpp \
+        ./console/main.cpp
 
 HEADERS += \
-    ../Simulation/analysis.hpp \
-    ../Simulation/node.hpp \
-    ../Simulation/parameters.hpp \
-    ../Simulation/random_thijs.hpp \
-    ../Simulation/rndutils.hpp \
-    ../Simulation/simulation.hpp \
-    ../Simulation/voronoi.hpp \
+    ./Simulation/analysis.hpp \
+    ./Simulation/node.hpp \
+    ./Simulation/parameters.hpp \
+    ./Simulation/random_thijs.hpp \
+    ./Simulation/rndutils.hpp \
+    ./Simulation/simulation.hpp \
+    ./Simulation/voronoi.hpp \
     config_parser.h
 
 DISTFILES += \
