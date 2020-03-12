@@ -4,9 +4,6 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 QMAKE_CXXFLAGS_RELEASE += -O3
-QMAKE_CXXFLAGS += -std=c++17
-
-TARGET=CONSOLE.app
 
 SOURCES += \
         ../Simulation/analysis.cpp \
@@ -28,8 +25,17 @@ HEADERS += \
 DISTFILES += \
     config.ini
 
+# In release mode, turn on profiling
+CONFIG(release, debug|release) {
 
-CONFIG += debug_and_release
+  DEFINES += NDEBUG
+
+  # gprof
+  QMAKE_CXXFLAGS += -pg
+  QMAKE_LFLAGS += -pg
+}
+
+
 
 # Boost.Test
 LIBS += -lboost_unit_test_framework
