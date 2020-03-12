@@ -31,8 +31,8 @@ script:
   # Build and run and profile normal program
  - qmake ./console/console.pro
  - make --silent release
- - time ./console
- - gprof ./console > gprof.log
+ - time ./CONSOLE.app
+ - gprof ./CONSOLE.app > gprof.log
  - head gprof.log -n 1000
   
  # Get code coverage
