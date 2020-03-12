@@ -30,9 +30,10 @@ script:
   # Build and run and profile normal program
  - qmake ./console.pro
  - make --silent release
- - time ./CONSOLE.app
- - gprof ./CONSOLE.app > gprof.log
- - head gprof.log -n 1000
+ # this part doesn't work for now 12/3/2020
+ #- time ./CONSOLE.app
+ #- gprof ./CONSOLE.app > gprof.log
+ #- head gprof.log -n 1000
   
  # Get code coverage
  - chmod +x ci/get_code_cov 
