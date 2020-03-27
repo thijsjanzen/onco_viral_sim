@@ -75,6 +75,9 @@ int main(int argc, char *argv[]) {
   std::ofstream outfile("output.txt", std::ios::app);
   outfile << all_parameters.birth_infected << "\t"
           << all_parameters.death_infected << "\t"
+          << all_parameters.birth_cancer   << "\t"
+          << all_parameters.death_cancer   << "\t"
+          << all_parameters.freq_resistant << "\t"
           << outcome                       << "\n";
   outfile.close();
   return 0;
