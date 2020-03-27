@@ -2,7 +2,7 @@ CFLAGS = -std=c++17 -O3 -Wall -fno-strict-aliasing -ffast-math
 OBJS = main.o simulation.o setup.o node.o analysis.o
 
 all: ${OBJS}
-	g++ ${CFLAGS} ${OBJS} -o testmodel.out
+	g++ ${CFLAGS} ${OBJS} -o onco_model
 
 setup.o: ./Simulation/setup.cpp
 	g++ ${CFLAGS} -c ./Simulation/setup.cpp
@@ -20,4 +20,4 @@ node.o: ./Simulation/node.cpp
 	g++ ${CFLAGS} -c ./Simulation/node.cpp
 
 clean:
-	rm -f testmodel.out ${OBJS}
+	rm -f onco_model ${OBJS}
