@@ -7,6 +7,7 @@
 #include "config_parser.h"
 
 // forward declaration
+bool file_exists (const std::string& name);
 void read_parameters_from_ini(Param& p, const std::string file_name);
 void obtain_equilibrium(simulation& Simulation, const Param& all_parameters);
 
@@ -72,6 +73,21 @@ int main(int argc, char *argv[]) {
 
 
   std::string outcome = do_analysis(all_parameters);
+
+  if(!file_exists("output.txt")) {
+      // write header to file
+      std::ofstream outfile("output.txt");
+      outfile << "birth_virus"      << "\t"
+              << "death_virus"      << "\t"
+              << "birth_cancer"     << "\t"
+              << "death_cancer"     << "\t"
+              << "freq_resistant"   << "\t"
+              << "outcome" << "\n" ;
+       outfile.close();
+   }
+
+
+
   std::ofstream outfile("output.txt", std::ios::app);
   outfile << all_parameters.birth_infected << "\t"
           << all_parameters.death_infected << "\t"
@@ -135,4 +151,9 @@ void read_parameters_from_ini(Param& p, const std::string file_name) {
     p.use_voronoi_grid = true;
 
   return;
+}
+
+bool file_exists (const std::string& name) {
+    std::ifstream f(name.c_str());
+    return f.good();
 }
