@@ -43,6 +43,7 @@ std::string do_analysis(Param all_parameters) {
               std::cout << "adding cancer!\n";
               Simulation.add_cells(cancer);
               Simulation.t = 0.f; // reset time
+              prev_cast_t = static_cast<int>(Simulation.t);
               cancer_added = true;
           }
           if(prev_t < all_parameters.time_adding_virus &&
@@ -52,16 +53,17 @@ std::string do_analysis(Param all_parameters) {
               std::cout << "adding virus!\n";
              Simulation.add_infected();
              Simulation.t = 0.f;
+             prev_cast_t = static_cast<int>(Simulation.t);
              virus_added = true;
           }
 
           auto next_t = std::chrono::steady_clock::now();
 
-          auto diff_t = std::chrono::duration_cast<std::chrono::seconds>(next_t - prev_timepoint).count();
+          // auto diff_t = std::chrono::duration_cast<std::chrono::seconds>(next_t - prev_timepoint).count();
 
           int cast_t = static_cast<int>(Simulation.t);
 
-          if((cast_t - prev_cast_t) >= 100) {
+          if((cast_t - prev_cast_t) >= 10) {
               prev_cast_t = cast_t;
 
             cell_counts = Simulation.num_cell_types;
@@ -92,10 +94,10 @@ std::string do_analysis(Param all_parameters) {
                     std::cout << "cancer eradicated\n";
                     break;
                 }
-                if(Simulation.num_cell_types[normal] < 1) {
-                    std::cout << "normal tissue gone\n";
-                    break;
-                }
+               // if(Simulation.num_cell_types[normal] < 1 && virus_added == true) {
+               //     std::cout << "normal tissue gone\n";
+               //     break;
+               // }
               }
               if(all_parameters.start_setup == full) {
                   if(Simulation.num_cell_types[cancer] < 1) {
