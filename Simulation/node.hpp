@@ -14,7 +14,7 @@
 #include <memory>
 #include <cmath>
 
-enum cell_type {normal, cancer, infected, resistant, empty};
+enum cell_type {normal, cancer, infected, resistant, empty, max_num};
 
 typedef struct node node;
 

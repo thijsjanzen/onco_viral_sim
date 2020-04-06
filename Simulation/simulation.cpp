@@ -30,7 +30,7 @@ void simulation::update_one_step() {
     size_t event = pick_event(rates, lambda);
     do_event(event);
 
-    /*if(parameters.start_setup == grow) {
+    if(parameters.start_setup == grow) {
         if(t < parameters.time_adding_cancer &&
            t+dt >= parameters.time_adding_cancer) {
           add_cells(cancer);
@@ -40,7 +40,7 @@ void simulation::update_one_step() {
            t+dt >= parameters.time_adding_virus) {
           add_infected();
         }
-    }*/
+    }
 
     // check if the distributions are not getting close to zero,
     // in that case, some numerical irregularities might pop up
@@ -289,6 +289,21 @@ std::array<size_t, 5> simulation::count_cell_types() const {
   }
   return total_num_cell_types;
 }
+
+std::array<size_t, 5> simulation::get_count_cell_types() const {
+  return num_cell_types;
+}
+
+
+
+void simulation::set_percent_infected(float percent_infected) {
+  parameters.percent_infected = percent_infected;
+}
+void simulation::set_infection_type(infection_routine infect_routine) {
+  parameters.infection_type = infect_routine;
+}
+
+
 
 /*
 void simulation::check_cell_type_counts() {

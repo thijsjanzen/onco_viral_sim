@@ -116,7 +116,7 @@ void MainWindow::display_regular() {
 
       for(size_t index = start; index < end; ++index) {
           size_t local_index = index - start;
-          row[local_index] = colorz[ sim->world[index].node_type ].rgb();
+          row[local_index] = colorz[ sim->world[index].get_cell_type() ].rgb();
       }
   }
 }
@@ -128,7 +128,7 @@ void MainWindow::display_voronoi(size_t sq_size) {
 
   //for(const auto& i: sim->world) {
   for(int i = 0; i < sim->num_cells; ++i) {
-      QBrush brush(colorz[sim->world[i].node_type]); // Qt::SolidPattern by default.
+      QBrush brush(colorz[sim->world[i].get_cell_type()]); // Qt::SolidPattern by default.
 
       QPainterPath path;
       path.addPolygon(polygons[i]);
@@ -489,7 +489,7 @@ void MainWindow::setup_simulation() {
     }
 
     update_plot(static_cast<double>(sim->t),
-                sim->count_cell_types());
+                sim->get_count_cell_types());
 
     is_paused = true;
 
@@ -530,7 +530,8 @@ void MainWindow::on_btn_start_clicked()
             }
 
             update_plot(static_cast<double>(sim->t),
-                        sim->count_cell_types());
+                        sim->get_count_cell_types());
+                        //sim->count_cell_types());
             QApplication::processEvents();
         }
         if(!is_running) break;
@@ -550,7 +551,8 @@ void MainWindow::on_btn_start_clicked()
     std::cout << time_taken<< "\n";
 }
 
-void MainWindow::update_plot(double t, const std::array<int, 5>& cell_numbers) {
+void MainWindow::update_plot(double t,
+                             const std::array<size_t, 5>& cell_numbers) {
     x_t.append(t);
     y_n.append(cell_numbers[0]);
     y_c.append(cell_numbers[1]);

@@ -37,18 +37,21 @@ public:
   std::array< binned_distribution, 4 > growth_prob;
   std::array< binned_distribution, 4 > death_prob;
 
+  void set_percent_infected(float);
+  void set_infection_type(infection_routine infect_routine);
   void add_infected(); // has to be public to allow for interaction by pressing
                        // a button
 
-  std::array<size_t, 5> num_cell_types;
   std::array<size_t, 5> count_cell_types() const;
   void check_cell_type_counts();
+  std::array<size_t, 5> get_count_cell_types() const;
 
   void add_cells(const cell_type& focal_cell_type);
 
   void obtain_equilibrium();
 
 private:
+  std::array<size_t, 5> num_cell_types;
 
   Param parameters;
 
