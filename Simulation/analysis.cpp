@@ -1,7 +1,7 @@
 #include "analysis.hpp"
 #include <fstream>
 
-std::string do_analysis(Param all_parameters) {
+std::array<size_t, 5> do_analysis(Param all_parameters) {
 
   // simulation procedure was as follows:
   // A completely normal population was simulated until the population stabilized
@@ -121,9 +121,7 @@ std::string do_analysis(Param all_parameters) {
   // B: tumor victory, e.g. only tumor cells remain
   // C: co-existence of the three populations
   cell_counts = Simulation.count_cell_types();
-  std::string outcome = get_outcome(cell_counts);
-
-  return outcome;
+  return cell_counts;
 }
 
 std::string get_outcome(const std::array<size_t, 5>& cell_counts) {
@@ -137,6 +135,7 @@ std::string get_outcome(const std::array<size_t, 5>& cell_counts) {
   // A: tumor eradication, e.g. only normal cells remain
   // B: tumor victory, e.g. only tumor cells remain
   // C: co-existence of the three populations
+  // D: tumor & resistant cells remain, no virus or normal cells.
   for(size_t i = 0; i < 4; ++i) freq[i] *= 1.0f / total_num_cells;
 
   if(freq[resistant] < 1e-6f) {
@@ -153,9 +152,13 @@ std::string get_outcome(const std::array<size_t, 5>& cell_counts) {
     }
 
     return "C";
+  } else {
+    // frequency resistant is non-zero
+    if(freq[infected] < 1e-6f) {
+        return "D";
+    } else {
+        return "C";
+    }
   }
-
-  return "D";
-
 
 }
