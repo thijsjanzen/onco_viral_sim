@@ -42,13 +42,13 @@ struct voronoi_point {
 
     bool operator==(const voronoi_point& other) const {
         // explicitly, this doesn't keep track of left and right!
-        if(fabs(x_ - other.x_) > 1e-3f) return false;
-        if(fabs(y_ - other.y_) > 1e-3f) return false;
+        if(fabs(x_ - other.x_) > 1e-6f) return false;
+        if(fabs(y_ - other.y_) > 1e-6f) return false;
         return true;
     }
 
     bool operator<(const voronoi_point& other) const {
-        if(fabs(x_ - other.x_) < 1e-3f) return y_ < other.y_;
+        if(fabs(x_ - other.x_) < 1e-6f) return y_ < other.y_;
         return x_ < other.x_;
     }
 
@@ -59,7 +59,7 @@ struct voronoi_point {
 
 struct voronoi_edge {
     voronoi_edge(voronoi_point s, voronoi_point e,
-                 int l, int r) : start(s), end(e), left(l), right(r) {}
+                 size_t l, size_t r) : start(s), end(e), left(l), right(r) {}
 
     voronoi_point start;
     voronoi_point end;
@@ -67,37 +67,34 @@ struct voronoi_edge {
     size_t right;
 
     voronoi_edge& operator=(const voronoi_edge& other) {
-      left = other.left;
+      left  = other.left;
       right = other.right;
       start = other.start;
-      end = other.end;
+      end   = other.end;
       return *this;
     }
 
-
     voronoi_edge(const voronoi_edge& other) {
-      left = other.left;
+      left  = other.left;
       right = other.right;
       start = other.start;
-      end = other.end;
+      end   = other.end;
     }
 
-
-
     bool operator<(const voronoi_edge& other) const {
-      //  if(start.x_ == other.start.x_)
-       if( fabs(start.x_ - other.start.x_) < 1e-3f) {
+      // if(start.x_ == other.start.x_)
+      if( fabs(start.x_ - other.start.x_) < 1e-6f) {
              return start.y_ < other.start.y_;
-       }
-       return start.x_ < other.start.x_;
+      }
+      return start.x_ < other.start.x_;
     }
 
     bool operator==(const voronoi_edge& other) const {
         // explicitly, this doesn't keep track of left and right!
-        if(fabs(start.x_ - other.start.x_) > 1e-3f) return false;
-        if(fabs(start.y_ - other.start.y_) > 1e-3f) return false;
-        if(fabs(end.x_ - other.end.x_) > 1e-3f) return false;
-        if(fabs(end.y_ - other.end.y_) > 1e-3f) return false;
+        if(fabs(start.x_ - other.start.x_) > 1e-6f) return false;
+        if(fabs(start.y_ - other.start.y_) > 1e-6f) return false;
+        if(fabs(end.x_ - other.end.x_) > 1e-6f) return false;
+        if(fabs(end.y_ - other.end.y_) > 1e-6f) return false;
         return true;
     }
 
