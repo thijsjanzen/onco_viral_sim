@@ -84,9 +84,7 @@ struct voronoi_edge {
     }
 
     bool operator<(const voronoi_edge& other) const {
-      if(start.x_ == other.start.x_)
-             return start.y_ < other.start.y_;
-      return start.x_ < other.start.x_;
+      return start < other.start;
     }
 
     bool operator==(const voronoi_edge& other) const {
