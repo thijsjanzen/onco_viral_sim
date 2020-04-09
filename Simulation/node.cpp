@@ -135,6 +135,10 @@ std::vector< voronoi_point> clean_edges(const std::vector< voronoi_edge >& input
                 break;
             }
         }
+        if(match == 1e6) {
+            std::cout << "could not connect all edges\n";
+            break;
+        }
         focal_edge = edges[match];
         edges[match] = edges.back();
         edges.pop_back();
