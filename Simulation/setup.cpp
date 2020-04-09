@@ -338,8 +338,8 @@ void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_
    }
 
    std::cout << "implementing all edges\n";
-   for(auto& i : all_edges) {
-       for(const auto& edge : i) {
+   for(auto i : all_edges) {
+       for(auto edge : i) {
            size_t left  = edge.left;
            size_t right = edge.right;
 
