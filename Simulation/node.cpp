@@ -123,6 +123,11 @@ std::vector< voronoi_point> clean_edges(const std::vector< voronoi_edge >& input
 
     std::vector< voronoi_edge > new_edges;
 
+
+
+
+
+
     voronoi_edge focal_edge = edges.back();
     new_edges.push_back(focal_edge);
     edges.pop_back();
