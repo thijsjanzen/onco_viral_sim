@@ -1,4 +1,4 @@
-CFLAGS = -std=c++17 -O3 -Wall -fno-strict-aliasing -ffast-math
+CFLAGS = -std=c++17 -O3 -Wall 
 OBJS = main.o simulation.o setup.o node.o analysis.o
 
 all: ${OBJS}
