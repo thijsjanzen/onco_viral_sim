@@ -77,19 +77,24 @@ struct voronoi_edge {
         return !(*this == other);
     }
 
-    void check() const {
+    bool check() const {
       if(std::isnan(start.x_)) {
           std::cout << "start.x_ isnan\n";
+          return false;
       }
       if(std::isnan(start.y_)) {
           std::cout << "start.y_ isnan\n";
+          return false;
       }
       if(std::isnan(end.x_)) {
           std::cout << "end.x_ isnan\n";
+          return false;
       }
       if(std::isnan(end.y_)) {
           std::cout << "end.y_ isnan\n";
+          return false;
       }
+      return true;
     }
 };
 
