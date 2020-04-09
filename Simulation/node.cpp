@@ -122,14 +122,6 @@ std::vector< voronoi_point> clean_edges(const std::vector< voronoi_edge >& input
     // the goal is to connect all edges, and then provide
     // all the outer points
     std::vector< voronoi_edge > edges = input_edges;
-    for(auto i : edges) {
-      i.check();
-    }
-    for(auto i : input_edges) {
-        i.check();
-    }
-    std::cout << "checks done\n";
-
     invert_edges(edges, pos);
 
     std::vector< voronoi_edge > new_edges;
@@ -141,7 +133,6 @@ std::vector< voronoi_point> clean_edges(const std::vector< voronoi_edge >& input
     static bool created_output = false;
 
     while(!edges.empty()) {
-        focal_edge.check();
         size_t match = 1e6; // should give out of bounds access if failure.
         for(size_t i = 0; i < edges.size(); ++i) {
             if(edges[i].start == focal_edge.end) {
