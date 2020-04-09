@@ -10,6 +10,7 @@
 #include <array>
 #include <cmath>
 #include <array>
+#include <fstream>
 
 #include "node.hpp"
 #include "random_thijs.hpp"
@@ -123,14 +124,12 @@ std::vector< voronoi_point> clean_edges(const std::vector< voronoi_edge >& input
 
     std::vector< voronoi_edge > new_edges;
 
-
-
-
-
-
     voronoi_edge focal_edge = edges.back();
     new_edges.push_back(focal_edge);
     edges.pop_back();
+
+    static bool created_output = false;
+
 
     while(!edges.empty()) {
         size_t match = 1e6; // should give out of bounds access if failure.
@@ -142,6 +141,23 @@ std::vector< voronoi_point> clean_edges(const std::vector< voronoi_edge >& input
         }
         if(match == 1e6) {
             std::cout << "could not connect all edges\n";
+
+            if(!created_output) {
+                created_output = true;
+                std::ofstream outfile("debug_edges.txt");
+                std::vector< voronoi_edge > edges_local = input_edges;
+
+                invert_edges(edges_local, pos);
+
+                std::sort(edges_local.begin(), edges_local.end());
+                for(auto e : edges_local) {
+                    outfile << e.start.x_ << "\t" << e.start.y_ << "\t" <<
+                               e.end.x_   << "\t" << e.end.y_ << "\n";
+                }
+                outfile.close();
+              }
+
+
             break;
         }
         focal_edge = edges[match];

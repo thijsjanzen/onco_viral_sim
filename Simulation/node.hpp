@@ -34,13 +34,13 @@ struct voronoi_point {
 
     bool operator==(const voronoi_point& other) const {
         // explicitly, this doesn't keep track of left and right!
-        if(fabs(x_ - other.x_) > 1e-2f) return false;
-        if(fabs(y_ - other.y_) > 1e-2f) return false;
+        if(fabs(x_ - other.x_) > 1e-3f) return false;
+        if(fabs(y_ - other.y_) > 1e-3f) return false;
         return true;
     }
 
     bool operator<(const voronoi_point& other) const {
-        if(fabs(x_ - other.x_) < 1e-2f) return y_ < other.y_;
+        if(fabs(x_ - other.x_) < 1e-3f) return y_ < other.y_;
         return x_ < other.x_;
     }
 
@@ -65,10 +65,10 @@ struct voronoi_edge {
 
     bool operator==(const voronoi_edge& other) const {
         // explicitly, this doesn't keep track of left and right!
-        if(fabs(start.x_ - other.start.x_) > 1e-6f) return false;
-        if(fabs(start.y_ - other.start.y_) > 1e-6f) return false;
-        if(fabs(end.x_ - other.end.x_) > 1e-6f) return false;
-        if(fabs(end.y_ - other.end.y_) > 1e-6f) return false;
+        if(fabs(start.x_ - other.start.x_) > 1e-2f) return false;
+        if(fabs(start.y_ - other.start.y_) > 1e-2f) return false;
+        if(fabs(end.x_ - other.end.x_) > 1e-2f) return false;
+        if(fabs(end.y_ - other.end.y_) > 1e-2f) return false;
         return true;
     }
 
