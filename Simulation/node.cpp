@@ -117,6 +117,9 @@ std::vector< voronoi_point> clean_edges(const std::vector< voronoi_edge >& input
     // the goal is to connect all edges, and then provide
     // all the outer points
     std::vector< voronoi_edge > edges = input_edges;
+    for(auto i : edges) {
+      i.check();
+    }
 
     invert_edges(edges, pos);
 
@@ -166,9 +169,6 @@ std::vector< voronoi_point> clean_edges(const std::vector< voronoi_edge >& input
                 }
                 outfile.close();
               }
-
-
-            break;
         }
         focal_edge = edges[match];
         edges[match] = edges.back();
