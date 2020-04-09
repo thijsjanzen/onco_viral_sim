@@ -72,47 +72,40 @@ int main(int argc, char *argv[]) {
    //           << outcome << "\n";
 
 
-    for(float lambda = 0; lambda < 10; lambda += 1) {
-            for(float delta = 0; delta < 15;  delta += 1) {
-                  all_parameters.birth_infected = lambda;
-                  all_parameters.death_infected = delta;
 
+   std::array<size_t, 5> cell_counts = do_analysis(all_parameters);
+   std::string outcome = get_outcome(cell_counts);
 
+  if(!file_exists("output.txt")) {
+      // write header to file
+      std::ofstream outfile("output.txt");
+      outfile << "birth_virus"      << "\t"
+              << "death_virus"      << "\t"
+              << "birth_cancer"     << "\t"
+              << "death_cancer"     << "\t"
+              << "freq_resistant"   << "\t"
+              << "outcome"          << "\t"
+              << "num_normal_cells" << "\t"
+              << "num_cancer_cells" << "\t"
+              << "num_infected_cells" << "\t"
+              << "num_resistant_cells" << "\t"
+              << "num_empty_cells"   << "\n";
+      outfile.close();
+   }
 
-        std::array<size_t, 5> cell_counts = do_analysis(all_parameters);
-        std::string outcome = get_outcome(cell_counts);
-
-        if(!file_exists("output.txt")) {
-            // write header to file
-            std::ofstream outfile("output.txt");
-            outfile << "birth_virus"      << "\t"
-                    << "death_virus"      << "\t"
-                    << "birth_cancer"     << "\t"
-                    << "death_cancer"     << "\t"
-                    << "freq_resistant"   << "\t"
-                    << "outcome"          << "\t"
-                    << "num_normal_cells" << "\t"
-                    << "num_cancer_cells" << "\t"
-                    << "num_infected_cells" << "\t"
-                    << "num_resistant_cells" << "\t"
-                    << "num_empty_cells"   << "\n";
-            outfile.close();
-         }
-
-        std::ofstream outfile("output.txt", std::ios::app);
-        outfile << all_parameters.birth_infected << "\t"
-                << all_parameters.death_infected << "\t"
-                << all_parameters.birth_cancer   << "\t"
-                << all_parameters.death_cancer   << "\t"
-                << all_parameters.freq_resistant << "\t"
-                << outcome                       << "\t";
-          for(int i = 0; i < 5; ++i) {
-              outfile << cell_counts[i] << "\t";
-          }
-        outfile << "\n";
-        outfile.close();
-              }
+    std::ofstream outfile("output.txt", std::ios::app);
+    outfile << all_parameters.birth_infected << "\t"
+            << all_parameters.death_infected << "\t"
+            << all_parameters.birth_cancer   << "\t"
+            << all_parameters.death_cancer   << "\t"
+            << all_parameters.freq_resistant << "\t"
+            << outcome                       << "\t";
+      for(size_t i = 0; i < 5; ++i) {
+          outfile << cell_counts[i] << "\t";
       }
+    outfile << "\n";
+    outfile.close();
+
   return 0;
 }
 

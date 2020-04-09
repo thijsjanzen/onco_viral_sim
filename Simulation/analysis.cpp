@@ -16,6 +16,7 @@ std::array<size_t, 5> do_analysis(Param all_parameters) {
 
   Simulation.initialize_network(filler);
   std::cout << "starting simulation\n";
+
   Simulation.t = 0.f;
   float prev_t = Simulation.t;
   std::array<size_t, 5> cell_counts;

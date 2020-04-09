@@ -70,6 +70,7 @@ size_t simulation::find_central_cell(const cell_type& focal_cell_type) {
 
 void simulation::initialize_network(std::vector< std::vector< voronoi_point > >& all_polys) {
    // initialize default.
+  std::cout << "Initializing network\n";
   for(size_t i = 0; i < 4; ++i) {
        growth_prob[i] = binned_distribution(sq_size, num_cells);
        death_prob[i] = binned_distribution(sq_size, num_cells);
@@ -86,10 +87,13 @@ void simulation::initialize_network(std::vector< std::vector< voronoi_point > >&
     }
   }
   if(parameters.use_voronoi_grid == true) {
+      std::cout << "setting up Voronoi grid\n";
       setup_voronoi(all_polys);
+      std::cout << "Done setting up Voronoi grid\n";
   }
 
   if(parameters.start_setup == grow || parameters.start_setup == converge) {
+    std::cout << "adding initial cells\n";
     add_cells(normal);
     //for(auto& i : world) {
     for(size_t i = 0; i < num_cells; ++i) {
