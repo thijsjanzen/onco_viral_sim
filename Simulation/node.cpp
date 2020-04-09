@@ -106,8 +106,13 @@ void invert_edges(std::vector< voronoi_edge>& edges, size_t pos) {
     // check for inverted edges.
     for(auto& i : edges) {
         if(i.right != pos) {
-            std::swap(i.left, i.right);
-            std::swap(i.start, i.end);
+            size_t tmp = i.right;
+            i.right = i.left;
+            i.left = tmp;
+
+            auto tmp_2 = i.start;
+            i.start = i.end;
+            i.end = tmp_2;
         }
     }
 }
@@ -122,8 +127,6 @@ std::vector< voronoi_point> clean_edges(const std::vector< voronoi_edge >& input
     }
 
     invert_edges(edges, pos);
-
-    std::sort(edges.begin(), edges.end());
 
     std::vector< voronoi_edge > new_edges;
 
