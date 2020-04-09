@@ -146,10 +146,20 @@ std::vector< voronoi_point> clean_edges(const std::vector< voronoi_edge >& input
                 created_output = true;
                 std::ofstream outfile("debug_edges.txt");
                 std::vector< voronoi_edge > edges_local = input_edges;
-
-               // invert_edges(edges_local, pos);
+                outfile << "raw:\n";
+                for(auto e : edges_local) {
+                    outfile << e.start.x_ << "\t" << e.start.y_ << "\t" <<
+                               e.end.x_   << "\t" << e.end.y_ << "\n";
+                }
+                outfile << "\ninverted:";
+                invert_edges(edges_local, pos);
+                for(auto e : edges_local) {
+                    outfile << e.start.x_ << "\t" << e.start.y_ << "\t" <<
+                               e.end.x_   << "\t" << e.end.y_ << "\n";
+                }
 
                 std::sort(edges_local.begin(), edges_local.end());
+                outfile << "\nsorted: ";
                 for(auto e : edges_local) {
                     outfile << e.start.x_ << "\t" << e.start.y_ << "\t" <<
                                e.end.x_   << "\t" << e.end.y_ << "\n";
