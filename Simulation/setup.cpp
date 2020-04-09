@@ -291,6 +291,7 @@ void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_
 
    voronoi::Sites sites;
 
+   std::cout << "Generating centre points\n";
    std::vector< voronoi_point > v(num_cells);
 
    for(size_t i = 0; i < num_cells; ++i) {
@@ -300,15 +301,19 @@ void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_
       v[i] = voronoi_point(x, y);
    }
 
+   std::cout << "convering centre points to vertices\n";
    for(auto i : v) {
       voronoi::Vertex temp_vertex(i.x_, i.y_);
       sites.push_back(temp_vertex);
    }
 
+   std::cout << "creating voronoi graph\n";
    voronoi::Graph graph = voronoi::build(std::move(sites), sq_size, sq_size);
 
    std::vector< std::vector< voronoi_edge > > all_edges(world.size());
 
+   std::cout << "Ready to build world\n";
+   std::cout << "collecting all edges\n";
    for(const auto& cell : graph.cells()) {
 
        size_t site_index = static_cast<size_t>(cell.site);
@@ -328,6 +333,7 @@ void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_
        }
    }
 
+   std::cout << "implementing all edges\n";
    for(auto& i : all_edges) {
        for(const auto& edge : i) {
            size_t left  = edge.left;
@@ -341,11 +347,13 @@ void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_
        }
    }
 
+   std::cout << "clean edges and add polies for plotting\n";
    for(size_t i = 0; i < num_cells; ++i) {
        std::vector< voronoi_point > poly = clean_edges(all_edges[i], i);
        all_polys.push_back(poly);
-     }
+   }
 
+   std::cout << "update neighbor information\n";
    for(size_t i = 0; i < num_cells; ++i) {
        world[i].inv_num_neighbors = 1.f / world[i].neighbors.size();
        update_growth_prob(i);
