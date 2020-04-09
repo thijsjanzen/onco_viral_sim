@@ -329,6 +329,8 @@ void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_
            voronoi_point end(  focal_edge.p1.x, focal_edge.p1.y);
 
            voronoi_edge local_edge(start, end, focal_edge.leftSite, focal_edge.rightSite);
+           local_edge.check();
+
            all_edges[site_index].push_back(local_edge);
        }
    }
@@ -339,8 +341,7 @@ void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_
            size_t left  = edge.left;
            size_t right = edge.right;
 
-           if(left >= 0 && right >= 0 &&
-              left < world.size() && right < world.size()){
+           if(left < world.size() && right < world.size()) {
                world[left].add_neighbor(world, right);
                world[right].add_neighbor(world, left);
            }
