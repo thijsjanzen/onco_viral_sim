@@ -10,6 +10,7 @@
 #include <array>
 #include <cmath>
 #include <array>
+#include <fstream>
 
 #include "node.hpp"
 #include "random_thijs.hpp"
@@ -105,8 +106,13 @@ void invert_edges(std::vector< voronoi_edge>& edges, size_t pos) {
     // check for inverted edges.
     for(auto& i : edges) {
         if(i.right != pos) {
-            std::swap(i.left, i.right);
-            std::swap(i.start, i.end);
+            size_t tmp = i.right;
+            i.right = i.left;
+            i.left = tmp;
+
+            auto tmp_2 = i.start;
+            i.start = i.end;
+            i.end = tmp_2;
         }
     }
 }
@@ -116,16 +122,15 @@ std::vector< voronoi_point> clean_edges(const std::vector< voronoi_edge >& input
     // the goal is to connect all edges, and then provide
     // all the outer points
     std::vector< voronoi_edge > edges = input_edges;
-
     invert_edges(edges, pos);
-
-    std::sort(edges.begin(), edges.end());
 
     std::vector< voronoi_edge > new_edges;
 
     voronoi_edge focal_edge = edges.back();
     new_edges.push_back(focal_edge);
     edges.pop_back();
+
+    static bool created_output = false;
 
     while(!edges.empty()) {
         size_t match = 1e6; // should give out of bounds access if failure.
@@ -134,6 +139,46 @@ std::vector< voronoi_point> clean_edges(const std::vector< voronoi_edge >& input
                 match = i;
                 break;
             }
+        }
+        if(match == 1e6) {
+            std::cout << "could not connect all edges\n";
+
+            if(!created_output) {
+                created_output = true;
+                std::ofstream outfile("debug_edges.txt");
+                std::vector< voronoi_edge > edges_local = input_edges;
+                outfile << "raw:\n";
+                for(auto e : edges_local) {
+                    outfile << e.start.x_ << "\t" << e.start.y_ << "\t" <<
+                               e.end.x_   << "\t" << e.end.y_ << "\t" <<
+                               e.left << "\t" << e.right << "\n";
+                    std::cout << e.start.x_ << "\t" << e.start.y_ << "\t" <<
+                                 e.end.x_   << "\t" << e.end.y_ << "\t" <<
+                                 e.left << "\t" << e.right << "\n";
+                }
+                outfile << "\ninverted:\n";
+                invert_edges(edges_local, pos);
+                for(auto e : edges_local) {
+                    outfile << e.start.x_ << "\t" << e.start.y_ << "\t" <<
+                               e.end.x_   << "\t" << e.end.y_ << "\t" <<
+                               e.left << "\t" << e.right << "\n";
+                    std::cout << e.start.x_ << "\t" << e.start.y_ << "\t" <<
+                                 e.end.x_   << "\t" << e.end.y_ << "\t" <<
+                                 e.left << "\t" << e.right << "\n";
+                }
+
+                std::sort(edges_local.begin(), edges_local.end());
+                outfile << "\nsorted:\n";
+                for(auto e : edges_local) {
+                    outfile << e.start.x_ << "\t" << e.start.y_ << "\t" <<
+                               e.end.x_   << "\t" << e.end.y_ << "\t" <<
+                               e.left << "\t" << e.right << "\n";
+                    std::cout << e.start.x_ << "\t" << e.start.y_ << "\t" <<
+                                 e.end.x_   << "\t" << e.end.y_ << "\t" <<
+                                 e.left << "\t" << e.right << "\n";
+                }
+                outfile.close();
+              }
         }
         focal_edge = edges[match];
         edges[match] = edges.back();

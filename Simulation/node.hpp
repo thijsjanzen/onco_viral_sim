@@ -13,16 +13,24 @@
 #include <vector>
 #include <memory>
 #include <cmath>
+#include <iostream>
 
 enum cell_type {normal, cancer, infected, resistant, empty, max_num};
 
 typedef struct node node;
 
 struct voronoi_point {
-    float x_, y_;
+    double x_, y_;
 
     voronoi_point() {
-        x_ = 0.f; y_ = 0.f;
+        x_ = 0.0; y_ = 0.0;
+    }
+
+
+    voronoi_point& operator=(const voronoi_point& other) {
+      x_ = other.x_;
+      y_ = other.y_;
+      return *this;
     }
 
     voronoi_point(const voronoi_point& other) {
@@ -30,18 +38,20 @@ struct voronoi_point {
         y_ = other.y_;
     }
 
-    voronoi_point(float x, float y) : x_(x), y_(y) {}
+    voronoi_point(double x, double y) : x_(x), y_(y) {}
 
     bool operator==(const voronoi_point& other) const {
         // explicitly, this doesn't keep track of left and right!
-        if(fabs(x_ - other.x_) > 1e-4f) return false;
-        if(fabs(y_ - other.y_) > 1e-4f) return false;
+        if(x_ != other.x_) return false;
+        if(y_ != other.y_) return false;
         return true;
     }
 
     bool operator<(const voronoi_point& other) const {
-        if(fabs(x_ - other.x_) < 1e-6f) return y_ < other.y_;
-        return x_ < other.x_;
+       // if(fabs(x_ - other.x_) < 1e-4f) return y_ < other.y_;
+       // return x_ < other.x_;
+       if(x_ == other.x_) return y_ < other.y_;
+       return x_ < other.x_;
     }
 
     bool operator!=(const voronoi_point& other) const {
@@ -51,29 +61,61 @@ struct voronoi_point {
 
 struct voronoi_edge {
     voronoi_edge(voronoi_point s, voronoi_point e,
-                 int l, int r) : start(s), end(e), left(l), right(r) {}
+                 size_t l, size_t r) : start(s), end(e), left(l), right(r) {}
 
     voronoi_point start;
     voronoi_point end;
     size_t left;
     size_t right;
 
+    voronoi_edge& operator=(const voronoi_edge& other) {
+      left  = other.left;
+      right = other.right;
+      start = other.start;
+      end   = other.end;
+      return *this;
+    }
+
+    voronoi_edge(const voronoi_edge& other) {
+      left  = other.left;
+      right = other.right;
+      start = other.start;
+      end   = other.end;
+    }
+
     bool operator<(const voronoi_edge& other) const {
-        if(start.x_ == other.start.x_) return start.y_ < other.start.y_;
-        return start.x_ < other.start.x_;
+      return start < other.start;
     }
 
     bool operator==(const voronoi_edge& other) const {
-        // explicitly, this doesn't keep track of left and right!
-        if(fabs(start.x_ - other.start.x_) > 1e-6f) return false;
-        if(fabs(start.y_ - other.start.y_) > 1e-6f) return false;
-        if(fabs(end.x_ - other.end.x_) > 1e-6f) return false;
-        if(fabs(end.y_ - other.end.y_) > 1e-6f) return false;
-        return true;
+      if(start != other.start) return false;
+      if(end   != other.end)   return false;
+
+      return true;
     }
 
     bool operator!=(const voronoi_edge& other) const {
         return !(*this == other);
+    }
+
+    bool check() const {
+      if(std::isnan(start.x_)) {
+          std::cout << "start.x_ isnan\n";
+          return false;
+      }
+      if(std::isnan(start.y_)) {
+          std::cout << "start.y_ isnan\n";
+          return false;
+      }
+      if(std::isnan(end.x_)) {
+          std::cout << "end.x_ isnan\n";
+          return false;
+      }
+      if(std::isnan(end.y_)) {
+          std::cout << "end.y_ isnan\n";
+          return false;
+      }
+      return true;
     }
 };
 

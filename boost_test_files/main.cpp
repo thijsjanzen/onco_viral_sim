@@ -21,11 +21,13 @@ BOOST_AUTO_TEST_CASE( infect_random )
   all_parameters.time_adding_cancer = 500;
   all_parameters.time_adding_virus = 100;
 
-  std::string outcome = do_analysis(all_parameters);
+  std::array<size_t, 5> result = do_analysis(all_parameters);
+  std::string outcome = get_outcome(result);
   BOOST_CHECK_EQUAL(outcome, "C");
 
   all_parameters.use_voronoi_grid = true;
-  outcome = do_analysis(all_parameters);
+  result = do_analysis(all_parameters);
+  get_outcome(result);
   BOOST_CHECK_EQUAL(outcome, "C");
 }
 
@@ -53,11 +55,13 @@ BOOST_AUTO_TEST_CASE( infect_all )
   all_parameters.initial_number_cancer_cells = 100;
   all_parameters.birth_cancer = 0.6f;
 
-  std::string outcome = do_analysis(all_parameters);
+  std::array<size_t, 5> result = do_analysis(all_parameters);
+  std::string outcome = get_outcome(result);
   BOOST_CHECK_EQUAL(outcome, "A");
 
   all_parameters.use_voronoi_grid = true;
-  outcome = do_analysis(all_parameters);
+  result = do_analysis(all_parameters);
+  outcome = get_outcome(result);
   BOOST_CHECK_EQUAL(outcome, "A");
 }
 
@@ -77,11 +81,13 @@ BOOST_AUTO_TEST_CASE( infect_center )
   all_parameters.time_adding_cancer = 500;
   all_parameters.time_adding_virus = 2;
 
-  std::string outcome = do_analysis(all_parameters);
+  std::array<size_t, 5> result = do_analysis(all_parameters);
+  std::string outcome = get_outcome(result);
   BOOST_CHECK_EQUAL(outcome, "C");
 
   all_parameters.use_voronoi_grid = true;
-  outcome = do_analysis(all_parameters);
+  result = do_analysis(all_parameters);
+  outcome = get_outcome(result);
   BOOST_CHECK_EQUAL(outcome, "C");
 }
 
@@ -106,12 +112,13 @@ BOOST_AUTO_TEST_CASE( test_converge )
   all_parameters.time_adding_virus = 500;
 
 
-  all_parameters.use_voronoi_grid = true;
-  std::string outcome = do_analysis(all_parameters);
+  std::array<size_t, 5> result = do_analysis(all_parameters);
+  std::string outcome = get_outcome(result);
   BOOST_CHECK_EQUAL(outcome, "B");
 
   all_parameters.use_voronoi_grid = false;
-  outcome = do_analysis(all_parameters);
+  result = do_analysis(all_parameters);
+  outcome = get_outcome(result);
   BOOST_CHECK_EQUAL(outcome, "B");
 }
 
@@ -132,12 +139,14 @@ BOOST_AUTO_TEST_CASE( long_distance_infection )
   // GROW SETUP
   all_parameters.start_setup = full;
 
-  std::string outcome = do_analysis(all_parameters);
+  std::array<size_t, 5> result = do_analysis(all_parameters);
+  std::string outcome = get_outcome(result);
   BOOST_CHECK_EQUAL(outcome, "A");
 
   all_parameters.use_voronoi_grid = true;
-  outcome = do_analysis(all_parameters);
-  BOOST_CHECK_EQUAL(outcome, "A");
+  result = do_analysis(all_parameters);
+  outcome = get_outcome(result);
+   BOOST_CHECK_EQUAL(outcome, "A");
 }
 
 // TODO: add tests with resistant cells
@@ -153,11 +162,13 @@ BOOST_AUTO_TEST_CASE( resistance )
 
   all_parameters.start_setup = full;
 
-  std::string outcome = do_analysis(all_parameters);
-  BOOST_CHECK_EQUAL(outcome, "D");
+  std::array<size_t, 5> result = do_analysis(all_parameters);
+  std::string outcome = get_outcome(result);
+   BOOST_CHECK_EQUAL(outcome, "D");
 
   all_parameters.use_voronoi_grid = true;
-  outcome = do_analysis(all_parameters);
+  result = do_analysis(all_parameters);
+  outcome = get_outcome(result);
   BOOST_CHECK_EQUAL(outcome, "D");
 }
 
@@ -177,11 +188,13 @@ BOOST_AUTO_TEST_CASE( check_full_2 )
   // GROW SETUP
   all_parameters.start_setup = full;
 
-  std::string outcome = do_analysis(all_parameters);
+  std::array<size_t, 5> result = do_analysis(all_parameters);
+  std::string outcome = get_outcome(result);
   BOOST_CHECK_EQUAL(outcome, "B");
 
   all_parameters.use_voronoi_grid = true;
-  outcome = do_analysis(all_parameters);
+  result = do_analysis(all_parameters);
+  outcome = get_outcome(result);
   BOOST_CHECK_EQUAL(outcome, "B");
 }
 
@@ -202,11 +215,13 @@ BOOST_AUTO_TEST_CASE( check_grow_2 )
   all_parameters.time_adding_cancer = 1000;
   all_parameters.time_adding_virus = 2000;
 
-  std::string outcome = do_analysis(all_parameters);
+  std::array<size_t, 5> result = do_analysis(all_parameters);
+  std::string outcome = get_outcome(result);
   BOOST_CHECK_EQUAL(outcome, "B");
 
   all_parameters.use_voronoi_grid = true;
-  outcome = do_analysis(all_parameters);
+  result = do_analysis(all_parameters);
+  outcome = get_outcome(result);
   BOOST_CHECK_EQUAL(outcome, "B");
 }
 

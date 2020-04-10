@@ -10,7 +10,6 @@ SOURCES += \
         ../Simulation/node.cpp \
         ../Simulation/setup.cpp \
         ../Simulation/simulation.cpp \
-        ../tests/standard_tests.cpp \
         main.cpp
 
 HEADERS += \

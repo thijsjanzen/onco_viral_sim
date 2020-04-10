@@ -7,6 +7,7 @@
 #include "config_parser.h"
 
 // forward declaration
+bool file_exists (const std::string& name);
 void read_parameters_from_ini(Param& p, const std::string file_name);
 void obtain_equilibrium(simulation& Simulation, const Param& all_parameters);
 
@@ -71,12 +72,40 @@ int main(int argc, char *argv[]) {
    //           << outcome << "\n";
 
 
-  std::string outcome = do_analysis(all_parameters);
-  std::ofstream outfile("output.txt", std::ios::app);
-  outfile << all_parameters.birth_infected << "\t"
-          << all_parameters.death_infected << "\t"
-          << outcome                       << "\n";
-  outfile.close();
+
+   std::array<size_t, 5> cell_counts = do_analysis(all_parameters);
+   std::string outcome = get_outcome(cell_counts);
+
+  if(!file_exists("output.txt")) {
+      // write header to file
+      std::ofstream outfile("output.txt");
+      outfile << "birth_virus"      << "\t"
+              << "death_virus"      << "\t"
+              << "birth_cancer"     << "\t"
+              << "death_cancer"     << "\t"
+              << "freq_resistant"   << "\t"
+              << "outcome"          << "\t"
+              << "num_normal_cells" << "\t"
+              << "num_cancer_cells" << "\t"
+              << "num_infected_cells" << "\t"
+              << "num_resistant_cells" << "\t"
+              << "num_empty_cells"   << "\n";
+      outfile.close();
+   }
+
+    std::ofstream outfile("output.txt", std::ios::app);
+    outfile << all_parameters.birth_infected << "\t"
+            << all_parameters.death_infected << "\t"
+            << all_parameters.birth_cancer   << "\t"
+            << all_parameters.death_cancer   << "\t"
+            << all_parameters.freq_resistant << "\t"
+            << outcome                       << "\t";
+      for(size_t i = 0; i < 5; ++i) {
+          outfile << cell_counts[i] << "\t";
+      }
+    outfile << "\n";
+    outfile.close();
+
   return 0;
 }
 
@@ -86,7 +115,7 @@ void read_parameters_from_ini(Param& p, const std::string file_name) {
 
   p.maximum_time = from_config.getValueOfKey<int>("maximum_time");
   p.time_adding_cancer = from_config.getValueOfKey<int>("time_adding_cancer");
-  p.time_adding_virus = from_config.getValueOfKey<int>("time_adding_virus");
+  p.time_adding_virus  = from_config.getValueOfKey<int>("time_adding_virus");
 
   p.initial_number_cancer_cells = from_config.getValueOfKey<size_t>("initial_number_cancer_cells");
   p.initial_number_normal_cells = from_config.getValueOfKey<size_t>("initial_number_normal_cells");
@@ -132,4 +161,9 @@ void read_parameters_from_ini(Param& p, const std::string file_name) {
     p.use_voronoi_grid = true;
 
   return;
+}
+
+bool file_exists (const std::string& name) {
+    std::ifstream f(name.c_str());
+    return f.good();
 }
