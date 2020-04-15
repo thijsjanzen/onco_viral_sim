@@ -12,7 +12,9 @@
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
-enum display_color {cells, normal_rate, cancer_rate, infected_rate, resistant_rate, dominant_rate};
+enum display_color {cells, t_cells,
+                    normal_rate, cancer_rate, infected_rate, resistant_rate,
+                    dominant_rate};
 
 enum grid_type {regular, voronoi};
 
@@ -24,20 +26,22 @@ public:
     MainWindow(QWidget *parent = nullptr);
      ~MainWindow();
 
-    void update_image(size_t sq_size);
+    void update_image(size_t sq_size,
+                      bool display_t_cells);
 
     void update_image(size_t sq_size,
                       const std::array< binned_distribution, 4 > & growth_rate);
 
 
-    void display_voronoi(size_t sq_size); // cell coloring
+    void display_voronoi(size_t sq_size,
+                         bool display_t_cells); // cell coloring
     void display_voronoi(const binned_distribution& growth_rate,
                          cell_type focal_cell_type,
                          size_t sq_size); // growth rate coloring
     void display_voronoi(const std::array< binned_distribution, 4 > & growth_rate,
                          size_t sq_size); // dominant growth rate coloring
 
-    void display_regular(); // cell type coloring
+    void display_regular(bool display_t_cells); // cell type coloring
     void display_regular(const binned_distribution& growth_rate,
                          cell_type focal_cell_type); // growth rate coloring
     void display_regular(const std::array< binned_distribution, 4 > & growth_rate); // dominant growth rate coloring

@@ -30,6 +30,7 @@ world(param.sq_num_cells * param.sq_num_cells)
   }
 
   long_distance_infection_probability = std::vector<double>(1, 0);
+  total_t_cell_concentration = 0.f;
   double lambda = static_cast<double>(1.0 / parameters.distance_infection_upon_death);
   for(size_t d = 1; d < sq_size; ++d) {
       double local_prob = static_cast<double>(parameters.prob_infection_upon_death) *
@@ -333,7 +334,9 @@ void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_
             std::cout << site_index << "\n";
            }
 
-           all_edges[site_index].push_back(local_edge);
+           if(local_edge.calc_dist() > 1e-2) {
+             all_edges[site_index].push_back(local_edge);
+           }
        }
    }
 

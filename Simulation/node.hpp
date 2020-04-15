@@ -42,9 +42,12 @@ struct voronoi_point {
 
     bool operator==(const voronoi_point& other) const {
         // explicitly, this doesn't keep track of left and right!
-        if(x_ != other.x_) return false;
-        if(y_ != other.y_) return false;
-        return true;
+      //  if(x_ != other.x_) return false;
+      //  if(y_ != other.y_) return false;
+      if(abs(x_ - other.x_) > 1e-3) return false;
+      if(abs(y_ - other.y_) > 1e-3) return false;
+
+      return true;
     }
 
     bool operator<(const voronoi_point& other) const {
@@ -60,6 +63,9 @@ struct voronoi_point {
 };
 
 struct voronoi_edge {
+  voronoi_edge() {
+  }
+
     voronoi_edge(voronoi_point s, voronoi_point e,
                  size_t l, size_t r) : start(s), end(e), left(l), right(r) {}
 
@@ -88,10 +94,9 @@ struct voronoi_edge {
     }
 
     bool operator==(const voronoi_edge& other) const {
-      if(start != other.start) return false;
-      if(end   != other.end)   return false;
-
-      return true;
+     if(start != other.start) return false;
+     if(end   != other.end)   return false;
+     return true;
     }
 
     bool operator!=(const voronoi_edge& other) const {
@@ -117,6 +122,12 @@ struct voronoi_edge {
       }
       return true;
     }
+
+    double calc_dist() {
+      double x_x = (start.x_ - end.x_) * (start.x_ - end.x_);
+      double y_y = (start.y_ - end.y_) * (start.y_ - end.y_);
+      return(std::sqrt(x_x + y_y));
+    }
 };
 
 std::vector< voronoi_point> clean_edges(const std::vector< voronoi_edge >& input_edges,
@@ -137,6 +148,7 @@ struct node {
 
   float inv_num_neighbors;
   float prob_normal_infected;
+  float t_cell_concentration;
 
   std::vector< node* > neighbors;
 
@@ -146,6 +158,8 @@ struct node {
   void set_coordinates(size_t row_size);
   void update_neighbors(std::vector< node >& world,
                         size_t world_size);
+
+  void add_t_cell(float amount);
 
 
   std::vector< cell_type > return_neighbor_types();

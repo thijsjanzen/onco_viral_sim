@@ -55,6 +55,10 @@ private:
 
   Param parameters;
 
+  float total_t_cell_concentration;
+  void diffuse();
+  void increase_t_cell_concentration(size_t pos);
+
   std::array< float, 8> rates;
 
   std::vector<double> long_distance_infection_probability;

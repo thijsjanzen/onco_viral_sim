@@ -65,6 +65,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     ui->drpdwnbox_display->addItem("Cell types");
+    ui->drpdwnbox_display->addItem("T-cells");
     ui->drpdwnbox_display->addItem("Normal Growth Rate");
     ui->drpdwnbox_display->addItem("Cancer Growth Rate");
     ui->drpdwnbox_display->addItem("Infected Growth Rate");
@@ -104,9 +105,19 @@ void MainWindow::set_pixel(int x, int y, const QColor& col) {
     image_.setPixel(x, y, col.rgb());
 }
 
-void MainWindow::display_regular() {
-  int line_size = row_size;
-  int num_lines = col_size;
+QColor get_t_cell_color(float concentration) {
+  if(concentration < 1e-6f) {
+      QColor col = {0, 0, 0, 255};
+      return col;
+  }
+
+  QColor col = {255, 0, 255, static_cast<int>(concentration * 255)};
+  return col;
+}
+
+void MainWindow::display_regular(bool display_t_cells) {
+  size_t line_size = row_size;
+  size_t num_lines = col_size;
 
   for(size_t i = 0; i < num_lines; ++i) {
       QRgb* row = (QRgb*) image_.scanLine(i);
@@ -116,19 +127,31 @@ void MainWindow::display_regular() {
 
       for(size_t index = start; index < end; ++index) {
           size_t local_index = index - start;
-          row[local_index] = colorz[ sim->world[index].get_cell_type() ].rgb();
+          if(!display_t_cells) row[local_index] = colorz[ sim->world[index].get_cell_type() ].rgb();
+          if(display_t_cells) row[local_index] = get_t_cell_color(sim->world[index].t_cell_concentration).rgba();
       }
   }
 }
 
-void MainWindow::display_voronoi(size_t sq_size) {
+void MainWindow::display_voronoi(size_t sq_size,
+                                 bool display_t_cells) {
   image_.fill(Qt::gray);
 
   QPainter painter(&image_);
 
-  //for(const auto& i: sim->world) {
-  for(int i = 0; i < sim->num_cells; ++i) {
-      QBrush brush(colorz[sim->world[i].get_cell_type()]); // Qt::SolidPattern by default.
+  for(size_t i = 0; i < sim->num_cells; ++i) {
+      QBrush brush;
+      if(display_t_cells) {
+          QColor t_col = get_t_cell_color(sim->world[i].t_cell_concentration);
+       /*   float conc = sim->world[i].t_cell_concentration;
+          if(conc > 0.01f) {
+            t_col.setAlpha(
+                static_cast<int>(sim->world[i].t_cell_concentration * 255));
+          }*/
+          brush = QBrush(t_col);
+      } else {
+          brush = QBrush(colorz[sim->world[i].get_cell_type()]); // Qt::SolidPattern by default.
+      }
 
       QPainterPath path;
       path.addPolygon(polygons[i]);
@@ -138,14 +161,13 @@ void MainWindow::display_voronoi(size_t sq_size) {
   }
 }
 
-
-
-void MainWindow::update_image(size_t sq_size) {
+void MainWindow::update_image(size_t sq_size,
+                              bool display_t_cells) {
     if(grid_type == regular) {
-        display_regular();
+        display_regular(display_t_cells);
     }
     if(grid_type == voronoi) {
-        display_voronoi(sq_size);
+        display_voronoi(sq_size, display_t_cells);
     }
 
     int w = ui->q_label->width();
@@ -154,6 +176,8 @@ void MainWindow::update_image(size_t sq_size) {
     ui->q_label->setPixmap((QPixmap::fromImage(image_)).scaled(w,h, Qt::KeepAspectRatio));
     ui->q_label->update();
 }
+
+
 
 QRgb get_color(const cell_type focal_cell_type, float rate) {
 
@@ -374,6 +398,11 @@ void MainWindow::update_parameters(Param& p) {
    p.distance_infection_upon_death = static_cast<float>(ui->box_distance_infection_death->value());
    p.prob_infection_upon_death = static_cast<float>(ui->box_prob_infection_death->value());
 
+   p.diffusion = static_cast<float>(ui->box_diffusion->value());
+   p.evaporation = static_cast<float>(ui->box_evaporation->value());
+   p.t_cell_increase = static_cast<float>(ui->box_inflammation->value());
+
+
    p.sq_num_cells = static_cast<size_t>(ui->box_sq_num_cells->value());
 
    p.infection_type = random_infection;
@@ -404,6 +433,8 @@ void MainWindow::update_parameters(Param& p) {
        focal_display_type = resistant_rate;
    if(display_string == "Dominant Growth Rate")
        focal_display_type = dominant_rate;
+   if(display_string == "T-cells")
+       focal_display_type = t_cells;
 
    auto grid_string = ui->box_grid_type->currentText();
    if(grid_string == "regular") {
@@ -483,7 +514,7 @@ void MainWindow::setup_simulation() {
 
     ui->btn_start->setText("Start");
 
-    if(focal_display_type == cells) update_image(all_parameters.sq_num_cells);
+    if(focal_display_type == cells) update_image(all_parameters.sq_num_cells, false);
     if(focal_display_type != cells)  {
         update_image(all_parameters.sq_num_cells, sim->growth_prob);
     }
@@ -524,8 +555,11 @@ void MainWindow::on_btn_start_clicked()
         int update_step = 1 + static_cast<int>((update_speed - 1) * 0.01f * range);
 
         if(counter % update_step == 0) {
-            if(focal_display_type == cells) update_image(all_parameters.sq_num_cells);
-            if(focal_display_type != cells)  {
+            if(focal_display_type == cells) {
+                update_image(all_parameters.sq_num_cells, false);
+            } else if (focal_display_type == t_cells) {
+                update_image(all_parameters.sq_num_cells, true);
+            } else {
                 update_image(all_parameters.sq_num_cells, sim->growth_prob);
             }
 
@@ -601,6 +635,8 @@ void MainWindow::on_drpdwnbox_display_activated(int index)
         focal_display_type = resistant_rate;
     if(display_string == "Dominant Growth Rate")
         focal_display_type = dominant_rate;
+    if(display_string == "T-cells")
+        focal_display_type = t_cells;
 }
 
 void MainWindow::on_btn_setup_clicked()

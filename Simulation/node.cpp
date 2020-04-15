@@ -22,6 +22,7 @@ node::node() {
   y_ = 0;
   inv_num_neighbors = 0.f;
   prob_normal_infected = 0.f;
+  t_cell_concentration = 0.f;
 }
 
 void node::add_neighbor(std::vector< node >& world,
@@ -102,6 +103,10 @@ void node::set_coordinates(size_t row_size) {
     y_ = pos % row_size;
 }
 
+void node::add_t_cell(float amount) {
+  t_cell_concentration += amount;
+}
+
 void invert_edges(std::vector< voronoi_edge>& edges, size_t pos) {
     // check for inverted edges.
     for(auto& i : edges) {
@@ -117,6 +122,17 @@ void invert_edges(std::vector< voronoi_edge>& edges, size_t pos) {
     }
 }
 
+std::vector< double > calc_dist(const std::vector< voronoi_edge >& v,
+                                const voronoi_edge& point) {
+  std::vector< double > output(v.size());
+  for(size_t i = 0; i < v.size(); ++i) {
+    double dx = point.end.x_ - v[i].start.x_;
+    double dy = point.end.y_ - v[i].start.y_;
+    output[i] = dx * dx + dy * dy;
+  }
+  return output;
+}
+
 std::vector< voronoi_point> clean_edges(const std::vector< voronoi_edge >& input_edges,
                                         size_t pos) {
     // the goal is to connect all edges, and then provide
@@ -128,62 +144,16 @@ std::vector< voronoi_point> clean_edges(const std::vector< voronoi_edge >& input
 
     voronoi_edge focal_edge = edges.back();
     new_edges.push_back(focal_edge);
-    edges.pop_back();
-
-    static bool created_output = false;
 
     while(!edges.empty()) {
-        size_t match = 1e6; // should give out of bounds access if failure.
-        for(size_t i = 0; i < edges.size(); ++i) {
-            if(edges[i].start == focal_edge.end) {
-                match = i;
-                break;
-            }
-        }
-        if(match == 1e6) {
-            std::cout << "could not connect all edges\n";
+       std::vector< double > distances = calc_dist(edges, focal_edge);
+       auto min_val = std::min_element(distances.begin(), distances.end());
+       auto match = std::distance(distances.begin(), min_val);
 
-            if(!created_output) {
-                created_output = true;
-                std::ofstream outfile("debug_edges.txt");
-                std::vector< voronoi_edge > edges_local = input_edges;
-                outfile << "raw:\n";
-                for(auto e : edges_local) {
-                    outfile << e.start.x_ << "\t" << e.start.y_ << "\t" <<
-                               e.end.x_   << "\t" << e.end.y_ << "\t" <<
-                               e.left << "\t" << e.right << "\n";
-                    std::cout << e.start.x_ << "\t" << e.start.y_ << "\t" <<
-                                 e.end.x_   << "\t" << e.end.y_ << "\t" <<
-                                 e.left << "\t" << e.right << "\n";
-                }
-                outfile << "\ninverted:\n";
-                invert_edges(edges_local, pos);
-                for(auto e : edges_local) {
-                    outfile << e.start.x_ << "\t" << e.start.y_ << "\t" <<
-                               e.end.x_   << "\t" << e.end.y_ << "\t" <<
-                               e.left << "\t" << e.right << "\n";
-                    std::cout << e.start.x_ << "\t" << e.start.y_ << "\t" <<
-                                 e.end.x_   << "\t" << e.end.y_ << "\t" <<
-                                 e.left << "\t" << e.right << "\n";
-                }
-
-                std::sort(edges_local.begin(), edges_local.end());
-                outfile << "\nsorted:\n";
-                for(auto e : edges_local) {
-                    outfile << e.start.x_ << "\t" << e.start.y_ << "\t" <<
-                               e.end.x_   << "\t" << e.end.y_ << "\t" <<
-                               e.left << "\t" << e.right << "\n";
-                    std::cout << e.start.x_ << "\t" << e.start.y_ << "\t" <<
-                                 e.end.x_   << "\t" << e.end.y_ << "\t" <<
-                                 e.left << "\t" << e.right << "\n";
-                }
-                outfile.close();
-              }
-        }
-        focal_edge = edges[match];
-        edges[match] = edges.back();
-        edges.pop_back();
-        new_edges.push_back(focal_edge);
+       focal_edge = edges[match];
+       edges[match] = edges.back();
+       edges.pop_back();
+       new_edges.push_back(focal_edge);
     }
     // allright, we have connected them now
     // now we collect the starting points

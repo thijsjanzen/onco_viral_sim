@@ -55,6 +55,14 @@ void simulation::update_one_step() {
       }
     }
 
+    if(total_t_cell_concentration > 0.f) {
+     int delta_t_ms = static_cast<int>(10 * (t + dt)) - static_cast<int>(10 * t);
+     if(delta_t_ms > 0) {
+      diffuse();
+     }
+    }
+
+
     t += dt;
 }
 
@@ -111,6 +119,7 @@ void simulation::implement_death(const cell_type& parent) {
 
   if(parent == infected && parameters.prob_infection_upon_death > 0.f) {
       infect_long_distance(position_of_dying_cell);
+      increase_t_cell_concentration(position_of_dying_cell);
   }
 }
 
@@ -303,6 +312,39 @@ void simulation::set_infection_type(infection_routine infect_routine) {
   parameters.infection_type = infect_routine;
 }
 
+void simulation::diffuse() {
+  // do something
+  std::vector<float> new_concentration(world.size(), 0.f);
+  for(size_t i = 0; i < world.size(); ++i) {
+    if(world[i].t_cell_concentration > 0.f) {
+       float current_conc = world[i].t_cell_concentration *
+                              (1 - parameters.evaporation);
+       float total_diffuse_loss = (parameters.diffusion * current_conc);
+       float diffuse_per_neighbor = total_diffuse_loss *
+                                        world[i].inv_num_neighbors;
+
+       for(const auto& j : world[i].neighbors) {
+          size_t other_pos = j->pos;
+          new_concentration[other_pos] += diffuse_per_neighbor;
+       }
+       new_concentration[i] += current_conc - total_diffuse_loss;
+    }
+  }
+
+  for(size_t i = 0; i < new_concentration.size(); ++i) {
+      float new_conc =  new_concentration[i];
+      if(new_conc < 1e-5f) new_conc = 0.f;
+      world[i].t_cell_concentration = new_conc;
+  }
+  total_t_cell_concentration = std::accumulate(new_concentration.begin(),
+                                               new_concentration.end(),
+                                               0.f);
+}
+
+void simulation::increase_t_cell_concentration(size_t pos) {
+  world[pos].add_t_cell(parameters.t_cell_increase);
+  total_t_cell_concentration += parameters.t_cell_increase;
+}
 
 
 /*
