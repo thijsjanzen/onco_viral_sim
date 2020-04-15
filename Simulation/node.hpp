@@ -26,7 +26,6 @@ struct voronoi_point {
         x_ = 0.0; y_ = 0.0;
     }
 
-
     voronoi_point& operator=(const voronoi_point& other) {
       x_ = other.x_;
       y_ = other.y_;

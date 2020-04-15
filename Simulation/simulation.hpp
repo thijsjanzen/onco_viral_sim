@@ -49,9 +49,9 @@ public:
   void add_cells(const cell_type& focal_cell_type);
 
   void obtain_equilibrium();
-
-private:
   std::array<size_t, 5> num_cell_types;
+private:
+
 
   Param parameters;
 
