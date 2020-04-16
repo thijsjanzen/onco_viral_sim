@@ -90,11 +90,11 @@ struct Param {
 
     use_voronoi_grid = false;
 
-    t_cell_increase = 0.1f;
+    t_cell_increase = 0.f;
     evaporation = 0.01f;
     diffusion = 0.1f;
-    t_cell_rate = 20;
-    t_cell_threshold = 0.2;
+    t_cell_rate = 10;
+    t_cell_threshold = 0.2f;
   }
 };
 

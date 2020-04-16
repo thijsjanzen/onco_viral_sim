@@ -678,8 +678,12 @@ void MainWindow::on_drpdwnbox_display_activated(int index)
         focal_display_type = cells;
     if(display_string == "Normal Growth Rate")
         focal_display_type = normal_rate;
+    if(display_string == "Normal Death Rate")
+        focal_display_type = normal_death_rate;
     if(display_string == "Cancer Growth Rate")
         focal_display_type = cancer_rate;
+    if(display_string == "Cancer Death Rate")
+        focal_display_type = cancer_death_rate;
     if(display_string == "Infected Growth Rate")
         focal_display_type = infected_rate;
     if(display_string == "Resistant Growth Rate")
