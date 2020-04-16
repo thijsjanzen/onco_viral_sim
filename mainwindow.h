@@ -13,7 +13,9 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 enum display_color {cells, t_cells,
-                    normal_rate, cancer_rate, infected_rate, resistant_rate,
+                    normal_rate, normal_death_rate,
+                    cancer_rate, cancer_death_rate,
+                    infected_rate, resistant_rate,
                     dominant_rate};
 
 enum grid_type {regular, voronoi};
@@ -45,6 +47,9 @@ public:
     void display_regular(const binned_distribution& growth_rate,
                          cell_type focal_cell_type); // growth rate coloring
     void display_regular(const std::array< binned_distribution, 4 > & growth_rate); // dominant growth rate coloring
+    void display_regular_death_rate(const binned_distribution& death_rate,
+                            cell_type focal_cell_type,
+                            size_t sq_size);
 
 
     void update_parameters(Param& p);

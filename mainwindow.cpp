@@ -67,7 +67,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->drpdwnbox_display->addItem("Cell types");
     ui->drpdwnbox_display->addItem("T-cells");
     ui->drpdwnbox_display->addItem("Normal Growth Rate");
+    ui->drpdwnbox_display->addItem("Normal Death Rate");
     ui->drpdwnbox_display->addItem("Cancer Growth Rate");
+    ui->drpdwnbox_display->addItem("Cancer Death Rate");
     ui->drpdwnbox_display->addItem("Infected Growth Rate");
     ui->drpdwnbox_display->addItem("Resistant Growth Rate");
     ui->drpdwnbox_display->addItem("Dominant Growth Rate");
@@ -303,8 +305,38 @@ void MainWindow::display_voronoi(const std::array< binned_distribution, 4 > & gr
   }
 }
 
+void MainWindow::display_regular_death_rate(const binned_distribution& death_rate,
+                                    cell_type focal_cell_type,
+                                    size_t sq_size) {
+  size_t line_size = row_size;
+  size_t num_lines = col_size;
+
+  float expected_max = sim->calc_max_t_cell_rate();
+
+  for(size_t i = 0; i < num_lines; ++i) {
+      QRgb* row = (QRgb*) image_.scanLine(i);
+
+      size_t start = i * line_size;
+      size_t end = start + line_size;
+
+      for(size_t index = start; index < end; ++index) {
+          size_t local_index = index - start;
+
+          if(focal_cell_type != cancer) {
+              row[local_index] = get_color(focal_cell_type,
+                                       death_rate.get_value(index));
+          } else {
+              float rate =  death_rate.get_value(index) / expected_max;
+              row[local_index] = get_color(focal_cell_type, rate);
+          }
+      }
+  }
+}
+
+
+
 void MainWindow::update_image(size_t sq_size,
-                              const std::array< binned_distribution, 4 > & growth_rate) {
+                              const std::array< binned_distribution, 4 >& growth_rate) {
 
     cell_type focal_cell_type = normal;
     if( focal_display_type == normal_rate)    focal_cell_type = normal;
@@ -313,10 +345,14 @@ void MainWindow::update_image(size_t sq_size,
     if( focal_display_type == resistant_rate) focal_cell_type = resistant;
 
     if(grid_type == regular) {
-      if(focal_display_type != dominant_rate) {
-        display_regular(growth_rate[focal_cell_type], focal_cell_type);
+      if(focal_display_type == dominant_rate) {
+          display_regular(growth_rate);
+      } else if (focal_display_type == cancer_death_rate) {
+          display_regular_death_rate(growth_rate[cancer], cancer, sq_size);
+      } else if (focal_display_type == normal_death_rate) {
+          display_regular_death_rate(growth_rate[normal], normal, sq_size);
       } else {
-        display_regular(growth_rate);
+          display_regular(growth_rate[focal_cell_type], focal_cell_type);
       }
     }
 
@@ -401,6 +437,7 @@ void MainWindow::update_parameters(Param& p) {
    p.diffusion = static_cast<float>(ui->box_diffusion->value());
    p.evaporation = static_cast<float>(ui->box_evaporation->value());
    p.t_cell_increase = static_cast<float>(ui->box_inflammation->value());
+   p.t_cell_rate = static_cast<float>(ui->box_t_cell_rate->value());
 
 
    p.sq_num_cells = static_cast<size_t>(ui->box_sq_num_cells->value());
@@ -425,8 +462,12 @@ void MainWindow::update_parameters(Param& p) {
        focal_display_type = cells;
    if(display_string == "Normal Growth Rate")
        focal_display_type = normal_rate;
+   if(display_string == "Normal Death Rate")
+       focal_display_type = normal_death_rate;
    if(display_string == "Cancer Growth Rate")
        focal_display_type = cancer_rate;
+   if(display_string == "Cancer Death Rate")
+       focal_display_type = cancer_death_rate;
    if(display_string == "Infected Growth Rate")
        focal_display_type = infected_rate;
    if(display_string == "Resistant Growth Rate")
@@ -514,8 +555,15 @@ void MainWindow::setup_simulation() {
 
     ui->btn_start->setText("Start");
 
-    if(focal_display_type == cells) update_image(all_parameters.sq_num_cells, false);
-    if(focal_display_type != cells)  {
+    if(focal_display_type == cells) {
+        update_image(all_parameters.sq_num_cells, false);
+    } else if (focal_display_type == t_cells) {
+        update_image(all_parameters.sq_num_cells, true);
+    } else if (focal_display_type == cancer_death_rate) {
+        update_image(all_parameters.sq_num_cells, sim->death_prob);
+    } else if (focal_display_type == normal_death_rate) {
+        update_image(all_parameters.sq_num_cells, sim->death_prob);
+    } else {
         update_image(all_parameters.sq_num_cells, sim->growth_prob);
     }
 
@@ -559,13 +607,16 @@ void MainWindow::on_btn_start_clicked()
                 update_image(all_parameters.sq_num_cells, false);
             } else if (focal_display_type == t_cells) {
                 update_image(all_parameters.sq_num_cells, true);
+            } else if (focal_display_type == cancer_death_rate) {
+                update_image(all_parameters.sq_num_cells, sim->death_prob);
+            } else if (focal_display_type == normal_death_rate) {
+                update_image(all_parameters.sq_num_cells, sim->death_prob);
             } else {
                 update_image(all_parameters.sq_num_cells, sim->growth_prob);
             }
 
             update_plot(static_cast<double>(sim->t),
                         sim->get_count_cell_types());
-                        //sim->count_cell_types());
             QApplication::processEvents();
         }
         if(!is_running) break;

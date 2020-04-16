@@ -52,6 +52,9 @@ struct Param {
   float t_cell_increase;
   float evaporation;
   float diffusion;
+  float t_cell_rate;
+  float t_cell_threshold;
+
 
   Param() {
     // default values, these don't necessarily make sense!
@@ -90,6 +93,8 @@ struct Param {
     t_cell_increase = 0.1f;
     evaporation = 0.01f;
     diffusion = 0.1f;
+    t_cell_rate = 20;
+    t_cell_threshold = 0.2;
   }
 };
 
