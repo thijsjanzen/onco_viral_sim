@@ -200,6 +200,12 @@ void simulation::update_death_prob(size_t pos,
     if(new_type < death_prob.size()) death_prob[new_type].update_entry(pos, 1.f);
 }
 
+void simulation::update_death_prob_cancer(float t_cell_rate,
+                                          size_t pos) {
+   float new_val = 1.f + t_cell_rate;
+   death_prob[cancer].update_entry(pos, new_val);
+}
+
 
 void simulation::update_rates() {
   rates[0] = parameters.birth_normal   * growth_prob[normal].get_total_sum();
@@ -208,7 +214,7 @@ void simulation::update_rates() {
 
   rates[2] = parameters.birth_cancer   * growth_prob[cancer].get_total_sum();
   rates[3] = parameters.death_cancer   * death_prob[cancer].get_total_sum();
-  assert(rates[3] == num_cell_types[cancer] * parameters.death_cancer);
+//  assert(rates[3] == num_cell_types[cancer] * parameters.death_cancer);
 
 
   rates[4] = parameters.birth_infected * growth_prob[infected].get_total_sum();
@@ -312,6 +318,19 @@ void simulation::set_infection_type(infection_routine infect_routine) {
   parameters.infection_type = infect_routine;
 }
 
+float simulation::calc_t_cell_death_rate(float concentration) {
+//  return 1.0 / (1 + expf(-parameters.t_cell_rate * (concentration -
+//                                                    parameters.t_cell_threshold)));
+
+  return expf(parameters.t_cell_rate * concentration);
+
+}
+
+float simulation::calc_max_t_cell_rate() {
+  return calc_t_cell_death_rate(parameters.t_cell_increase);
+}
+
+
 void simulation::diffuse() {
   // do something
   std::vector<float> new_concentration(world.size(), 0.f);
@@ -335,6 +354,10 @@ void simulation::diffuse() {
       float new_conc =  new_concentration[i];
       if(new_conc < 1e-5f) new_conc = 0.f;
       world[i].t_cell_concentration = new_conc;
+      if(new_conc > 0.f) {
+        float added_t_cell_death_rate = calc_t_cell_death_rate(new_conc);
+        update_death_prob_cancer(added_t_cell_death_rate, i);
+      }
   }
   total_t_cell_concentration = std::accumulate(new_concentration.begin(),
                                                new_concentration.end(),

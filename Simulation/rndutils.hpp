@@ -231,7 +231,7 @@ namespace detail {
   inline auto do_generate_canonical(typename GCB::urng_t& rgen) noexcept
     -> enable_if_t<(GCB::samples == 1), typename GCB::real_t>
   {
-    const auto rx = static_cast<typename GCB::real_t>(1) / (GCB::range + static_cast<typename GCB::real_t>(1));
+    constexpr auto rx = static_cast<typename GCB::real_t>(1) / (GCB::range + static_cast<typename GCB::real_t>(1));
     const auto s = static_cast<typename GCB::real_t>(rgen()) - GCB::gmin;
     return s * rx;
   }
@@ -340,8 +340,8 @@ public:
   using engine_type = xorshift128;
 
   static constexpr uint64_t default_seed = static_cast<uint64_t>(0xccf05c43b8137c1f);
-  static constexpr uint64_t (min)() { return 0; };
-  static constexpr uint64_t (max)() { return -1; };
+  static constexpr uint64_t (min)() { return 0ull; };
+  static constexpr uint64_t (max)() { return std::numeric_limits<uint64_t>::max(); };
 
   template <typename T>
   static T canonical(uint64_t rnd)
@@ -352,26 +352,27 @@ public:
     return s * rx;
   }
 
-  explicit xorshift128(uint64_t val = default_seed) noexcept
+  explicit xorshift128(uint64_t val = default_seed)
   {
     seed(val);
   }
 
-  explicit xorshift128(std::seed_seq& sseq) noexcept
+  explicit xorshift128(std::seed_seq& sseq)
   {
     seed(sseq);
   }
 
-  void seed(uint64_t val = default_seed) noexcept
+  void seed(uint64_t val = default_seed)
   {
     std::seed_seq sseq{val};
     seed(sseq);
   }
 
-  void seed(std::seed_seq& sseq) noexcept
+  void seed(std::seed_seq& sseq)
   {
-    auto* p = reinterpret_cast<uint32_t*>(state_.data());
-    sseq.generate(p, p + 2 * state_.size());
+    auto mt = std::default_random_engine{ sseq };
+    auto mtd = std::uniform_int_distribution<size_t>{};
+    for (auto& s : state_) s = mtd(mt);
   }
 
   uint64_t operator()(void) noexcept
@@ -431,26 +432,27 @@ public:
   static constexpr uint64_t(min)() { return static_cast<uint64_t>(0); };
   static constexpr uint64_t(max)() { return static_cast<uint64_t>(-1); };
 
-  explicit xorshift1024(uint64_t val = default_seed) noexcept
+  explicit xorshift1024(uint64_t val = default_seed)
   {
     seed(val);
   }
 
-  explicit xorshift1024(std::seed_seq& sseq) noexcept
+  explicit xorshift1024(std::seed_seq& sseq)
   {
     seed(sseq);
   }
 
-  void seed(uint64_t val = default_seed) noexcept
+  void seed(uint64_t val = default_seed)
   {
     std::seed_seq sseq{val};
     seed(sseq);
   }
 
-  void seed(std::seed_seq& sseq) noexcept
+  void seed(std::seed_seq& sseq)
   {
-    auto* p = reinterpret_cast<uint32_t*>(state_.data());
-    sseq.generate(p, p + 2 * state_.size());
+    auto mt = std::default_random_engine{ sseq };
+    auto mtd = std::uniform_int_distribution<size_t>{};
+    for (auto& s : state_) s = mtd(mt);
     pivot_ = 0;
   }
 
@@ -469,12 +471,12 @@ public:
     for (unsigned long long i = 0; i < z; ++i) this->operator()();
   }
 
-  friend bool operator==(engine_type const& lhs, engine_type const& rhs) noexcept
+  friend bool operator==(engine_type const& lhs, engine_type const& rhs)
   {
     return lhs.state_ == rhs.state_;
   }
 
-  friend bool operator!=(engine_type const& lhs, engine_type const& rhs) noexcept
+  friend bool operator!=(engine_type const& lhs, engine_type const& rhs)
   {
     return !(lhs == rhs);
   }
@@ -495,7 +497,7 @@ public:
 
 private:
   std::array<uint64_t, 16> state_;
-  int pivot_;
+  int pivot_ = 0;
 };
 
 
@@ -1032,7 +1034,7 @@ public:
 
 
   mutable_discrete_distribution()
-  : cdf_(1, result_type(0))
+    : cdf_(1, result_type{ 0 })
   { // default ctor
   }
 
@@ -1368,7 +1370,7 @@ private:
 
 #define RNDUTILS_FAST_GENERATE_CANONICAL_REAL_BITS(Real, Bits, URNG)     \
   template <>                                                            \
-  inline Real generate_canonical<Real, Bits, URNG>(URNG & reng) noexcept \
+  inline Real generate_canonical<Real, Bits, URNG>(URNG & reng)          \
   {                                                                      \
     return rndutils::detail::generate_canonical<Real, Bits, URNG>(reng); \
   }
@@ -1379,13 +1381,13 @@ private:
   RNDUTILS_FAST_GENERATE_CANONICAL_REAL_BITS(double, size_t(-1), URNG) \
   RNDUTILS_FAST_GENERATE_CANONICAL_REAL_BITS(long double, size_t(-1), URNG)
 
-/*
+
 #if defined(RNDUTILS_ENABLE_FAST_STD_GENERATE_CANONICAL)
 namespace std {
   RNDUTILS_FAST_GENERATE_CANONICAL(rndutils::xorshift128)
   RNDUTILS_FAST_GENERATE_CANONICAL(rndutils::xorshift1024)
 }
 #endif
-*/
+
 
 #endif

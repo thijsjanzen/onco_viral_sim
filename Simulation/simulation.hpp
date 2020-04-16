@@ -49,6 +49,8 @@ public:
   void add_cells(const cell_type& focal_cell_type);
 
   void obtain_equilibrium();
+
+  float calc_max_t_cell_rate();
   std::array<size_t, 5> num_cell_types;
 private:
 
@@ -72,6 +74,8 @@ private:
   void implement_growth(const cell_type& parent);
   void update_growth_prob(size_t pos);
   void update_death_prob(size_t pos);
+  void update_death_prob_cancer(float t_cell_rate,
+                                            size_t pos);
 
   size_t find_center(const cell_type& focal_cell_type);
 
@@ -104,6 +108,8 @@ private:
 
   void ask_infect_neighbours(size_t depth, float p, size_t pos);
   void update_count(cell_type old_type, cell_type new_type);
+  float calc_t_cell_death_rate(float concentration);
+
 };
 
 
