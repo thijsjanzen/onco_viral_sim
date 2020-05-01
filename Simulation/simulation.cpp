@@ -354,7 +354,9 @@ void simulation::diffuse() {
       world[i].t_cell_concentration = new_conc;
       if(new_conc > 0.f) {
         float added_t_cell_death_rate = calc_t_cell_death_rate(new_conc);
-        float mult = 1.0f - world[i].freq_type_neighbours(cancer);
+        float mult = 1.0f - parameters.t_cell_density_scaler *
+                            world[i].freq_type_neighbours(cancer);
+        if(mult < 0.f) mult = 0.f;
         float new_t_cell_death_rate = mult * added_t_cell_death_rate;
         update_death_prob_cancer(new_t_cell_death_rate, i);
       }
