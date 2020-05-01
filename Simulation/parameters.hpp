@@ -53,7 +53,6 @@ struct Param {
   float evaporation;
   float diffusion;
   float t_cell_rate;
-  float t_cell_threshold;
   float t_cell_density_scaler;
 
 
@@ -95,7 +94,6 @@ struct Param {
     evaporation = 0.01f;
     diffusion = 0.1f;
     t_cell_rate = 10;
-    t_cell_threshold = 0.2f;
     t_cell_density_scaler = 1.0f;
   }
 };

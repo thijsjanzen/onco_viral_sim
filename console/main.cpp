@@ -141,6 +141,13 @@ void read_parameters_from_ini(Param& p, const std::string file_name) {
 
   p.sq_num_cells = from_config.getValueOfKey<size_t>("sq_num_cells");
 
+  p.t_cell_increase = from_config.getValueOfKey<float>("t_cell_increase");
+  p.evaporation = from_config.getValueOfKey<float>("evaporation");
+  p.diffusion   = from_config.getValueOfKey<float>("diffusion");
+  p.t_cell_rate = from_config.getValueOfKey<float>("t_cell_rate");
+  p.t_cell_density_scaler = from_config.getValueOfKey<float>("t_cell_density_scaler");
+
+
   p.infection_type = random_infection;
   auto infection_string = from_config.getValueOfKey<std::string>("infection_type");
   if(infection_string == "Random")
