@@ -161,7 +161,6 @@ struct node {
 
   void add_t_cell(float amount);
 
-
   std::vector< cell_type > return_neighbor_types();
 
   void add_neighbor(std::vector< node >& world,
