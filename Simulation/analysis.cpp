@@ -67,30 +67,30 @@ std::array<size_t, 5> do_analysis(Param all_parameters) {
           if((cast_t - prev_cast_t) >= 10) {
               prev_cast_t = cast_t;
 
-            cell_counts = Simulation.num_cell_types;
+            cell_counts = Simulation.get_count_cell_types();  //Simulation.num_cell_types;
 
             auto total_t = std::chrono::duration_cast<std::chrono::seconds>(next_t - start_t).count();
 
               std::cout << static_cast<int>(Simulation.t) << "\t" <<
-                           Simulation.num_cell_types[normal] << "\t" <<
-                           Simulation.num_cell_types[cancer] << "\t" <<
-                           Simulation.num_cell_types[infected] << "\t" <<
-                           Simulation.num_cell_types[resistant] << "\t" <<
+                           cell_counts[normal] << "\t" <<
+                           cell_counts[cancer] << "\t" <<
+                           cell_counts[infected] << "\t" <<
+                           cell_counts[resistant] << "\t" <<
                            "total time spent: " << total_t << " seconds\n";
 
               std::ofstream logfile("logfile.txt", std::ios::app);
               logfile << static_cast<int>(Simulation.t) << "\t" <<
-                         Simulation.num_cell_types[normal] << "\t" <<
-                         Simulation.num_cell_types[cancer] << "\t" <<
-                         Simulation.num_cell_types[infected] << "\t" <<
-                         Simulation.num_cell_types[resistant] << "\t" <<
+                         cell_counts[normal] << "\t" <<
+                         cell_counts[cancer] << "\t" <<
+                         cell_counts[infected] << "\t" <<
+                         cell_counts[resistant] << "\t" <<
                          "total time spent: " << total_t << " seconds\n";
               logfile.close();
 
               if(all_parameters.start_setup == grow ||
                  all_parameters.start_setup == converge) {
 
-                if(Simulation.num_cell_types[cancer] < 1 &&
+                if(cell_counts[cancer] < 1 &&
                    virus_added == true) {
                     std::cout << "cancer eradicated\n";
                     break;
@@ -101,11 +101,11 @@ std::array<size_t, 5> do_analysis(Param all_parameters) {
                // }
               }
               if(all_parameters.start_setup == full) {
-                  if(Simulation.num_cell_types[cancer] < 1) {
+                  if(cell_counts[cancer] < 1) {
                       std::cout << "cancer eradicated";
                       break;
                   }
-                  if(Simulation.num_cell_types[normal] < 1) {
+                  if(cell_counts[normal] < 1) {
                       std::cout << "normal tissue gone\n";
                       break;
                   }

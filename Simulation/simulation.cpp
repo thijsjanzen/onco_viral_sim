@@ -309,8 +309,6 @@ std::array<size_t, 5> simulation::get_count_cell_types() const {
   return num_cell_types;
 }
 
-
-
 void simulation::set_percent_infected(float percent_infected) {
   parameters.percent_infected = percent_infected;
 }
@@ -356,7 +354,11 @@ void simulation::diffuse() {
       world[i].t_cell_concentration = new_conc;
       if(new_conc > 0.f) {
         float added_t_cell_death_rate = calc_t_cell_death_rate(new_conc);
-        update_death_prob_cancer(added_t_cell_death_rate, i);
+        float mult = 1.0f - parameters.t_cell_density_scaler *
+                            world[i].freq_type_neighbours(cancer);
+        if(mult < 0.f) mult = 0.f;
+        float new_t_cell_death_rate = mult * added_t_cell_death_rate;
+        update_death_prob_cancer(new_t_cell_death_rate, i);
       }
   }
   total_t_cell_concentration = std::accumulate(new_concentration.begin(),
