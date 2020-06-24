@@ -351,7 +351,7 @@ void simulation::diffuse() {
   for(size_t i = 0; i < new_concentration.size(); ++i) {
       float new_conc =  new_concentration[i];
       if(new_conc < 1e-5f) new_conc = 0.f;
-      world[i].t_cell_concentration = new_conc;
+      world[i].t_cell_concentration = new_conc;  // swap of the vectors
       if(new_conc > 0.f) {
         float added_t_cell_death_rate = calc_t_cell_death_rate(new_conc);
         float mult = 1.0f - parameters.t_cell_density_scaler *

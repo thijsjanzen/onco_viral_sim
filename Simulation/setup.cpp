@@ -12,6 +12,12 @@ world(param.sq_num_cells * param.sq_num_cells)
 {
   parameters = param;
 
+  rndgen.set_seed(parameters.seed);
+  std::ofstream seed_file("seed.txt", std::ios::app);
+  seed_file << parameters.seed;
+  seed_file.close();
+
+
   sq_size = parameters.sq_num_cells;
   num_cells = sq_size * sq_size;
 
@@ -38,7 +44,6 @@ world(param.sq_num_cells * param.sq_num_cells)
       long_distance_infection_probability.push_back(local_prob);
       if(local_prob < 1e-3) break;
   }
-
 }
 
 

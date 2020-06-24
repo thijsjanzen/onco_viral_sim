@@ -113,6 +113,8 @@ void read_parameters_from_ini(Param& p, const std::string file_name) {
 
   ConfigFile from_config(file_name);
 
+  p.seed = from_config.getValueOfKey<size_t>("seed");
+
   p.maximum_time = from_config.getValueOfKey<int>("maximum_time");
   p.time_adding_cancer = from_config.getValueOfKey<int>("time_adding_cancer");
   p.time_adding_virus  = from_config.getValueOfKey<int>("time_adding_virus");

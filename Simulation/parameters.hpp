@@ -9,11 +9,14 @@
 
 #include <cstdio>
 #include <cmath>
+#include <random>
 
 enum infection_routine {random_infection, center_infection};
 enum start_type {full, grow, converge};
 
 struct Param {
+
+  size_t seed;
 
   int maximum_time;
 
@@ -53,10 +56,14 @@ struct Param {
   float evaporation;
   float diffusion;
   float t_cell_rate;
+  float t_cell_threshold;
   float t_cell_density_scaler;
 
 
   Param() {
+    std::random_device rd;
+    seed = rd();
+
     // default values, these don't necessarily make sense!
     maximum_time = 500; // default from Berg et al 2019
     time_adding_virus = 3000; // default from Berg et al 2019
@@ -94,6 +101,7 @@ struct Param {
     evaporation = 0.01f;
     diffusion = 0.1f;
     t_cell_rate = 10;
+    t_cell_threshold = 0.2f;
     t_cell_density_scaler = 1.0f;
   }
 };

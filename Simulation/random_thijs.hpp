@@ -20,13 +20,17 @@ struct rnd_t {
   }
 
   std::cauchy_distribution<float> cauch_dist = std::cauchy_distribution<float>(0.f, 0.01f);
-  std::bernoulli_distribution bern_dist = std::bernoulli_distribution(0.01);
+  std::bernoulli_distribution      bern_dist = std::bernoulli_distribution(0.01);
 
   rndutils::uniform01_distribution<float> rndutil_norm;
 
   int random_number(size_t n)    {
     if(n <= 1) return 0;
     return std::uniform_int_distribution<> (0, static_cast<int>(n - 1))(rndgen_);
+  }
+
+  void set_seed(unsigned int s) {
+    rndgen_ = rndutils::make_random_engine(s);
   }
 
   float uniform()    {
