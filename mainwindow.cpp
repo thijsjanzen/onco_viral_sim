@@ -59,6 +59,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->box_infection_routine->addItem("Center");
     ui->box_infection_routine->addItem("Random");
+    ui->box_infection_routine->addItem("Periphery");
 
     ui->box_start_setup->addItem("Full");
     ui->box_start_setup->addItem("Grow");
@@ -707,6 +708,8 @@ void MainWindow::on_btn_add_virus_clicked()
        sim->set_infection_type(random_infection);
    if(infection_string == "Center")
        sim->set_infection_type(center_infection);
+   if(infection_string == "Periphery")
+       sim->set_infection_type(periphery_infection);
 
    sim->set_percent_infected(static_cast<float>(ui->box_percent_infected->value()));
 

@@ -171,6 +171,8 @@ struct node {
 
   void die();
 
+  std::vector< size_t > get_cancer_neighbours();
+
   cell_type get_cell_type() const {
     return node_type;
   }

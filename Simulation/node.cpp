@@ -164,3 +164,16 @@ std::vector< voronoi_point> clean_edges(const std::vector< voronoi_edge >& input
     }
     return outer_points;
 }
+
+std::vector< size_t > node::get_cancer_neighbours() {
+  std::vector< size_t > output;
+  for(auto i : neighbors) {
+    if(i->get_cell_type() == cancer) {
+      output.push_back(i->pos);
+    }
+  }
+  return output;
+}
+
+
+
