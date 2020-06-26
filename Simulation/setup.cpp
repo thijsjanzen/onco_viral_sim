@@ -68,6 +68,32 @@ size_t simulation::find_central_cell(const cell_type& focal_cell_type) {
     return(std::distance(dist.begin(), min));
 }
 
+size_t simulation::find_central_cell(const std::vector< size_t >& positions) {
+    // first calculate average x and y of cell type:
+    float x = 0.f;
+    float y = 0.f;
+    int counter = 0;
+    for(const auto& i : positions) {
+            x += world[i].x_;
+            y += world[i].y_;
+            counter++;
+    }
+
+    x *= 1.0f / counter;
+    y *= 1.0f / counter;
+
+    std::vector< float > dist(positions.size(), 1e9);
+    for (size_t i = 0; i < positions.size(); ++i) {
+      size_t pos = positions[i];
+      dist[i] = (world[pos].x_ - x) * (world[pos].x_ - x) +
+                 (world[pos].y_ - y) * (world[pos].y_ - y);
+    }
+
+    auto min = std::min_element(dist.begin(), dist.end());
+    return(std::distance(dist.begin(), min));
+}
+
+
 
 void simulation::initialize_network(std::vector< std::vector< voronoi_point > >& all_polys) {
    // initialize default.
@@ -266,7 +292,9 @@ void simulation::infect_center_largest() {
       to_be_infected = *m;
   }
 
-  size_t focal_pos = clusters[largest_cluster][0];
+  size_t index_central_cell = find_central_cell(clusters[largest_cluster]);
+
+  size_t focal_pos = clusters[largest_cluster][index_central_cell];
   std::vector<size_t> cells_turned(1, focal_pos);
 
   change_cell_type(focal_pos, infected);

@@ -89,6 +89,7 @@ private:
   void update_death_cdf_all();
 
   size_t find_central_cell(const cell_type& focal_cell_type);
+  size_t find_central_cell(const std::vector< size_t >& positions);
 
 
   void infect_random();
