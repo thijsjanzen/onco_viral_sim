@@ -20,7 +20,7 @@ struct rnd_t {
   }
 
   std::cauchy_distribution<float> cauch_dist = std::cauchy_distribution<float>(0.f, 0.01f);
-  std::bernoulli_distribution bern_dist = std::bernoulli_distribution(0.01);
+  std::bernoulli_distribution      bern_dist = std::bernoulli_distribution(0.01);
 
   rndutils::uniform01_distribution<float> rndutil_norm;
 
