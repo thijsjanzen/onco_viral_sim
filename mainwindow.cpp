@@ -450,6 +450,8 @@ void MainWindow::update_parameters(Param& p) {
        p.infection_type = random_infection;
    if(infection_string == "Center")
        p.infection_type = center_infection;
+   if(infection_string == "Periphery")
+       p.infection_type = periphery_infection;
 
 
     auto start_string = ui->box_start_setup->currentText();
