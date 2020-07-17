@@ -90,10 +90,14 @@ private:
   void update_death_cdf_all();
 
   size_t find_central_cell(const cell_type& focal_cell_type);
+  size_t find_central_cell(const std::vector< size_t >& positions);
 
 
   void infect_random();
   void infect_center();
+  void infect_center_largest();
+ // void infect_periphery();
+  void infect_periphery2();
   void infect_all_cancer();
 
   void initialize_full();

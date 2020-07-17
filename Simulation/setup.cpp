@@ -73,6 +73,32 @@ size_t simulation::find_central_cell(const cell_type& focal_cell_type) {
     return(std::distance(dist.begin(), min));
 }
 
+size_t simulation::find_central_cell(const std::vector< size_t >& positions) {
+    // first calculate average x and y of cell type:
+    float x = 0.f;
+    float y = 0.f;
+    int counter = 0;
+    for(const auto& i : positions) {
+            x += world[i].x_;
+            y += world[i].y_;
+            counter++;
+    }
+
+    x *= 1.0f / counter;
+    y *= 1.0f / counter;
+
+    std::vector< float > dist(positions.size(), 1e9);
+    for (size_t i = 0; i < positions.size(); ++i) {
+      size_t pos = positions[i];
+      dist[i] = (world[pos].x_ - x) * (world[pos].x_ - x) +
+                 (world[pos].y_ - y) * (world[pos].y_ - y);
+    }
+
+    auto min = std::min_element(dist.begin(), dist.end());
+    return(std::distance(dist.begin(), min));
+}
+
+
 
 void simulation::initialize_network(std::vector< std::vector< voronoi_point > >& all_polys) {
    // initialize default.
@@ -200,7 +226,256 @@ void simulation::infect_random() {
     }
 }
 
+void remove_entries(std::vector< size_t >& source,
+                    const std::vector< size_t >& to_remove) {
+  for(auto i : to_remove) {
+    for(size_t j = 0; j < source.size(); ++j)  {
+       if(source[j] == i) {
+           source[j] = source.back();
+           source.pop_back();
+           break;
+       }
+    }
+  }
+}
+
+
+void simulation::infect_center_largest() {
+  size_t num_cancer_cells = num_cell_types[cancer];
+  if (num_cancer_cells == 0) return;
+  // here, we inject cancer in the largest tumour mass.
+  // thus, we first have to collect all tumour cells, and group them.
+
+  std::vector< size_t > cancer_cell_pos(num_cancer_cells);
+  size_t cnt = 0;
+  size_t j = 0;
+  for (const auto& i : world) {
+      if (i.get_cell_type() == cancer) {
+          cancer_cell_pos[cnt] = j;
+          cnt++;
+      }
+      j++;
+  }
+
+  std::vector< std::vector< size_t > > clusters;
+  std::vector< size_t > cluster_sizes;
+  while(!cancer_cell_pos.empty()) {
+    std::vector< size_t > cluster;
+    cluster.push_back(cancer_cell_pos[0]);
+
+    for(size_t i = 0; i < cluster.size(); ++i) {
+      std::vector< size_t > neighbours = world[cluster[i]].get_cancer_neighbours();
+      for(size_t j = 0; j < neighbours.size(); ++j) {
+
+          // this is not the fastest method, but it is very reliable.
+          // probably a method using an unsorted set could work much faster.
+          if(std::find(cluster.begin(), cluster.end(), neighbours[j]) ==
+             cluster.end()) {
+              cluster.push_back(neighbours[j]);
+          }
+      }
+    }
+    // now we have to remove these entries
+    remove_entries(cancer_cell_pos, cluster);
+    cluster_sizes.push_back(cluster.size());
+    clusters.push_back(cluster);
+  }
+
+  auto m = std::max_element(cluster_sizes.begin(), cluster_sizes.end());
+
+  size_t largest_cluster = 0;
+  for (size_t i = 0; i < cluster_sizes.size(); ++i) {
+      if (cluster_sizes[i] == *m) {
+          largest_cluster = i;
+          break;
+       }
+  }
+  size_t to_be_infected = static_cast<size_t>(parameters.percent_infected * *m);
+  if(to_be_infected == 0) return;
+
+  if(*m < to_be_infected) {
+      to_be_infected = *m;
+  }
+
+  size_t index_central_cell = find_central_cell(clusters[largest_cluster]);
+
+  size_t focal_pos = clusters[largest_cluster][index_central_cell];
+  std::vector<size_t> cells_turned(1, focal_pos);
+
+  change_cell_type(focal_pos, infected);
+
+  size_t counter = 0;
+  while(cells_turned.size() < to_be_infected && num_cancer_cells > 0) {
+    focal_pos = cells_turned[counter];
+    for(size_t i = 0; i < world[focal_pos].neighbors.size(); ++i) {
+      size_t other_pos = world[focal_pos].neighbors[i]->pos;
+      if(world[other_pos].get_cell_type() == cancer) {
+
+         change_cell_type(other_pos, infected);
+         cells_turned.push_back(other_pos);
+         num_cancer_cells--;
+
+         if(cells_turned.size() >= to_be_infected) break;
+      }
+    }
+    counter++;
+    if(counter > cells_turned.size()) break;
+  }
+
+  for(const auto& i : cells_turned) {
+     update_growth_prob(i);
+     update_death_prob(i);
+  }
+}
+
+void simulation::infect_periphery2() {
+  size_t num_cancer_cells = num_cell_types[cancer];
+  if (num_cancer_cells == 0) return;
+  // here, we inject cancer in the largest tumour mass.
+  // thus, we first have to collect all tumour cells, and group them.
+
+  std::vector< size_t > cancer_cell_pos(num_cancer_cells);
+  size_t cnt = 0;
+  size_t j = 0;
+  for (const auto& i : world) {
+      if (i.get_cell_type() == cancer) {
+          cancer_cell_pos[cnt] = j;
+          cnt++;
+      }
+      j++;
+  }
+
+  std::vector< std::vector< size_t > > clusters;
+  std::vector< size_t > cluster_sizes;
+  while(!cancer_cell_pos.empty()) {
+    std::vector< size_t > cluster;
+    cluster.push_back(cancer_cell_pos[0]);
+
+    for(size_t i = 0; i < cluster.size(); ++i) {
+      std::vector< size_t > neighbours = world[cluster[i]].get_cancer_neighbours();
+      for(size_t j = 0; j < neighbours.size(); ++j) {
+
+          // this is not the fastest method, but it is very reliable.
+          // probably a method using an unsorted set could work much faster.
+          if(std::find(cluster.begin(), cluster.end(), neighbours[j]) ==
+             cluster.end()) {
+              cluster.push_back(neighbours[j]);
+          }
+      }
+    }
+    // now we have to remove these entries
+    remove_entries(cancer_cell_pos, cluster);
+    cluster_sizes.push_back(cluster.size());
+    clusters.push_back(cluster);
+  }
+
+  auto m = std::max_element(cluster_sizes.begin(), cluster_sizes.end());
+
+  size_t largest_cluster = 0;
+  for (size_t i = 0; i < cluster_sizes.size(); ++i) {
+      if (cluster_sizes[i] == *m) {
+          largest_cluster = i;
+          break;
+       }
+  }
+
+  // now we have the largest cluster.
+  // let's now determine the distance to the center of the cluster.
+
+  // first, we determine the center:
+  float x = 0.f;
+  float y = 0.f;
+  int counter = 0;
+  for(const auto& i : clusters[largest_cluster]) {
+          x += world[i].x_;
+          y += world[i].y_;
+          counter++;
+  }
+
+  x *= 1.0f / counter;
+  y *= 1.0f / counter;
+
+  struct peri_cell {
+    size_t pos;
+    float dist_to_center;
+  };
+
+  std::vector< peri_cell > periphery;
+
+  for (size_t i = 0; i < clusters[largest_cluster].size(); ++i) {
+     size_t pos = clusters[largest_cluster][i];
+
+     if(world[pos].freq_type_neighbours(normal) > 0.f) {
+       peri_cell add;
+       add.dist_to_center = (world[pos].x_ - x) * (world[pos].x_ - x) +
+                            (world[pos].y_ - y) * (world[pos].y_ - y);
+       add.pos = pos;
+       periphery.push_back(add);
+      }
+    }
+
+  size_t to_be_infected = static_cast<size_t>(parameters.percent_infected * periphery.size());
+  if(to_be_infected == 0) return;
+
+  std::sort(periphery.begin(), periphery.end(),
+            [](auto const& a, auto const& b) {return a.dist_to_center > b.dist_to_center;});
+
+
+  std::vector< size_t > cells_turned;
+  for (size_t i = 0; i < to_be_infected; ++i) {
+     size_t focal_pos = periphery[i].pos;
+     change_cell_type(focal_pos, infected);
+     cells_turned.push_back(focal_pos);
+  }
+
+  for(const auto& i : cells_turned) {
+     update_growth_prob(i);
+     update_death_prob(i);
+  }
+}
+
+/*
+void simulation::infect_periphery() {
+
+  struct peri_cell {
+    size_t pos;
+    float freq;
+  };
+
+  std::vector< peri_cell > cancer_cell_pos;
+  for (const auto& i : world) {
+      if (i.get_cell_type() == cancer &&
+          i.freq_type_neighbours(cancer) < 1.f) {
+              peri_cell add;
+              add.pos = i.pos;
+              add.freq = i.freq_type_neighbours(cancer);
+              cancer_cell_pos.push_back(add);
+      }
+  }
+
+  size_t to_be_infected = static_cast<size_t>(parameters.percent_infected * cancer_cell_pos.size());
+  if(to_be_infected == 0) return;
+
+  std::sort(cancer_cell_pos.begin(),cancer_cell_pos.end(),
+            [](auto const& a, auto const& b) {return a.freq < b.freq;});
+
+
+  std::vector< size_t > cells_turned;
+  for (size_t i = 0; i < to_be_infected; ++i) {
+     size_t focal_pos = cancer_cell_pos[i].pos;
+     change_cell_type(focal_pos, infected);
+     cells_turned.push_back(focal_pos);
+  }
+
+  for(const auto& i : cells_turned) {
+     update_growth_prob(i);
+     update_death_prob(i);
+  }
+}
+*/
+
 void simulation::infect_center() {
+ // infect_center_largest();
     int num_cancer_cells = num_cell_types[cancer];
 
     size_t to_be_infected = static_cast<size_t>(parameters.percent_infected * num_cancer_cells);
@@ -252,7 +527,8 @@ void simulation::infect_all_cancer() {
 
 void simulation::add_infected() {
 
-    if(parameters.percent_infected == 1.0f) {
+    if(parameters.percent_infected == 1.0f &&
+       parameters.infection_type == random_infection) {
         infect_all_cancer();
         return;
     }
@@ -262,7 +538,10 @@ void simulation::add_infected() {
             infect_random();
             break;
         case center_infection:
-            infect_center();
+            infect_center_largest();
+            break;
+        case periphery_infection:
+            infect_periphery2();
             break;
     }
 }
