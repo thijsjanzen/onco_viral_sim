@@ -5,7 +5,7 @@
 #include "../Simulation/simulation.hpp"
 #include "../Simulation/analysis.hpp"
 
-BOOST_AUTO_TEST_CASE( infect_random )
+BOOST_AUTO_TEST_CASE( set_infection )
 {
   //  void set_percent_infected(float);
   // void set_infection_type(infection_routine infect_routine);

@@ -50,8 +50,7 @@ std::array<size_t, 5> do_analysis(Param all_parameters) {
           }
           if(prev_t < all_parameters.time_adding_virus &&
              Simulation.t >= all_parameters.time_adding_virus &&
-             virus_added_2 == false &&
-             virus_added   == true  &&
+             virus_added   == false  &&
              cancer_added  == true) {
              std::cout << "adding virus for the second time!\n";
              Simulation.add_infected(all_parameters.infection_type,
@@ -63,7 +62,8 @@ std::array<size_t, 5> do_analysis(Param all_parameters) {
 
           if(prev_t < all_parameters.time_adding_virus_2 &&
              Simulation.t >= all_parameters.time_adding_virus_2 &&
-             virus_added == false &&
+             virus_added == true &&
+             virus_added_2 == false &&
              cancer_added  == true) {
               std::cout << "adding virus!\n";
              Simulation.add_infected(all_parameters.infection_type_2,
@@ -105,15 +105,18 @@ std::array<size_t, 5> do_analysis(Param all_parameters) {
               if(all_parameters.start_setup == grow ||
                  all_parameters.start_setup == converge) {
 
-                if(cell_counts[cancer] < 1 &&
-                   virus_added == true) {
+                if(cell_counts[cancer] < 1 && virus_added == true) {
                     std::cout << "cancer eradicated\n";
                     break;
                 }
-               // if(Simulation.num_cell_types[normal] < 1 && virus_added == true) {
-               //     std::cout << "normal tissue gone\n";
-               //     break;
-               // }
+                if(cell_counts[normal] < 1 && virus_added == true) {
+                    std::cout << "normal tissue gone\n";
+                    break;
+                }
+                if(cell_counts[infected] < 1 && virus_added == true) {
+                    std::cout << "virus wiped out\n";
+                    break;
+                }
               }
               if(all_parameters.start_setup == full) {
                   if(cell_counts[cancer] < 1) {

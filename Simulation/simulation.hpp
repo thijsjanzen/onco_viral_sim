@@ -53,9 +53,9 @@ public:
 
   float calc_max_t_cell_rate();
   std::array<size_t, 5> num_cell_types;
+
+  Param get_parameters();
 private:
-
-
   Param parameters;
 
   float total_t_cell_concentration;
@@ -93,7 +93,6 @@ private:
   size_t find_central_cell(const cell_type& focal_cell_type);
   size_t find_central_cell(const std::vector< size_t >& positions);
 
-
   void infect_random(float fraction);
   void infect_center(float fraction);
   void infect_center_largest(float fraction);
@@ -108,7 +107,6 @@ private:
 
 
   void change_cell_type(const size_t& pos, const cell_type& new_cell_type);
-
 
   void ask_infect_neighbours(size_t depth, float p, size_t pos);
   void update_count(cell_type old_type, cell_type new_type);
