@@ -5,6 +5,37 @@
 #include "../Simulation/simulation.hpp"
 #include "../Simulation/analysis.hpp"
 
+
+
+BOOST_AUTO_TEST_CASE( t_cells )
+{
+  std::cout << "simulation with growth\n";
+  std::cout << "testing t cell effect\n";
+
+  Param all_parameters;
+  all_parameters.sq_num_cells = 100;
+  all_parameters.use_voronoi_grid = false;
+  all_parameters.infection_type = center_infection;
+
+  // GROW SETUP
+  all_parameters.start_setup = grow;
+  all_parameters.maximum_time = 1000;
+  all_parameters.time_adding_cancer = 500;
+  all_parameters.time_adding_virus = 100;
+
+  all_parameters.t_cell_increase = 1.f;
+  all_parameters.prob_infection_upon_death = 0.1f;
+
+  std::array<size_t, 5> result = do_analysis(all_parameters);
+  std::string outcome = get_outcome(result);
+  BOOST_CHECK_EQUAL(outcome, "C");
+
+  all_parameters.use_voronoi_grid = true;
+  result = do_analysis(all_parameters);
+  outcome = get_outcome(result);
+  BOOST_CHECK_EQUAL(outcome, "C");
+}
+
 BOOST_AUTO_TEST_CASE( infect_second_time )
 {
   std::cout << "simulation allowing growth from the start\n";
@@ -35,34 +66,6 @@ BOOST_AUTO_TEST_CASE( infect_second_time )
 
 
 
-
-BOOST_AUTO_TEST_CASE( t_cells )
-{
-  std::cout << "simulation with growth\n";
-  std::cout << "testing t cell effect\n";
-
-  Param all_parameters;
-  all_parameters.sq_num_cells = 100;
-  all_parameters.use_voronoi_grid = false;
-  all_parameters.infection_type = center_infection;
-
-  // GROW SETUP
-  all_parameters.start_setup = grow;
-  all_parameters.maximum_time = 1000;
-  all_parameters.time_adding_cancer = 500;
-  all_parameters.time_adding_virus = 100;
-
-  all_parameters.t_cell_increase = 1.f;
-
-  std::array<size_t, 5> result = do_analysis(all_parameters);
-  std::string outcome = get_outcome(result);
-  BOOST_CHECK_EQUAL(outcome, "C");
-
-  all_parameters.use_voronoi_grid = true;
-  result = do_analysis(all_parameters);
-  outcome = get_outcome(result);
-  BOOST_CHECK_EQUAL(outcome, "C");
-}
 
 
 

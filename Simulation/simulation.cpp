@@ -338,7 +338,6 @@ float simulation::calc_max_t_cell_rate() {
   return calc_t_cell_death_rate(parameters.t_cell_increase);
 }
 
-
 void simulation::diffuse() {
   // do something
   std::vector<float> new_concentration(world.size(), 0.f);
