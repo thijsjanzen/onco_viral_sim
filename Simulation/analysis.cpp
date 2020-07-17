@@ -113,7 +113,8 @@ std::array<size_t, 5> do_analysis(Param all_parameters) {
                     std::cout << "normal tissue gone\n";
                     break;
                 }
-                if(cell_counts[infected] < 1 && virus_added == true) {
+                if(cell_counts[infected] < 1 && virus_added == true &&
+                   cell_counts[normal] < 1) {
                     std::cout << "virus wiped out\n";
                     break;
                 }
@@ -173,7 +174,7 @@ std::string get_outcome(const std::array<size_t, 5>& cell_counts) {
     return "C";
   } else {
     // frequency resistant is non-zero
-    if(freq[infected] < 1e-6f) {
+    if(freq[infected] < freq[cancer]) {
         return "D";
     } else {
         return "C";
