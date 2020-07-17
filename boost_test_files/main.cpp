@@ -5,6 +5,36 @@
 #include "../Simulation/simulation.hpp"
 #include "../Simulation/analysis.hpp"
 
+BOOST_AUTO_TEST_CASE( check_grow_2 )
+{
+  std::cout << "simulation allowing growth from the start\n";
+  std::cout << "Using weakened virus, expected tumor win\n";
+
+  Param all_parameters;
+  all_parameters.sq_num_cells = 100;
+  all_parameters.use_voronoi_grid = false;
+  all_parameters.birth_infected = 0.2f;
+  all_parameters.death_infected = 2.0f;
+
+  // GROW SETUP
+  all_parameters.start_setup = grow;
+  all_parameters.maximum_time = 1000;
+  all_parameters.time_adding_cancer = 100;
+  all_parameters.time_adding_virus = 200;
+
+  std::array<size_t, 5> result = do_analysis(all_parameters);
+  std::string outcome = get_outcome(result);
+  BOOST_CHECK_EQUAL(outcome, "B");
+
+  all_parameters.use_voronoi_grid = true;
+  result = do_analysis(all_parameters);
+  outcome = get_outcome(result);
+  BOOST_CHECK_EQUAL(outcome, "B");
+}
+
+
+
+
 BOOST_AUTO_TEST_CASE( set_infection )
 {
   Param all_parameters;
@@ -219,32 +249,7 @@ BOOST_AUTO_TEST_CASE( check_full_2 )
   BOOST_CHECK_EQUAL(outcome, "B");
 }
 
-BOOST_AUTO_TEST_CASE( check_grow_2 )
-{
-  std::cout << "simulation allowing growth from the start\n";
-  std::cout << "Using weakened virus, expected tumor win\n";
 
-  Param all_parameters;
-  all_parameters.sq_num_cells = 100;
-  all_parameters.use_voronoi_grid = false;
-  all_parameters.birth_infected = 0.2f;
-  all_parameters.death_infected = 2.0f;
-
-  // GROW SETUP
-  all_parameters.start_setup = grow;
-  all_parameters.maximum_time = 1000;
-  all_parameters.time_adding_cancer = 100;
-  all_parameters.time_adding_virus = 200;
-
-  std::array<size_t, 5> result = do_analysis(all_parameters);
-  std::string outcome = get_outcome(result);
-  BOOST_CHECK_EQUAL(outcome, "B");
-
-  all_parameters.use_voronoi_grid = true;
-  result = do_analysis(all_parameters);
-  outcome = get_outcome(result);
-  BOOST_CHECK_EQUAL(outcome, "B");
-}
 
 // TODO:
 

@@ -172,7 +172,8 @@ void simulation::add_cells(const cell_type& focal_cell_type) {
   }
 
   size_t counter = 0;
-  while (cells_turned.size() < max_number_of_cells) {
+  while (cells_turned.size() < max_number_of_cells &&
+         counter < cells_turned.size()) {
     focal_pos = cells_turned[counter];
     for (size_t i = 0; i < world[focal_pos].neighbors.size(); ++i) {
       size_t other_pos = world[focal_pos].neighbors[i]->pos;
