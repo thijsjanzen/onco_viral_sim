@@ -70,7 +70,7 @@ std::array<size_t, 5> do_analysis(Param all_parameters) {
                                      all_parameters.percent_infected_2);
              Simulation.t = 0.f;
              prev_cast_t = static_cast<int>(Simulation.t);
-             virus_added = true;
+             virus_added_2 = true;
           }
 
           auto next_t = std::chrono::steady_clock::now();
