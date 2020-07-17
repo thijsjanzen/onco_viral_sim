@@ -96,8 +96,7 @@ private:
   void infect_random();
   void infect_center();
   void infect_center_largest();
- // void infect_periphery();
-  void infect_periphery2();
+  void infect_periphery();
   void infect_all_cancer();
 
   void initialize_full();
