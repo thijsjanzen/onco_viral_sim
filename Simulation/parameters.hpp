@@ -68,14 +68,14 @@ struct Param {
     seed = rd();
 
     // default values, these don't necessarily make sense!
-    maximum_time = 500; // default from Berg et al 2019
-    time_adding_virus = 3000; // default from Berg et al 2019
-    time_adding_cancer = 1000; // normally the population is first allowed to stabilize
+    maximum_time = 1000; // default from Berg et al 2019
+    time_adding_virus = 100; // default from Berg et al 2019
+    time_adding_cancer = 500; // normally the population is first allowed to stabilize
 
     infection_type = random_infection;
     percent_infected = 0.1f;
 
-    time_adding_virus_2 = 5000;
+    time_adding_virus_2 = 500000; // extremely high value to make it unlikely to trigger by default
     infection_type_2 = random_infection;
     percent_infected_2 = 0.1f;
 

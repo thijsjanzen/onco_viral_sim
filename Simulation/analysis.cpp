@@ -29,6 +29,7 @@ std::array<size_t, 5> do_analysis(Param all_parameters) {
   Simulation.t = 0.f;
   bool cancer_added = false;
   bool virus_added = false;
+  bool virus_added_2 = false;
 
   auto prev_timepoint = std::chrono::steady_clock::now();
   auto start_t = prev_timepoint;
@@ -49,9 +50,10 @@ std::array<size_t, 5> do_analysis(Param all_parameters) {
           }
           if(prev_t < all_parameters.time_adding_virus &&
              Simulation.t >= all_parameters.time_adding_virus &&
-             virus_added == false &&
+             virus_added_2 == false &&
+             virus_added   == true  &&
              cancer_added  == true) {
-              std::cout << "adding virus!\n";
+             std::cout << "adding virus for the second time!\n";
              Simulation.add_infected(all_parameters.infection_type,
                                      all_parameters.percent_infected);
              Simulation.t = 0.f;

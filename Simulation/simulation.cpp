@@ -322,6 +322,10 @@ void simulation::set_infection_type(infection_routine infect_routine) {
   parameters.infection_type = infect_routine;
 }
 
+Param simulation::get_parameters() {
+  return parameters;
+}
+
 float simulation::calc_t_cell_death_rate(float concentration) {
 //  return 1.0 / (1 + expf(-parameters.t_cell_rate * (concentration -
 //                                                    parameters.t_cell_threshold)));

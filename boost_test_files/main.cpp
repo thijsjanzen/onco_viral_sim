@@ -7,6 +7,29 @@
 
 BOOST_AUTO_TEST_CASE( infect_random )
 {
+  //  void set_percent_infected(float);
+  // void set_infection_type(infection_routine infect_routine);
+  Param all_parameters;
+  simulation Simulation(all_parameters);
+
+  std::vector< std::vector< voronoi_point > > filler;
+
+  Simulation.initialize_network(filler);
+
+  float target = 0.1f;
+  Simulation.set_percent_infected(target);
+  BOOST_CHECK_EQUAL(Simulation.get_parameters().percent_infected,
+                    target);
+
+  infection_routine test = random_infection;
+  Simulation.set_infection_type(test);
+  BOOST_CHECK_EQUAL(Simulation.get_parameters().infection_type,
+                    test);
+}
+
+
+BOOST_AUTO_TEST_CASE( infect_random )
+{
   std::cout << "simulation allowing growth from the start\n";
   std::cout << "using random infection\n";
 
@@ -17,7 +40,7 @@ BOOST_AUTO_TEST_CASE( infect_random )
 
   // GROW SETUP
   all_parameters.start_setup = grow;
-  all_parameters.maximum_time = 2000;
+  all_parameters.maximum_time = 1000;
   all_parameters.time_adding_cancer = 500;
   all_parameters.time_adding_virus = 100;
 
@@ -27,8 +50,8 @@ BOOST_AUTO_TEST_CASE( infect_random )
 
   all_parameters.use_voronoi_grid = true;
   result = do_analysis(all_parameters);
-  get_outcome(result);
-  BOOST_CHECK_EQUAL(outcome, "C");
+  std::string outcome2 = get_outcome(result);
+  BOOST_CHECK_EQUAL(outcome, outcome2);
 }
 
 
@@ -47,9 +70,9 @@ BOOST_AUTO_TEST_CASE( infect_all )
 
   // GROW SETUP
   all_parameters.start_setup = grow;
-  all_parameters.maximum_time = 2000;
+  all_parameters.maximum_time = 1000;
   all_parameters.time_adding_cancer = 500;
-  all_parameters.time_adding_virus = 2;
+  all_parameters.time_adding_virus = 100;
 
   all_parameters.initial_number_normal_cells = 5000;
   all_parameters.initial_number_cancer_cells = 100;
@@ -77,7 +100,7 @@ BOOST_AUTO_TEST_CASE( infect_center )
 
   // GROW SETUP
   all_parameters.start_setup = grow;
-  all_parameters.maximum_time = 2000;
+  all_parameters.maximum_time = 1000;
   all_parameters.time_adding_cancer = 500;
   all_parameters.time_adding_virus = 2;
 
@@ -107,7 +130,7 @@ BOOST_AUTO_TEST_CASE( test_converge )
   // GROW SETUP
   all_parameters.start_setup = converge;
 
-  all_parameters.maximum_time = 10000;
+  all_parameters.maximum_time = 1000;
   all_parameters.time_adding_cancer = 1000;
   all_parameters.time_adding_virus = 500;
 
@@ -211,9 +234,9 @@ BOOST_AUTO_TEST_CASE( check_grow_2 )
 
   // GROW SETUP
   all_parameters.start_setup = grow;
-  all_parameters.maximum_time = 10000;
-  all_parameters.time_adding_cancer = 1000;
-  all_parameters.time_adding_virus = 2000;
+  all_parameters.maximum_time = 1000;
+  all_parameters.time_adding_cancer = 100;
+  all_parameters.time_adding_virus = 200;
 
   std::array<size_t, 5> result = do_analysis(all_parameters);
   std::string outcome = get_outcome(result);
@@ -224,8 +247,6 @@ BOOST_AUTO_TEST_CASE( check_grow_2 )
   outcome = get_outcome(result);
   BOOST_CHECK_EQUAL(outcome, "B");
 }
-
-
 
 // TODO:
 
