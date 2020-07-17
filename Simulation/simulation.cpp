@@ -38,7 +38,14 @@ void simulation::update_one_step() {
 
         if(t < parameters.time_adding_virus &&
            t+dt >= parameters.time_adding_virus) {
-          add_infected();
+          add_infected(parameters.infection_type,
+                       parameters.percent_infected);
+        }
+
+        if(t < parameters.time_adding_virus_2 &&
+           t+dt >= parameters.time_adding_virus_2) {
+          add_infected(parameters.infection_type_2,
+                       parameters.percent_infected_2);
         }
     }
 
@@ -61,7 +68,6 @@ void simulation::update_one_step() {
       diffuse();
      }
     }
-
 
     t += dt;
 }

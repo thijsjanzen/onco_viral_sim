@@ -191,11 +191,11 @@ void simulation::add_cells(const cell_type& focal_cell_type) {
   }
 }
 
-void simulation::infect_random() {
+void simulation::infect_random(float fraction) {
     int num_cancer_cells = num_cell_types[cancer];
 
     int infected_cells = 0;
-    int to_be_infected = static_cast<int>(parameters.percent_infected * num_cancer_cells);
+    int to_be_infected = static_cast<int>(fraction * num_cancer_cells);
     if(to_be_infected == 0) return;
 
     std::vector< size_t > cancer_pos(num_cancer_cells);
@@ -240,7 +240,7 @@ void remove_entries(std::vector< size_t >& source,
 }
 
 
-void simulation::infect_center_largest() {
+void simulation::infect_center_largest(float fraction) {
   size_t num_cancer_cells = num_cell_types[cancer];
   if (num_cancer_cells == 0) return;
   // here, we inject cancer in the largest tumour mass.
@@ -290,7 +290,7 @@ void simulation::infect_center_largest() {
           break;
        }
   }
-  size_t to_be_infected = static_cast<size_t>(parameters.percent_infected * *m);
+  size_t to_be_infected = static_cast<size_t>(fraction * *m);
   if(to_be_infected == 0) return;
 
   if(*m < to_be_infected) {
@@ -328,7 +328,7 @@ void simulation::infect_center_largest() {
   }
 }
 
-void simulation::infect_periphery2() {
+void simulation::infect_periphery(float fraction) {
   size_t num_cancer_cells = num_cell_types[cancer];
   if (num_cancer_cells == 0) return;
   // here, we inject cancer in the largest tumour mass.
@@ -414,7 +414,7 @@ void simulation::infect_periphery2() {
       }
     }
 
-  size_t to_be_infected = static_cast<size_t>(parameters.percent_infected * periphery.size());
+  size_t to_be_infected = static_cast<size_t>(fraction * periphery.size());
   if(to_be_infected == 0) return;
 
   std::sort(periphery.begin(), periphery.end(),
@@ -434,51 +434,12 @@ void simulation::infect_periphery2() {
   }
 }
 
-/*
-void simulation::infect_periphery() {
 
-  struct peri_cell {
-    size_t pos;
-    float freq;
-  };
-
-  std::vector< peri_cell > cancer_cell_pos;
-  for (const auto& i : world) {
-      if (i.get_cell_type() == cancer &&
-          i.freq_type_neighbours(cancer) < 1.f) {
-              peri_cell add;
-              add.pos = i.pos;
-              add.freq = i.freq_type_neighbours(cancer);
-              cancer_cell_pos.push_back(add);
-      }
-  }
-
-  size_t to_be_infected = static_cast<size_t>(parameters.percent_infected * cancer_cell_pos.size());
-  if(to_be_infected == 0) return;
-
-  std::sort(cancer_cell_pos.begin(),cancer_cell_pos.end(),
-            [](auto const& a, auto const& b) {return a.freq < b.freq;});
-
-
-  std::vector< size_t > cells_turned;
-  for (size_t i = 0; i < to_be_infected; ++i) {
-     size_t focal_pos = cancer_cell_pos[i].pos;
-     change_cell_type(focal_pos, infected);
-     cells_turned.push_back(focal_pos);
-  }
-
-  for(const auto& i : cells_turned) {
-     update_growth_prob(i);
-     update_death_prob(i);
-  }
-}
-*/
-
-void simulation::infect_center() {
+void simulation::infect_center(float fraction) {
  // infect_center_largest();
     int num_cancer_cells = num_cell_types[cancer];
 
-    size_t to_be_infected = static_cast<size_t>(parameters.percent_infected * num_cancer_cells);
+    size_t to_be_infected = static_cast<size_t>(fraction * num_cancer_cells);
     if(to_be_infected == 0) return;
 
     //now find starting cell to infect
@@ -525,23 +486,24 @@ void simulation::infect_all_cancer() {
 }
 
 
-void simulation::add_infected() {
+void simulation::add_infected(infection_routine infect_type,
+                              float fraction) {
 
-    if(parameters.percent_infected == 1.0f &&
-       parameters.infection_type == random_infection) {
+    if(fraction == 1.0f &&
+       infect_type == random_infection) {
         infect_all_cancer();
         return;
     }
 
-    switch(parameters.infection_type) {
+    switch(infect_type) {
         case random_infection:
-            infect_random();
+            infect_random(fraction);
             break;
         case center_infection:
-            infect_center_largest();
+            infect_center_largest(fraction);
             break;
         case periphery_infection:
-            infect_periphery2();
+            infect_periphery(fraction);
             break;
     }
 }
@@ -561,8 +523,7 @@ void simulation::initialize_full() {
         update_death_prob(i.pos);
     }
 
-    parameters.percent_infected = 0.1f;
-    infect_center();
+    infect_center(0.1f);
 
     // and update again, just for added safety:
     for(auto& i : world) {

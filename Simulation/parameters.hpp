@@ -33,13 +33,16 @@ struct Param {
 
 
   int time_adding_virus;
+  int time_adding_virus_2;
   int time_adding_cancer;
 
   size_t initial_number_cancer_cells;
   size_t initial_number_normal_cells;
 
   float percent_infected;
+  float percent_infected_2;
   infection_routine infection_type;
+  infection_routine infection_type_2;
 
   float prob_normal_infection;
 
@@ -69,6 +72,13 @@ struct Param {
     time_adding_virus = 3000; // default from Berg et al 2019
     time_adding_cancer = 1000; // normally the population is first allowed to stabilize
 
+    infection_type = random_infection;
+    percent_infected = 0.1f;
+
+    time_adding_virus_2 = 5000;
+    infection_type_2 = random_infection;
+    percent_infected_2 = 0.1f;
+
     initial_number_cancer_cells = 500;
     initial_number_normal_cells = 1000;
 
@@ -81,9 +91,6 @@ struct Param {
 
     death_cancer_resistant = 0.1f;
     birth_cancer_resistant = 0.9f;
-
-    infection_type = random_infection;
-    percent_infected = 0.1f;
 
     prob_normal_infection = 0.0f;
     freq_resistant = 0.0f;

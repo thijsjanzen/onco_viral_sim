@@ -39,7 +39,8 @@ public:
 
   void set_percent_infected(float);
   void set_infection_type(infection_routine infect_routine);
-  void add_infected(); // has to be public to allow for interaction by pressing
+  void add_infected(infection_routine infect_type,
+                    float fraction); // has to be public to allow for interaction by pressing
                        // a button
 
   std::array<size_t, 5> count_cell_types() const;
@@ -93,10 +94,10 @@ private:
   size_t find_central_cell(const std::vector< size_t >& positions);
 
 
-  void infect_random();
-  void infect_center();
-  void infect_center_largest();
-  void infect_periphery();
+  void infect_random(float fraction);
+  void infect_center(float fraction);
+  void infect_center_largest(float fraction);
+  void infect_periphery(float fraction);
   void infect_all_cancer();
 
   void initialize_full();
