@@ -52,7 +52,7 @@ std::array<size_t, 5> do_analysis(Param all_parameters) {
              Simulation.t >= all_parameters.time_adding_virus &&
              virus_added   == false  &&
              cancer_added  == true) {
-             std::cout << "adding virus for the second time!\n";
+             std::cout << "adding virus!\n";
              Simulation.add_infected(all_parameters.infection_type,
                                      all_parameters.percent_infected);
              Simulation.t = 0.f;
@@ -65,7 +65,7 @@ std::array<size_t, 5> do_analysis(Param all_parameters) {
              virus_added == true &&
              virus_added_2 == false &&
              cancer_added  == true) {
-              std::cout << "adding virus!\n";
+              std::cout << "adding virus for the second time!\n";
              Simulation.add_infected(all_parameters.infection_type_2,
                                      all_parameters.percent_infected_2);
              Simulation.t = 0.f;

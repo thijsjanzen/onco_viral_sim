@@ -7,8 +7,6 @@
 
 BOOST_AUTO_TEST_CASE( set_infection )
 {
-  //  void set_percent_infected(float);
-  // void set_infection_type(infection_routine infect_routine);
   Param all_parameters;
   simulation Simulation(all_parameters);
 
