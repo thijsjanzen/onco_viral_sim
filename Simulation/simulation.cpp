@@ -326,6 +326,14 @@ Param simulation::get_parameters() {
   return parameters;
 }
 
+infection_routine simulation::get_infection_type() const {
+  return(parameters.infection_type);
+}
+
+float simulation::get_percent_infected() const {
+  return(parameters.percent_infected);
+}
+
 float simulation::calc_t_cell_death_rate(float concentration) {
 //  return 1.0 / (1 + expf(-parameters.t_cell_rate * (concentration -
 //                                                    parameters.t_cell_threshold)));

@@ -55,6 +55,8 @@ public:
   std::array<size_t, 5> num_cell_types;
 
   Param get_parameters();
+  infection_routine get_infection_type() const;
+  float get_percent_infected() const;
 
 private:
   Param parameters;

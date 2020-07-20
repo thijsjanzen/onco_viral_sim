@@ -8,7 +8,7 @@
 #include "simulation.hpp"
 
 simulation::simulation(const Param& param) :
-world(param.sq_num_cells * param.sq_num_cells)
+world(param.sq_num_cells * param.sq_num_cells * param.sq_num_cells)
 {
   parameters = param;
 
@@ -17,9 +17,8 @@ world(param.sq_num_cells * param.sq_num_cells)
   seed_file << parameters.seed;
   seed_file.close();
 
-
   sq_size = parameters.sq_num_cells;
-  num_cells = sq_size * sq_size;
+  num_cells = sq_size * sq_size * sq_size;
 
   num_cell_types = {0, 0, 0, 0, num_cells}; // all cells are empty
 
@@ -51,21 +50,26 @@ size_t simulation::find_central_cell(const cell_type& focal_cell_type) {
     // first calculate average x and y of cell type:
     float x = 0.f;
     float y = 0.f;
+    float z = 0.f;
     int counter = 0;
     for(const auto& i : world) {
         if(i.get_cell_type() == focal_cell_type) {
             x += i.x_;
             y += i.y_;
+            z += i.z_;
             counter++;
         }
     }
     x *= 1.0f / counter;
     y *= 1.0f / counter;
+    z *= 1.0f / counter;
 
     std::vector< float > dist(world.size(), 1e9);
     for(size_t i = 0; i < world.size(); ++i) {
         if(world[i].get_cell_type() == focal_cell_type) {
-            dist[i] = (world[i].x_ - x) * (world[i].x_ - x) + (world[i].y_ - y) * (world[i].y_ - y);
+            dist[i] = (world[i].x_ - x) * (world[i].x_ - x) +
+                      (world[i].y_ - y) * (world[i].y_ - y) +
+                      (world[i].z_ - z) * (world[i].z_ - z);
         }
     }
 
@@ -544,8 +548,9 @@ void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_
    for(size_t i = 0; i < num_cells; ++i) {
       float x = rndgen.uniform() * sq_size;
       float y = rndgen.uniform() * sq_size;
+      float z = rndgen.uniform() * sq_size;
 
-      v[i] = voronoi_point(x, y);
+      v[i] = voronoi_point(x, y, z);
    }
 
    std::cout << "convering centre points to vertices\n";
@@ -572,8 +577,8 @@ void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_
 
        for(const auto& edge : cell.halfEdges) {
            voronoi::Edge focal_edge = graph.edges()[edge.edge];
-           voronoi_point start(focal_edge.p0.x, focal_edge.p0.y);
-           voronoi_point end(  focal_edge.p1.x, focal_edge.p1.y);
+           voronoi_point start(focal_edge.p0.x, focal_edge.p0.y, 0);
+           voronoi_point end(  focal_edge.p1.x, focal_edge.p1.y, 0);
 
            voronoi_edge local_edge(start, end, focal_edge.leftSite, focal_edge.rightSite);
            if(!local_edge.check()) {

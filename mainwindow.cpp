@@ -119,21 +119,16 @@ QColor get_t_cell_color(float concentration) {
 }
 
 void MainWindow::display_regular(bool display_t_cells) {
-  size_t line_size = row_size;
-  size_t num_lines = col_size;
-
-  for(size_t i = 0; i < num_lines; ++i) {
-      QRgb* row = (QRgb*) image_.scanLine(i);
-
-      size_t start = i * line_size;
-      size_t end = start + line_size;
-
-      for(size_t index = start; index < end; ++index) {
-          size_t local_index = index - start;
-          if(!display_t_cells) row[local_index] = colorz[ sim->world[index].get_cell_type() ].rgb();
-          if(display_t_cells) row[local_index] = get_t_cell_color(sim->world[index].t_cell_concentration).rgba();
-      }
-  }
+  int z = ui->depth_slider->value();
+  for(int x = 0; x < row_size; ++x) {
+      QRgb* row = (QRgb*) image_.scanLine(x);
+      for(int y = 0; y < row_size; ++y) {
+        int index = y + row_size * (x + z * row_size);
+        //  assert(sim->world[index].z_ == z);
+        if(!display_t_cells) row[y] = colorz[ sim->world[index].get_cell_type() ].rgb();
+        if(display_t_cells)  row[y] = get_t_cell_color(sim->world[index].t_cell_concentration).rgba();
+       }
+    }
 }
 
 void MainWindow::display_voronoi(size_t sq_size,
@@ -538,6 +533,15 @@ void MainWindow::setup_simulation() {
 
     update_parameters(all_parameters);
 
+    if(all_parameters.use_voronoi_grid) {
+        QMessageBox::warning(this,
+                             tr("Oncolytic Virus Simulator"),
+                             tr("Voronoi Grid is not implemented in 3D yet"));
+        return;
+    }
+
+
+
     sim = std::make_unique<simulation>(all_parameters);   //simulation(all_parameters);
 
     //Simulation.initialize_network();
@@ -714,6 +718,8 @@ void MainWindow::on_btn_add_virus_clicked()
        sim->set_infection_type(periphery_infection);
 
    sim->set_percent_infected(static_cast<float>(ui->box_percent_infected->value()));
-
-   sim->add_infected();
+ //  infect_type,
+ //                                float fraction
+   sim->add_infected(sim->get_infection_type(),
+                     sim->get_percent_infected());
 }
