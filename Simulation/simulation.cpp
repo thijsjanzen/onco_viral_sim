@@ -123,10 +123,12 @@ void simulation::implement_death(const cell_type& parent) {
 
   change_cell_type(position_of_dying_cell, empty);
 
-  if(parent == infected && parameters.prob_infection_upon_death > 0.f) {
+  if (parent == infected && parameters.prob_infection_upon_death > 0.f) {
       infect_long_distance(position_of_dying_cell);
-      increase_t_cell_concentration(position_of_dying_cell);
   }
+  if (parent == infected && parameters.t_cell_increase > 0) {
+      increase_t_cell_concentration(position_of_dying_cell);
+    }
 }
 
 void simulation::implement_growth(const cell_type& parent) {
