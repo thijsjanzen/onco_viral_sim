@@ -41,7 +41,7 @@ void node::add_neighbor(std::vector< node >& world,
 }
 
 
-bool within_limits(int x, int y, int z, size_t limit) {
+bool within_limits(int x, int y, int z, int limit) {
   if(x < 0) return false;
   if(y < 0) return false;
   if(z < 0) return false;

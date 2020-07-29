@@ -144,6 +144,7 @@ void read_parameters_from_ini(Param& p, const std::string file_name) {
   p.sq_num_cells = from_config.getValueOfKey<size_t>("sq_num_cells");
 
   p.t_cell_increase = from_config.getValueOfKey<float>("t_cell_increase");
+
   p.evaporation = from_config.getValueOfKey<float>("evaporation");
   p.diffusion   = from_config.getValueOfKey<float>("diffusion");
   p.t_cell_rate = from_config.getValueOfKey<float>("t_cell_rate");
@@ -156,6 +157,8 @@ void read_parameters_from_ini(Param& p, const std::string file_name) {
     p.infection_type = random_infection;
   if(infection_string == "Center")
     p.infection_type = center_infection;
+  if(infection_string == "Periphery")
+    p.infection_type = periphery_infection;
 
   auto start_string = from_config.getValueOfKey<std::string>("start_type");
   if(start_string == "Grow")
