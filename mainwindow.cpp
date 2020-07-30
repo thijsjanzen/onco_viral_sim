@@ -637,6 +637,7 @@ void MainWindow::on_btn_start_clicked()
     st << " seconds\n";
     ui->text->appendPlainText(QString::fromStdString(st.str()));
     std::cout << time_taken<< "\n";
+    is_running = false;
 }
 
 void MainWindow::update_plot(double t,
@@ -695,6 +696,21 @@ void MainWindow::on_drpdwnbox_display_activated(int index)
         focal_display_type = dominant_rate;
     if(display_string == "T-cells")
         focal_display_type = t_cells;
+
+    if (!is_running) {
+        if(focal_display_type == cells) {
+            update_image(all_parameters.sq_num_cells, false);
+        } else if (focal_display_type == t_cells) {
+            update_image(all_parameters.sq_num_cells, true);
+        } else if (focal_display_type == cancer_death_rate) {
+            update_image(all_parameters.sq_num_cells, sim->death_prob);
+        } else if (focal_display_type == normal_death_rate) {
+            update_image(all_parameters.sq_num_cells, sim->death_prob);
+        } else {
+            update_image(all_parameters.sq_num_cells, sim->growth_prob);
+        }
+          QApplication::processEvents();
+    }
 }
 
 void MainWindow::on_btn_setup_clicked()
@@ -715,5 +731,6 @@ void MainWindow::on_btn_add_virus_clicked()
 
    sim->set_percent_infected(static_cast<float>(ui->box_percent_infected->value()));
 
-   sim->add_infected();
+   sim->add_infected(sim->get_infection_type(),
+                     sim->get_percent_infected());
 }
