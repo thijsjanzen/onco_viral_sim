@@ -112,7 +112,7 @@ private:
 
   void ask_infect_neighbours(size_t depth, float p, size_t pos);
   void update_count(cell_type old_type, cell_type new_type);
-  float calc_t_cell_death_rate(float concentration);
+  // float calc_t_cell_death_rate(float concentration);
 
 };
 
