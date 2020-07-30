@@ -107,13 +107,18 @@ public:
   }
 
   template <typename It>
-  int draw_from_dist(It first, It last, float max_val, rnd_t& r) const {
-   int max_index = std::distance(first, last);
+  size_t draw_from_dist(It first, It last, float max_val, rnd_t& r) const {
+   auto max_index = std::distance(first, last);
+   size_t cnt = 0;
    while (true) {
-     int index = r.random_number(static_cast<size_t>(max_index));
+     size_t index = r.random_number(static_cast<size_t>(max_index));
      float val = *(first + index);
      if (r.uniform() < (1.f * val / max_val)) {
        return index;
+     }
+     cnt++;
+     if (cnt > max_index * 10) {
+       return draw_cdf(first, last, r);
      }
    }
   }
@@ -128,7 +133,8 @@ public:
     if(frac < 0.1f) {
       col = draw_cdf(start, end, r);
     } else {
-      col = draw_from_dist(start, end, 1.f, r);
+      auto max_val = std::max_element(start, end);
+      col = draw_from_dist(start, end, *max_val, r);
     }
     size_t result = row * bin_size + col;
 
@@ -155,6 +161,10 @@ public:
     // the entries below go wrong, once the last cell in the simulation is dead?
    // assert(row_sum[row] >= 0.f);
   //  assert(total_sum >= 0.f);
+    if (std::isinf(total_sum)) {
+        int a = 5;
+      }
+
   }
 
   float get_total_sum() const {

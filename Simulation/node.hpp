@@ -174,7 +174,7 @@ struct node {
 
   void die();
 
-  std::vector< size_t > get_cancer_neighbours();
+  std::vector< size_t > get_cancer_neighbours() const;
 
   cell_type get_cell_type() const {
     return node_type;
@@ -183,6 +183,9 @@ struct node {
   void set_cell_type(cell_type new_type) {
     node_type = new_type;
   }
+
+  float calc_t_cell_added_death_rate(float t_cell_rate,
+                                     float t_cell_density_scaler) const;
 
 private:
     cell_type node_type;

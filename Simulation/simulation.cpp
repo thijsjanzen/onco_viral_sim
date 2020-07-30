@@ -128,8 +128,9 @@ void simulation::implement_death(const cell_type& parent) {
   }
   if (parent == infected && parameters.t_cell_increase > 0) {
       increase_t_cell_concentration(position_of_dying_cell);
-    }
+  }
 }
+
 void simulation::implement_growth(const cell_type& parent) {
 
    // drawing position of growth is slow/bottleneck:
@@ -204,13 +205,25 @@ void simulation::update_death_prob(size_t pos,
                                    cell_type old_type,
                                    cell_type new_type) {
     if(old_type < death_prob.size()) death_prob[old_type].update_entry(pos, 0.f);
-    if(new_type < death_prob.size()) death_prob[new_type].update_entry(pos, 1.f);
+    if(new_type < death_prob.size()) {
+        float death_rate = 1.0f;
+        if (new_type == cancer || new_type == resistant) {
+           float additional_rate =
+               world[pos].calc_t_cell_added_death_rate(parameters.t_cell_rate,
+                                                       parameters.t_cell_density_scaler);
+           death_rate += additional_rate;
+        }
+        death_prob[new_type].update_entry(pos, death_rate);
+      }
 }
 
 void simulation::update_death_prob_cancer(float t_cell_rate,
                                           size_t pos) {
-   float new_val = 1.f + t_cell_rate;
-   death_prob[cancer].update_entry(pos, new_val);
+  cell_type focal_cell_type = world[pos].get_cell_type();
+   if (focal_cell_type == cancer || focal_cell_type == resistant) {
+    float new_val = 1.0f + t_cell_rate;
+    death_prob[focal_cell_type].update_entry(pos, new_val);
+   }
 }
 
 
@@ -231,7 +244,7 @@ void simulation::update_rates() {
 
   rates[6] = parameters.birth_cancer_resistant * growth_prob[resistant].get_total_sum();
   rates[7] = parameters.death_cancer_resistant * death_prob[resistant].get_total_sum();
-  assert(rates[7] == num_cell_types[resistant] * parameters.death_cancer_resistant);
+//  assert(rates[7] == num_cell_types[resistant] * parameters.death_cancer_resistant);
 
 }
 
@@ -338,14 +351,9 @@ float simulation::get_percent_infected() const {
 float simulation::calc_t_cell_death_rate(float concentration) {
 //  return 1.0 / (1 + expf(-parameters.t_cell_rate * (concentration -
 //                                                    parameters.t_cell_threshold)));
-
   return expf(parameters.t_cell_rate * concentration);
-
 }
 
-float simulation::calc_max_t_cell_rate() {
-  return calc_t_cell_death_rate(parameters.t_cell_increase);
-}
 
 void simulation::diffuse() {
   // do something
@@ -371,12 +379,11 @@ void simulation::diffuse() {
       if(new_conc < 1e-5f) new_conc = 0.f;
       world[i].t_cell_concentration = new_conc;  // swap of the vectors
       if(new_conc > 0.f) {
-        float added_t_cell_death_rate = calc_t_cell_death_rate(new_conc);
-        float mult = 1.0f - parameters.t_cell_density_scaler *
-                            world[i].freq_type_neighbours(cancer);
-        if(mult < 0.f) mult = 0.f;
-        float new_t_cell_death_rate = mult * added_t_cell_death_rate;
-        update_death_prob_cancer(new_t_cell_death_rate, i);
+        float added_t_cell_death_rate =
+            world[i].calc_t_cell_added_death_rate(parameters.t_cell_rate,
+                                                  parameters.t_cell_density_scaler);
+
+        update_death_prob_cancer(added_t_cell_death_rate, i);
       }
   }
   total_t_cell_concentration = std::accumulate(new_concentration.begin(),
@@ -388,6 +395,13 @@ void simulation::increase_t_cell_concentration(size_t pos) {
   world[pos].add_t_cell(parameters.t_cell_increase);
   total_t_cell_concentration += parameters.t_cell_increase;
 }
+
+float simulation::calc_max_t_cell_rate() {
+  return expf(parameters.t_cell_increase *
+                            parameters.t_cell_rate);
+
+}
+
 
 
 /*
