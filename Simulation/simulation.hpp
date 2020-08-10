@@ -98,6 +98,7 @@ private:
 
   void infect_random(float fraction);
   void infect_center(float fraction);
+  void infect_center_square(size_t one_side);
   void infect_center_largest(float fraction);
   void infect_periphery(float fraction);
   void infect_all_cancer();

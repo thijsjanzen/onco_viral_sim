@@ -45,10 +45,15 @@ void node::update_neighbors(std::vector< node >& world,
                             size_t world_size) {
 
 
-    static int relative_points[4][2] = { {-1, 0},
+  // PLOS EDIT TO EIGHT NEIGHBOURS!
+    static int relative_points[8][2] = { {-1, 0},
                                         {1, 0},
                                         {0, 1},
-                                        {0, -1} };
+                                        {0, -1},
+                                         {-1, -1}, // extended to eight neighbours
+                                         {-1,  1},
+                                         {1 , -1},
+                                         {1 , 1}};
 
     for(int i = 0; i < 4; ++i) {
         int other_x = static_cast<int>(x_) + relative_points[i][0];

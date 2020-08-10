@@ -81,11 +81,19 @@ MainWindow::MainWindow(QWidget *parent)
     is_paused = false;
     is_running = false;
 
-    colorz.push_back(QColor(0, 0, 255));
-    colorz.push_back(QColor(255, 0, 0));
-    colorz.push_back(QColor(0, 255, 0));
-    colorz.push_back(QColor(128, 0, 128));
-    colorz.push_back(QColor(0, 0, 0));
+    /*
+    colorz.push_back(QColor(0, 0, 255));  // normal, blue
+    colorz.push_back(QColor(255, 0, 0));  // cancer, red
+    colorz.push_back(QColor(0, 255, 0));  // infected, green
+    colorz.push_back(QColor(128, 0, 128));  // resistant, purple
+    colorz.push_back(QColor(0, 0, 0));      // empty, black
+*/
+    colorz.push_back(QColor(0, 0, 255));  // normal, blue
+    colorz.push_back(QColor(0, 128, 1));  // cancer, darkgreen
+    colorz.push_back(QColor(128, 0, 0));  // infected, red
+    colorz.push_back(QColor(128, 0, 128));  // resistant, purple
+    colorz.push_back(QColor(128, 128, 128));      // empty, grey
+
 
     factor_x = 1.f;
     factor_y = 1.f;
@@ -624,6 +632,20 @@ void MainWindow::on_btn_start_clicked()
         }
         if(!is_running) break;
     }
+
+    if(focal_display_type == cells) {
+        update_image(all_parameters.sq_num_cells, false);
+    } else if (focal_display_type == t_cells) {
+        update_image(all_parameters.sq_num_cells, true);
+    } else if (focal_display_type == cancer_death_rate) {
+        update_image(all_parameters.sq_num_cells, sim->death_prob);
+    } else if (focal_display_type == normal_death_rate) {
+        update_image(all_parameters.sq_num_cells, sim->death_prob);
+    } else {
+        update_image(all_parameters.sq_num_cells, sim->growth_prob);
+    }
+
+    QApplication::processEvents();
 
 
     auto end_time = std::chrono::high_resolution_clock::now();

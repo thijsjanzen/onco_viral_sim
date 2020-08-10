@@ -240,6 +240,27 @@ void remove_entries(std::vector< size_t >& source,
   }
 }
 
+void simulation::infect_center_square(size_t one_side) {
+  size_t min_x = static_cast<size_t>(parameters.sq_num_cells * 0.5f - one_side * 0.5f);
+  size_t min_y = min_x;
+
+  std::vector< int > cells_turned;
+
+  for(size_t x = min_x; x < min_x + one_side; x++) {
+    for( size_t y = min_y; y < min_y + one_side; y++) {
+      size_t pos = y * parameters.sq_num_cells + x;
+       change_cell_type(pos, infected);
+       cells_turned.push_back(pos);
+    }
+  }
+
+  for(const auto& i : cells_turned) {
+     update_growth_prob(i);
+     update_death_prob(i);
+  }
+
+}
+
 
 void simulation::infect_center_largest(float fraction) {
   size_t num_cancer_cells = num_cell_types[cancer];
@@ -512,11 +533,8 @@ void simulation::add_infected(infection_routine infect_type,
 
 void simulation::initialize_full() {
     for(auto& i : world) {
-       change_cell_type(i.pos, normal);
+       change_cell_type(i.pos, cancer);
     }
-
-    parameters.initial_number_cancer_cells = static_cast<int>(0.1f * world.size());
-    add_cells(cancer);
 
     // just for safety, do a full scan:
     for(auto& i : world) {
@@ -524,7 +542,7 @@ void simulation::initialize_full() {
         update_death_prob(i.pos);
     }
 
-    infect_center(0.1f);
+    infect_center_square(30);
 
     // and update again, just for added safety:
     for(auto& i : world) {
