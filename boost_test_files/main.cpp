@@ -13,7 +13,7 @@ BOOST_AUTO_TEST_CASE( birth_death )
   Param all_parameters;
   all_parameters.sq_num_cells = 100;
   all_parameters.use_voronoi_grid = false;
-  all_parameters.start_setup = empty;
+  all_parameters.start_setup = empty_grid;
 
   simulation Simulation(all_parameters);
 
@@ -25,8 +25,25 @@ BOOST_AUTO_TEST_CASE( birth_death )
   Simulation.t = 0.f;
 
   // add a normal cell, then kill it
-  Simulation.test_change_cell_type(5000, normal);
 
+  for(auto c : {normal, cancer, infected, resistant}) {
+    std::cout << c << "\n";
+    Simulation.test_change_cell_type(5000, c);
+
+    BOOST_CHECK_EQUAL(Simulation.world[5000].get_cell_type(),
+                      c);
+
+    BOOST_CHECK_EQUAL(Simulation.death_prob[c].get_value(5000),
+                      1.0);
+
+    Simulation.test_change_cell_type(5000, empty);
+
+    BOOST_CHECK_EQUAL(Simulation.world[5000].get_cell_type(),
+                      empty);
+
+    BOOST_CHECK_EQUAL(Simulation.death_prob[c].get_value(5000),
+                      0.0);
+   }
  }
 
 
