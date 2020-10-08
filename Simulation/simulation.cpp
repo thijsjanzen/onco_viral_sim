@@ -414,6 +414,10 @@ void simulation::test_change_cell_type(const size_t& pos,
   change_cell_type(pos, new_cell_type);
 }
 
+void simulation::test_event(size_t event) {
+  do_event(event);
+}
+
 
 
 /*

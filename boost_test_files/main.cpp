@@ -44,7 +44,25 @@ BOOST_AUTO_TEST_CASE( birth_death )
     BOOST_CHECK_EQUAL(Simulation.death_prob[c].get_value(5000),
                       0.0);
    }
- }
+
+  std::vector< cell_type > v = {normal, empty, cancer, empty,
+                                infected, empty, resistant, empty};
+
+   for(size_t i = 0; i < 7; ++i) {
+    Simulation.test_event(i);
+    BOOST_CHECK_EQUAL(Simulation.world[0].get_cell_type(),
+                      v[i]);
+
+    if (v[i] != empty) {
+        BOOST_CHECK_EQUAL(Simulation.death_prob[v[i]].get_value(0),
+                          1.0);
+    }
+   }
+
+
+}
+
+
 
 
 
