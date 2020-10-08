@@ -7,6 +7,32 @@
 
 
 
+BOOST_AUTO_TEST_CASE( birth_death )
+{
+  std::cout << "testing birth and death\n";
+  Param all_parameters;
+  all_parameters.sq_num_cells = 100;
+  all_parameters.use_voronoi_grid = false;
+  all_parameters.start_setup = empty;
+
+  simulation Simulation(all_parameters);
+
+  std::vector< std::vector< voronoi_point > > filler;
+
+  Simulation.initialize_network(filler);
+  std::cout << "starting simulation\n";
+
+  Simulation.t = 0.f;
+
+  // add a normal cell, then kill it
+  Simulation.test_change_cell_type(5000, normal);
+
+ }
+
+
+
+
+/*
 BOOST_AUTO_TEST_CASE( t_cells )
 {
   std::cout << "simulation with growth\n";
@@ -341,7 +367,7 @@ BOOST_AUTO_TEST_CASE( check_full_2 )
   outcome = get_outcome(result);
   BOOST_CHECK_EQUAL(outcome, "B");
 }
-
+*/
 
 
 // TODO:

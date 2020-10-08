@@ -354,7 +354,7 @@ void simulation::diffuse() {
   std::vector<float> new_concentration(world.size(), 0.f);
   for(size_t i = 0; i < world.size(); ++i) {
     if(world[i].t_cell_concentration > 0.f) {
-       float current_conc = world[i].t_cell_concentration *
+      /* float current_conc = world[i].t_cell_concentration *
                               (1 - parameters.evaporation);
        float total_diffuse_loss = (parameters.diffusion * current_conc);
        float diffuse_per_neighbor = total_diffuse_loss *
@@ -364,12 +364,25 @@ void simulation::diffuse() {
           size_t other_pos = j->pos;
           new_concentration[other_pos] += diffuse_per_neighbor;
        }
-       new_concentration[i] += current_conc - total_diffuse_loss;
+       new_concentration[i] += current_conc - total_diffuse_loss;*/
+      float current_conc = world[i].t_cell_concentration;
+      //
+      if (i == 4447) {
+          int a = 5;
+        }
+
+      for(const auto& j : world[i].neighbors) {
+         size_t other_pos = j->pos;
+         float other_conc = world[other_pos].t_cell_concentration;
+         float delta_conc = other_conc - current_conc;
+         current_conc += delta_conc * parameters.diffusion;
+      }
+      new_concentration[i] = current_conc;
     }
   }
 
   for(size_t i = 0; i < new_concentration.size(); ++i) {
-      float new_conc =  new_concentration[i];
+      float new_conc =  new_concentration[i] * (1 - parameters.evaporation);
       if(new_conc < 1e-5f) new_conc = 0.f;
       world[i].t_cell_concentration = new_conc;  // swap of the vectors
       if(new_conc > 0.f) {
@@ -394,6 +407,11 @@ float simulation::calc_max_t_cell_rate() {
   return expf(parameters.t_cell_increase *
                             parameters.t_cell_rate);
 
+}
+
+void simulation::test_change_cell(const size_t& pos,
+                                 const cell_type& new_cell_type) {
+  change_cell_type(pos, new_cell_type);
 }
 
 

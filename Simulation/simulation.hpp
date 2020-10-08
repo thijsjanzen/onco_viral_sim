@@ -58,6 +58,8 @@ public:
   infection_routine get_infection_type() const;
   float get_percent_infected() const;
 
+  test_change_cell(const size_t& pos, const cell_type& new_cell_type);
+
 private:
   Param parameters;
 
