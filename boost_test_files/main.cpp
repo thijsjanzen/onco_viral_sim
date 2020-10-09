@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE( birth_death )
   for(size_t i = 0; i < 4; ++i) {
      BOOST_CHECK_EQUAL(cells[i], 0);
   }
-  BOOST_CHECK_EQUAL(cells[5], all_parameters.sq_num_cells *
+  BOOST_CHECK_EQUAL(cells[4], all_parameters.sq_num_cells *
                               all_parameters.sq_num_cells);
 
 
@@ -104,10 +104,21 @@ BOOST_AUTO_TEST_CASE( birth_death )
     BOOST_CHECK_EQUAL(Simulation.test_pick_event(vx, 1.0), i);
     vx[i] = 0.0f;
    }
+}
 
+BOOST_AUTO_TEST_CASE( check_outcome )
+{
+  std::array<size_t, 5> cell_counts_normal = {100000, 0, 0, 0, 0};
 
+  BOOST_CHECK_EQUAL(get_outcome(cell_counts_normal), "A");
 
+  std::array<size_t, 5> cell_counts_cancer = {0, 1000000, 0, 0, 0};
 
+  BOOST_CHECK_EQUAL(get_outcome(cell_counts_cancer), "B");
+
+  std::array<size_t, 5> cell_counts_resistant = {0, 0, 0, 1000000, 0};
+
+  BOOST_CHECK_EQUAL(get_outcome(cell_counts_resistant), "C");
 }
 
 
