@@ -24,6 +24,14 @@ BOOST_AUTO_TEST_CASE( birth_death )
 
   Simulation.t = 0.f;
 
+  // count cell types
+  std::array<size_t, 5> cells = Simulation.count_cell_types();
+  for(size_t i = 0; i < 4; ++i) {
+     BOOST_CHECK_EQUAL(cells[i], 0);
+  }
+  BOOST_CHECK_EQUAL(cells[5], all_parameters.sq_num_cells *
+                              all_parameters.sq_num_cells);
+
 
   // test update_rates
 
@@ -96,6 +104,10 @@ BOOST_AUTO_TEST_CASE( birth_death )
     BOOST_CHECK_EQUAL(Simulation.test_pick_event(vx, 1.0), i);
     vx[i] = 0.0f;
    }
+
+
+
+
 }
 
 
