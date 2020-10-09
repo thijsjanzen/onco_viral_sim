@@ -426,6 +426,10 @@ float simulation::get_rates(size_t event) {
   return rates[event];
 }
 
+size_t simulation::test_pick_event(const std::array<float, 8>& v, float s) {
+  return pick_event(v, s);
+}
+
 
 
 /*

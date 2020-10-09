@@ -62,6 +62,7 @@ public:
   void test_event(size_t event);
   void test_update_rates();
   float get_rates(size_t event);
+  size_t test_pick_event(const std::array<float, 8>& v, float s);
 private:
   Param parameters;
 

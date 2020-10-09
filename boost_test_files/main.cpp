@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE( birth_death )
   // add a normal cell, then kill it
 
   for(auto c : {normal, cancer, infected, resistant}) {
-    std::cout << c << "\n";
+  //  std::cout << c << "\n";
     Simulation.test_change_cell_type(5000, c);
 
     BOOST_CHECK_EQUAL(Simulation.world[5000].get_cell_type(),
@@ -88,7 +88,14 @@ BOOST_AUTO_TEST_CASE( birth_death )
     }
    }
 
-
+   // test pick event
+   std::array<float, 8 > vx = {0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
+   BOOST_CHECK_EQUAL(Simulation.test_pick_event(vx, 0.0), 0);
+   for(size_t i = 0; i < 8; ++i) {
+    vx[i] = 1.0f;
+    BOOST_CHECK_EQUAL(Simulation.test_pick_event(vx, 1.0), i);
+    vx[i] = 0.0f;
+   }
 }
 
 
