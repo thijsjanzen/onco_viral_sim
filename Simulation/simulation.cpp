@@ -418,6 +418,14 @@ void simulation::test_event(size_t event) {
   do_event(event);
 }
 
+void simulation::test_update_rates() {
+  update_rates();
+}
+
+float simulation::get_rates(size_t event) {
+  return rates[event];
+}
+
 
 
 /*

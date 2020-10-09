@@ -60,6 +60,8 @@ public:
 
   void test_change_cell_type(const size_t& pos, const cell_type& new_cell_type);
   void test_event(size_t event);
+  void test_update_rates();
+  float get_rates(size_t event);
 private:
   Param parameters;
 

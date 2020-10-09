@@ -24,6 +24,32 @@ BOOST_AUTO_TEST_CASE( birth_death )
 
   Simulation.t = 0.f;
 
+
+  // test update_rates
+
+  Simulation.test_update_rates();
+  for(auto c : {normal, cancer, infected, resistant}) {
+   BOOST_CHECK_EQUAL(Simulation.death_prob[c].get_total_sum(), 0.0);
+   BOOST_CHECK_EQUAL(Simulation.growth_prob[c].get_total_sum(), 0.0);
+   BOOST_CHECK_EQUAL(Simulation.get_rates(c), 0.0);
+  }
+
+  Simulation.test_change_cell_type(0, normal);
+  Simulation.test_update_rates();
+  BOOST_CHECK_EQUAL(Simulation.get_rates(1), all_parameters.death_normal);
+
+  Simulation.test_change_cell_type(3, cancer);
+  Simulation.test_update_rates();
+  BOOST_CHECK_EQUAL(Simulation.get_rates(3), all_parameters.death_cancer);
+
+  Simulation.test_change_cell_type(0, empty);
+  Simulation.test_change_cell_type(3, empty);
+  Simulation.test_update_rates();
+
+
+
+
+  // test change_chell_type
   // add a normal cell, then kill it
 
   for(auto c : {normal, cancer, infected, resistant}) {
@@ -45,11 +71,14 @@ BOOST_AUTO_TEST_CASE( birth_death )
                       0.0);
    }
 
+  // test do_event
+
   std::vector< cell_type > v = {normal, empty, cancer, empty,
                                 infected, empty, resistant, empty};
 
    for(size_t i = 0; i < 7; ++i) {
     Simulation.test_event(i);
+
     BOOST_CHECK_EQUAL(Simulation.world[0].get_cell_type(),
                       v[i]);
 
