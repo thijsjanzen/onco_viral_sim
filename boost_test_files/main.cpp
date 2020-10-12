@@ -196,6 +196,32 @@ BOOST_AUTO_TEST_CASE( add_cells )
                     all_parameters.initial_number_cancer_cells);
 }
 
+BOOST_AUTO_TEST_CASE( setup_types)
+{
+  std::cout << "testing adding cells\n";
+  Param all_parameters;
+  all_parameters.sq_num_cells = 100;
+  all_parameters.use_voronoi_grid = false;
+  all_parameters.start_setup = full;
+
+  simulation Simulation(all_parameters);
+
+  std::vector< std::vector< voronoi_point > > filler;
+
+  Simulation.initialize_network(filler);
+  std::array<size_t, 5> cell_cnt = Simulation.count_cell_types();
+
+  size_t total_num_cells = all_parameters.sq_num_cells *
+                           all_parameters.sq_num_cells;
+
+  BOOST_CHECK_EQUAL(cell_cnt[normal],
+                    total_num_cells * 0.9);
+  BOOST_CHECK_EQUAL(cell_cnt[cancer],
+                    total_num_cells * 0.09);
+  BOOST_CHECK_EQUAL(cell_cnt[infected],
+                    total_num_cells * 0.01);
+}
+
 
 BOOST_AUTO_TEST_CASE( voronoi )
 {
