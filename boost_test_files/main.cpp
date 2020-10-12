@@ -166,6 +166,35 @@ BOOST_AUTO_TEST_CASE( find_central_cell )
   BOOST_CHECK_EQUAL(y2, y3);
 }
 
+BOOST_AUTO_TEST_CASE( add_cells )
+{
+  std::cout << "testing adding cells\n";
+  Param all_parameters;
+  all_parameters.sq_num_cells = 100;
+  all_parameters.use_voronoi_grid = false;
+  all_parameters.start_setup = empty_grid;
+  all_parameters.initial_number_normal_cells = 1000;
+  all_parameters.initial_number_cancer_cells = 100;
+
+  simulation Simulation(all_parameters);
+
+  std::vector< std::vector< voronoi_point > > filler;
+
+  Simulation.initialize_network(filler);
+
+  std::array<size_t, 5> cell_cnt = Simulation.count_cell_types();
+  BOOST_CHECK_EQUAL(cell_cnt[normal], 0);
+
+  Simulation.add_cells(normal);
+  cell_cnt = Simulation.count_cell_types();
+  BOOST_CHECK_EQUAL(cell_cnt[normal],
+                    all_parameters.initial_number_normal_cells);
+
+  Simulation.add_cells(cancer);
+  cell_cnt = Simulation.count_cell_types();
+  BOOST_CHECK_EQUAL(cell_cnt[cancer],
+                    all_parameters.initial_number_cancer_cells);
+}
 
 
 
