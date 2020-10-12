@@ -90,8 +90,6 @@ private:
   void update_death_prob_cancer(float t_cell_rate,
                                             size_t pos);
 
-
-
   void update_death_prob(size_t pos,
                          cell_type old_type,
                          cell_type new_type);

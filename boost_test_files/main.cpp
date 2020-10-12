@@ -197,6 +197,28 @@ BOOST_AUTO_TEST_CASE( add_cells )
 }
 
 
+BOOST_AUTO_TEST_CASE( voronoi )
+{
+  std::cout << "testing voronoi\n";
+  Param all_parameters;
+  all_parameters.sq_num_cells = 100;
+  all_parameters.use_voronoi_grid = true;
+  all_parameters.start_setup = empty_grid;
+
+  simulation Simulation(all_parameters);
+
+  std::vector< std::vector< voronoi_point > > filler;
+
+  Simulation.initialize_network(filler);
+
+  BOOST_CHECK_EQUAL(filler.size(), all_parameters.sq_num_cells *
+                                   all_parameters.sq_num_cells);
+
+  for(const auto& i : Simulation.world) {
+        BOOST_CHECK_GT(i.neighbors.size(), 0);
+  }
+}
+
 
 /*
 BOOST_AUTO_TEST_CASE( t_cells )
