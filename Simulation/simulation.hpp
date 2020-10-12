@@ -58,6 +58,10 @@ public:
   infection_routine get_infection_type() const;
   float get_percent_infected() const;
 
+ // size_t find_center(const cell_type& focal_cell_type) const;
+  size_t find_central_cell(const cell_type& focal_cell_type) const;
+  size_t find_central_cell(const std::vector< size_t >& positions) const;
+
   void test_change_cell_type(const size_t& pos, const cell_type& new_cell_type);
   void test_event(size_t event);
   void test_update_rates();
@@ -86,7 +90,7 @@ private:
   void update_death_prob_cancer(float t_cell_rate,
                                             size_t pos);
 
-  size_t find_center(const cell_type& focal_cell_type);
+
 
   void update_death_prob(size_t pos,
                          cell_type old_type,
@@ -98,8 +102,6 @@ private:
   void update_growth_cdf(size_t pos);
   void update_death_cdf_all();
 
-  size_t find_central_cell(const cell_type& focal_cell_type);
-  size_t find_central_cell(const std::vector< size_t >& positions);
 
   void infect_random(float fraction);
   void infect_center(float fraction);

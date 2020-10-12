@@ -122,6 +122,49 @@ BOOST_AUTO_TEST_CASE( check_outcome )
 }
 
 
+BOOST_AUTO_TEST_CASE( find_central_cell )
+{
+  std::cout << "testing finding center cells\n";
+  Param all_parameters;
+  all_parameters.sq_num_cells = 100;
+  all_parameters.use_voronoi_grid = false;
+  all_parameters.start_setup = empty_grid;
+
+  simulation Simulation(all_parameters);
+
+  std::vector< std::vector< voronoi_point > > filler;
+
+  Simulation.initialize_network(filler);
+
+  // first we try to find the central empty cell (50, 50), coordinate: 5000
+  auto index = Simulation.find_central_cell(empty);
+  auto x = Simulation.world[index].x_;
+  auto y = Simulation.world[index].y_;
+  BOOST_CHECK_EQUAL(x, 49);
+  BOOST_CHECK_EQUAL(y, 49);
+
+  size_t row_size = all_parameters.sq_num_cells;
+  // now we add a square of cancer cells, and calculate the center
+  std::vector< size_t > positions;
+  for(size_t x = 10; x < 21; ++x) {
+      for(size_t y = 10; y < 21; ++y) {
+          size_t pos = y * row_size + x;
+          Simulation.test_change_cell_type(pos, cancer);
+          positions.push_back(pos);
+        }
+  }
+  auto index2 = Simulation.find_central_cell(cancer);
+  auto x2 = Simulation.world[index2].x_;
+  auto y2 = Simulation.world[index2].y_;
+  BOOST_CHECK_EQUAL(x2, 15);
+  BOOST_CHECK_EQUAL(y2, 15);
+
+  auto index3 = Simulation.find_central_cell(positions);
+  auto x3 = Simulation.world[positions[index3]].x_;
+  auto y3 = Simulation.world[positions[index3]].y_;
+  BOOST_CHECK_EQUAL(x2, x3);
+  BOOST_CHECK_EQUAL(y2, y3);
+}
 
 
 

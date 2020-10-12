@@ -47,7 +47,7 @@ world(param.sq_num_cells * param.sq_num_cells)
 }
 
 
-size_t simulation::find_central_cell(const cell_type& focal_cell_type) {
+size_t simulation::find_central_cell(const cell_type& focal_cell_type) const {
     // first calculate average x and y of cell type:
     float x = 0.f;
     float y = 0.f;
@@ -73,7 +73,7 @@ size_t simulation::find_central_cell(const cell_type& focal_cell_type) {
     return(std::distance(dist.begin(), min));
 }
 
-size_t simulation::find_central_cell(const std::vector< size_t >& positions) {
+size_t simulation::find_central_cell(const std::vector< size_t >& positions) const {
     // first calculate average x and y of cell type:
     float x = 0.f;
     float y = 0.f;
