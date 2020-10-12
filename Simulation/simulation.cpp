@@ -151,27 +151,23 @@ void simulation::ask_infect_neighbours(size_t depth, float p, size_t pos) {
     if(p < 1e-6f) return;
     if(std::isnan(p)) return;
 
-    if(depth > 1) {
-        depth--;
-        for(const auto& n : world[pos].neighbors) {
-            ask_infect_neighbours(depth, p, n->pos);
-        }
+    if (depth == 0) return;
 
-    } else {
-        for(auto& n : world[pos].neighbors) {
-            if(n->get_cell_type() == cancer) {
-                if(rndgen.uniform() < p) {
-                    change_cell_type(n->pos, infected);
-                }
-            }
-            if(n->get_cell_type() == normal) {
-                 if(rndgen.uniform() < p) {
-                     if(rndgen.uniform() < n->prob_normal_infected) {
-                         change_cell_type(n->pos, infected);
-                     }
-                 }
+    depth--;
+    for(auto& n : world[pos].neighbors) {
+        if(n->get_cell_type() == cancer) {
+            if(rndgen.uniform() < p) {
+                change_cell_type(n->pos, infected);
             }
         }
+        if(n->get_cell_type() == normal) {
+             if(rndgen.uniform() < p) {
+                 if(rndgen.uniform() < n->prob_normal_infected) {
+                     change_cell_type(n->pos, infected);
+                 }
+             }
+        }
+        ask_infect_neighbours(depth, p, n->pos);
     }
 }
 
@@ -429,6 +425,11 @@ float simulation::get_rates(size_t event) {
 size_t simulation::test_pick_event(const std::array<float, 8>& v, float s) {
   return pick_event(v, s);
 }
+
+void simulation::test_ask_infect_neighbours(size_t depth, float p, size_t pos) {
+  ask_infect_neighbours(depth, p, pos);
+}
+
 
 
 

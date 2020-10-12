@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE( add_cells )
 
 BOOST_AUTO_TEST_CASE( setup_types)
 {
-  std::cout << "testing adding cells\n";
+  std::cout << "testing setup types\n";
   Param all_parameters;
   all_parameters.sq_num_cells = 100;
   all_parameters.use_voronoi_grid = false;
@@ -220,6 +220,51 @@ BOOST_AUTO_TEST_CASE( setup_types)
                     total_num_cells * 0.09);
   BOOST_CHECK_EQUAL(cell_cnt[infected],
                     total_num_cells * 0.01);
+}
+
+BOOST_AUTO_TEST_CASE( ask_infect_neighbours)
+{
+  std::cout << "testing ask infect neighbours\n";
+  Param all_parameters;
+  all_parameters.sq_num_cells = 100;
+  all_parameters.use_voronoi_grid = false;
+  all_parameters.start_setup = full;
+
+  simulation Simulation(all_parameters);
+
+  std::vector< std::vector< voronoi_point > > filler;
+
+  Simulation.initialize_network(filler);
+
+  size_t row_size = all_parameters.sq_num_cells;
+  size_t x = 50;
+  for(size_t y = 40; y < 61; ++y) {
+      size_t pos = y * row_size + x;
+      Simulation.test_change_cell_type(pos, cancer);
+  }
+  size_t y2 = 50;
+  for(size_t x2 = 40; x2 < 61; ++x2) {
+      size_t pos = y2 * row_size + x2;
+      Simulation.test_change_cell_type(pos, cancer);
+  }
+
+  // now we have a cross of individuals
+  size_t initial_pos = 50 * 100 + 50;
+  Simulation.test_change_cell_type(initial_pos, infected);
+  size_t dist = 3;
+  Simulation.test_ask_infect_neighbours(dist, 1.f, initial_pos);
+  for(size_t x = 40; x < 61; ++x) {
+    size_t pos = 50 * row_size + x;
+    int dist_x = static_cast<int>(x) - static_cast<int>(50);
+    if (dist_x < 0) dist_x *= -1;
+
+    auto ct = Simulation.world[pos].get_cell_type();
+    if (dist_x > static_cast<int>(dist)) {
+      BOOST_CHECK_EQUAL(ct, cancer);
+    } else {
+      BOOST_CHECK_EQUAL(ct, infected);
+    }
+  }
 }
 
 
