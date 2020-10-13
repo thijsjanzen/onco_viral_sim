@@ -350,7 +350,7 @@ void simulation::diffuse() {
   std::vector<float> new_concentration(world.size(), 0.f);
   for(size_t i = 0; i < world.size(); ++i) {
     if(world[i].t_cell_concentration > 0.f) {
-      /* float current_conc = world[i].t_cell_concentration *
+       /*float current_conc = world[i].t_cell_concentration *
                               (1 - parameters.evaporation);
        float total_diffuse_loss = (parameters.diffusion * current_conc);
        float diffuse_per_neighbor = total_diffuse_loss *
@@ -360,25 +360,33 @@ void simulation::diffuse() {
           size_t other_pos = j->pos;
           new_concentration[other_pos] += diffuse_per_neighbor;
        }
-       new_concentration[i] += current_conc - total_diffuse_loss;*/
+       new_concentration[i] += current_conc - total_diffuse_loss;
+       */
+
       float current_conc = world[i].t_cell_concentration;
-      //
-      if (i == 4447) {
-          int a = 5;
-        }
+      new_concentration[i] += current_conc;
 
       for(const auto& j : world[i].neighbors) {
          size_t other_pos = j->pos;
          float other_conc = world[other_pos].t_cell_concentration;
-         float delta_conc = other_conc - current_conc;
-         current_conc += delta_conc * parameters.diffusion;
+         float delta_conc = current_conc - other_conc;
+
+         float diffusion_amount = delta_conc *
+             parameters.diffusion * world[i].inv_num_neighbors;
+
+         if (diffusion_amount > 0) { // otherwise we track the same flow twice.
+           new_concentration[i] -= diffusion_amount;
+
+           new_concentration[other_pos] += diffusion_amount;
+         }
       }
-      new_concentration[i] = current_conc;
+      //new_concentration[i] = current_conc;
+
     }
   }
 
   for(size_t i = 0; i < new_concentration.size(); ++i) {
-      float new_conc =  new_concentration[i] * (1 - parameters.evaporation);
+      float new_conc =  new_concentration[i];
       if(new_conc < 1e-5f) new_conc = 0.f;
       world[i].t_cell_concentration = new_conc;  // swap of the vectors
       if(new_conc > 0.f) {
@@ -429,6 +437,15 @@ size_t simulation::test_pick_event(const std::array<float, 8>& v, float s) {
 void simulation::test_ask_infect_neighbours(size_t depth, float p, size_t pos) {
   ask_infect_neighbours(depth, p, pos);
 }
+
+void simulation::test_increase_t_cell_concentration(size_t pos) {
+  increase_t_cell_concentration(pos);
+}
+
+void simulation::test_diffuse() {
+  diffuse();
+}
+
 
 
 

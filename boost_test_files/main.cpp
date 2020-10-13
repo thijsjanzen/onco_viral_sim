@@ -271,8 +271,6 @@ BOOST_AUTO_TEST_CASE( random_stuff )
 {
   Param all_parameters;
   all_parameters.sq_num_cells = 100;
-  all_parameters.use_voronoi_grid = false;
-  all_parameters.start_setup = full;
 
   simulation Simulation(all_parameters);
 
@@ -288,6 +286,71 @@ BOOST_AUTO_TEST_CASE( random_stuff )
 }
 
 
+BOOST_AUTO_TEST_CASE( diffuse )
+{
+  std::cout << "testing voronoi\n";
+  Param all_parameters;
+  all_parameters.sq_num_cells = 100;
+  all_parameters.use_voronoi_grid = false;
+  all_parameters.start_setup = empty_grid;
+  all_parameters.t_cell_increase = 10.f;
+  all_parameters.evaporation = 0.0f;
+  all_parameters.diffusion = 0.1f;
+
+  simulation Simulation(all_parameters);
+  std::vector< std::vector< voronoi_point > > filler;
+
+  Simulation.initialize_network(filler);
+
+  size_t x = 50;
+  size_t y = 50;
+  size_t pos = y * 100 + x;
+
+  Simulation.test_increase_t_cell_concentration(pos);
+  Simulation.test_diffuse();
+
+  // now all direct neighbors of (50, 50) should have 1.
+
+  static int relative_points[4][2] = { {-1, 0},
+                                      {1, 0},
+                                      {0, 1},
+                                      {0, -1} };
+
+
+  for(int i = 0; i < 4; ++i) {
+      int other_x = static_cast<int>(x) + relative_points[i][0];
+      int other_y = static_cast<int>(y) + relative_points[i][1];
+
+       int other_pos = other_y + other_x * static_cast<int>(100);
+
+        if(other_pos != pos)   {
+
+          float local_conc = Simulation.world[other_pos].t_cell_concentration ;
+
+          BOOST_CHECK_EQUAL( local_conc ,
+                              0.25);
+        }
+   }
+
+  Simulation.test_diffuse();
+    for(int i = 0; i < 4; ++i) {
+        int other_x = static_cast<int>(x) + relative_points[i][0];
+        int other_y = static_cast<int>(y) + relative_points[i][1];
+
+         int other_pos = other_y + other_x * static_cast<int>(100);
+
+          if(other_pos != pos)   {
+
+            float local_conc = Simulation.world[other_pos].t_cell_concentration ;
+
+            BOOST_CHECK_EQUAL( static_cast<int>(100 * local_conc) ,
+                               static_cast<int>(100 * 0.45f) );
+                                           //  0.25 + ((9 - 0.25) * 0.1) / 4 -
+                                           // 3 * (0.25 * 0.1) / 4
+          }
+     }
+
+}
 
 BOOST_AUTO_TEST_CASE( voronoi )
 {
@@ -310,6 +373,8 @@ BOOST_AUTO_TEST_CASE( voronoi )
         BOOST_CHECK_GT(i.neighbors.size(), 0);
   }
 }
+
+
 
 
 /*
