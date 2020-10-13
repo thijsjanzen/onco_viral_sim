@@ -270,7 +270,7 @@ BOOST_AUTO_TEST_CASE( ask_infect_neighbours)
 BOOST_AUTO_TEST_CASE( random_stuff )
 {
   Param all_parameters;
-  all_parameters.sq_num_cells = 100;
+  all_parameters.sq_num_cells = 10;
 
   simulation Simulation(all_parameters);
 
@@ -280,9 +280,40 @@ BOOST_AUTO_TEST_CASE( random_stuff )
   BOOST_CHECK_EQUAL(x, 10);
 
   Simulation.growth_prob[0].update_entry(10, 0.0f);
-  Simulation.growth_prob[0].update_entry(100, 0.01f);
+  Simulation.growth_prob[0].update_entry(50, 0.01f);
   auto x2 = Simulation.growth_prob[0].draw_explicit(Simulation.rndgen);
-  BOOST_CHECK_EQUAL(x2, 100);
+  BOOST_CHECK_EQUAL(x2, 50);
+
+  // now we populate with equal numbers
+  int total_num_cells = all_parameters.sq_num_cells * all_parameters.sq_num_cells;
+  for(int i = 0; i < total_num_cells; ++i) {
+    Simulation.growth_prob[0].update_entry(i, 1.0f);
+  }
+  // and now we draw many numbers:
+  int num_zero = 0;
+  int num_ten  = 0;
+  int num_repl = 100000;
+  for(int r = 0; r < num_repl; ++r) {
+      auto xx = Simulation.growth_prob[0].draw_explicit(Simulation.rndgen);
+      if(xx == 0) num_zero++;
+      if(xx == 10) num_ten++;
+  }
+
+  float expected_freq = 1.f / total_num_cells;
+  float freq_zero     = 1.f * num_zero / num_repl;
+  float freq_ten      = 1.f * num_ten  / num_repl;
+
+
+  BOOST_CHECK_CLOSE(freq_zero,
+                    expected_freq, 10.f);
+  BOOST_CHECK_CLOSE(freq_ten,
+                    expected_freq, 10.f);
+  BOOST_CHECK_CLOSE(freq_zero,
+                    freq_ten, 10.f);
+
+
+
+
 }
 
 
