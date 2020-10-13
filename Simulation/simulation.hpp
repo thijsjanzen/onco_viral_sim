@@ -51,7 +51,6 @@ public:
 
   void obtain_equilibrium();
 
-  float calc_max_t_cell_rate();
   std::array<size_t, 5> num_cell_types;
 
   Param get_parameters();

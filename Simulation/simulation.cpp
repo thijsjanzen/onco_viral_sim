@@ -407,12 +407,6 @@ void simulation::increase_t_cell_concentration(size_t pos) {
   total_t_cell_concentration += parameters.t_cell_increase;
 }
 
-float simulation::calc_max_t_cell_rate() {
-  return expf(parameters.t_cell_increase *
-                            parameters.t_cell_rate);
-
-}
-
 void simulation::test_change_cell_type(const size_t& pos,
                                  const cell_type& new_cell_type) {
   change_cell_type(pos, new_cell_type);
