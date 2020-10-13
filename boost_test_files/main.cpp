@@ -267,6 +267,27 @@ BOOST_AUTO_TEST_CASE( ask_infect_neighbours)
   }
 }
 
+BOOST_AUTO_TEST_CASE( random_stuff )
+{
+  Param all_parameters;
+  all_parameters.sq_num_cells = 100;
+  all_parameters.use_voronoi_grid = false;
+  all_parameters.start_setup = full;
+
+  simulation Simulation(all_parameters);
+
+  // test random numbers
+  Simulation.growth_prob[0].update_entry(10, 1.0f);
+  auto x = Simulation.growth_prob[0].draw_explicit(Simulation.rndgen);
+  BOOST_CHECK_EQUAL(x, 10);
+
+  Simulation.growth_prob[0].update_entry(10, 0.0f);
+  Simulation.growth_prob[0].update_entry(100, 0.01f);
+  auto x2 = Simulation.growth_prob[0].draw_explicit(Simulation.rndgen);
+  BOOST_CHECK_EQUAL(x2, 100);
+}
+
+
 
 BOOST_AUTO_TEST_CASE( voronoi )
 {
