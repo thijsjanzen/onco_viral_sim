@@ -444,6 +444,10 @@ void simulation::test_infect_periphery(float frac) {
   infect_periphery(frac);
 }
 
+void simulation::test_infect_random(float frac) {
+  infect_random(frac);
+}
+
 
 
 

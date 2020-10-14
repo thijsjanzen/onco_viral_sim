@@ -391,9 +391,6 @@ BOOST_AUTO_TEST_CASE( infect_periphery )
   all_parameters.sq_num_cells = 100;
   all_parameters.use_voronoi_grid = false;
   all_parameters.start_setup = empty_grid;
-  all_parameters.t_cell_increase = 10.f;
-  all_parameters.evaporation = 0.0f;
-  all_parameters.diffusion = 0.1f;
 
   simulation Simulation(all_parameters);
   std::vector< std::vector< voronoi_point > > filler;
@@ -427,7 +424,46 @@ BOOST_AUTO_TEST_CASE( infect_periphery )
                     76);
 }
 
+BOOST_AUTO_TEST_CASE( infect_random)
+{
+  std::cout << "test random\n";
 
+  Param all_parameters;
+  all_parameters.sq_num_cells = 100;
+  all_parameters.use_voronoi_grid = false;
+  all_parameters.start_setup = empty_grid;
+
+  simulation Simulation(all_parameters);
+  std::vector< std::vector< voronoi_point > > filler;
+
+  Simulation.initialize_network(filler);
+
+  // create a square
+  for (size_t x = 40; x < 60; ++x) {
+      for (size_t y = 40; y < 60; ++y) {
+          size_t pos = x + y * 100;
+          Simulation.test_change_cell_type(pos, cancer);
+      }
+  }
+
+  std::array<size_t, 5> cell_counts_before = Simulation.count_cell_types();
+  BOOST_CHECK_EQUAL(cell_counts_before[cancer],
+                    400);
+
+  // now we randomly infect some cells
+  Simulation.test_infect_random(0.1);
+  std::array<size_t, 5> cell_counts_after = Simulation.count_cell_types();
+
+  BOOST_CHECK_LT(cell_counts_after[cancer],
+                 cell_counts_before[cancer]); // after < before
+
+
+  BOOST_CHECK_GT(cell_counts_after[infected],  // after > before
+                 cell_counts_before[infected]);
+
+  BOOST_CHECK_EQUAL(cell_counts_after[infected],
+                    40);
+}
 
 
 BOOST_AUTO_TEST_CASE( voronoi )
