@@ -102,7 +102,7 @@ size_t simulation::find_central_cell(const std::vector< size_t >& positions) con
 
 void simulation::initialize_network(std::vector< std::vector< voronoi_point > >& all_polys) {
    // initialize default.
-  std::cout << "Initializing network\n";
+//   std::cout << "Initializing network\n";
   for(size_t i = 0; i < 4; ++i) {
        growth_prob[i] = binned_distribution(sq_size, num_cells);
        death_prob[i] = binned_distribution(sq_size, num_cells);
@@ -398,6 +398,7 @@ void simulation::infect_periphery(float fraction) {
 
   struct peri_cell {
     size_t pos;
+    float freq_cancer;
     float dist_to_center;
   };
 
@@ -406,11 +407,15 @@ void simulation::infect_periphery(float fraction) {
   for (size_t i = 0; i < clusters[largest_cluster].size(); ++i) {
      size_t pos = clusters[largest_cluster][i];
 
-     if(world[pos].freq_type_neighbours(normal) > 0.f) {
+     float freq_cancer = world[pos].freq_type_neighbours(cancer);
+
+     if(freq_cancer < 1.0f &&
+        world[pos].get_cell_type() == cancer) {
        peri_cell add;
        add.dist_to_center = (world[pos].x_ - x) * (world[pos].x_ - x) +
                             (world[pos].y_ - y) * (world[pos].y_ - y);
        add.pos = pos;
+       add.freq_cancer = freq_cancer;
        periphery.push_back(add);
       }
     }
@@ -419,14 +424,20 @@ void simulation::infect_periphery(float fraction) {
   if(to_be_infected == 0) return;
 
   std::sort(periphery.begin(), periphery.end(),
-            [](auto const& a, auto const& b) {return a.dist_to_center > b.dist_to_center;});
+            [](auto const& a, auto const& b) {
+              if (a.dist_to_center == b.dist_to_center) {
+                 return a.freq_cancer < b.freq_cancer;
+              }
+              return a.dist_to_center > b.dist_to_center;});
 
 
   std::vector< size_t > cells_turned;
   for (size_t i = 0; i < to_be_infected; ++i) {
      size_t focal_pos = periphery[i].pos;
-     change_cell_type(focal_pos, infected);
-     cells_turned.push_back(focal_pos);
+     if (world[focal_pos].get_cell_type() == cancer) {
+       change_cell_type(focal_pos, infected);
+       cells_turned.push_back(focal_pos);
+     }
   }
 
   for(const auto& i : cells_turned) {

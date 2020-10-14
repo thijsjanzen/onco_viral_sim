@@ -440,6 +440,10 @@ void simulation::test_diffuse() {
   diffuse();
 }
 
+void simulation::test_infect_periphery(float frac) {
+  infect_periphery(frac);
+}
+
 
 
 

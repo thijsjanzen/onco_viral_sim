@@ -67,6 +67,7 @@ public:
   void test_ask_infect_neighbours(size_t depth, float p, size_t pos);
   void test_increase_t_cell_concentration(size_t pos);
   void test_diffuse();
+  void test_infect_periphery(float frac);
 
   float get_rates(size_t event);
   size_t test_pick_event(const std::array<float, 8>& v, float s);
