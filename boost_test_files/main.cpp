@@ -802,12 +802,12 @@ BOOST_AUTO_TEST_CASE( t_cells )
 
   std::array<size_t, 5> result = do_analysis(all_parameters);
   std::string outcome = get_outcome(result);
-  BOOST_CHECK_EQUAL(outcome, "C");
+  BOOST_CHECK_EQUAL(outcome, "A");
 
   all_parameters.use_voronoi_grid = true;
   result = do_analysis(all_parameters);
   outcome = get_outcome(result);
-  BOOST_CHECK_EQUAL(outcome, "C");
+  BOOST_CHECK_EQUAL(outcome, "A");
 }
 
 BOOST_AUTO_TEST_CASE( infect_second_time )
@@ -1059,12 +1059,12 @@ BOOST_AUTO_TEST_CASE( long_distance_infection )
 
   std::array<size_t, 5> result = do_analysis(all_parameters);
   std::string outcome = get_outcome(result);
-  BOOST_CHECK_EQUAL(outcome, "A");
+  BOOST_CHECK_EQUAL(outcome, "C");
 
   all_parameters.use_voronoi_grid = true;
   result = do_analysis(all_parameters);
   outcome = get_outcome(result);
-   BOOST_CHECK_EQUAL(outcome, "A");
+   BOOST_CHECK_EQUAL(outcome, "C");
 }
 
 // TODO: add tests with resistant cells
