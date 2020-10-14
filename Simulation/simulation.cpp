@@ -448,6 +448,10 @@ void simulation::test_infect_random(float frac) {
   infect_random(frac);
 }
 
+void simulation::test_infect_center(float frac) {
+  infect_center(frac);
+}
+
 
 
 
