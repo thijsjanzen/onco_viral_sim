@@ -452,6 +452,10 @@ void simulation::test_infect_center(float frac) {
   infect_center(frac);
 }
 
+void simulation::test_infect_center_largest(float frac) {
+  infect_center_largest(frac);
+}
+
 
 
 
