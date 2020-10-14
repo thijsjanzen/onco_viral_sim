@@ -64,7 +64,7 @@ public:
   void test_change_cell_type(const size_t& pos, const cell_type& new_cell_type);
   void test_event(size_t event);
   void test_update_rates();
-  void test_ask_infect_neighbours(size_t depth, float p, size_t pos);
+  void test_ask_infect_neighbours(size_t depth, size_t pos);
   void test_increase_t_cell_concentration(size_t pos);
   void test_diffuse();
   void test_infect_periphery(float frac);
@@ -72,6 +72,7 @@ public:
   void test_infect_center(float frac);
   void test_infect_center_largest(float frac);
   void test_infect_all_cancer();
+  void test_infect_long_distance(size_t pos);
 
   float get_rates(size_t event);
   size_t test_pick_event(const std::array<float, 8>& v, float s);
@@ -123,7 +124,8 @@ private:
 
   void change_cell_type(const size_t& pos, const cell_type& new_cell_type);
 
-  void ask_infect_neighbours(size_t depth, float p, size_t pos);
+  void ask_infect_neighbours(size_t depth, size_t pos);
+
   void update_count(cell_type old_type, cell_type new_type);
   // float calc_t_cell_death_rate(float concentration);
 

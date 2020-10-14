@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE( birth_death )
   std::vector< cell_type > v = {normal, empty, cancer, empty,
                                 infected, empty, resistant, empty};
 
-   for(size_t i = 0; i < 7; ++i) {
+   for(size_t i = 0; i < 8; ++i) {
     Simulation.test_event(i);
 
     BOOST_CHECK_EQUAL(Simulation.world[0].get_cell_type(),
@@ -229,6 +229,8 @@ BOOST_AUTO_TEST_CASE( ask_infect_neighbours)
   all_parameters.sq_num_cells = 100;
   all_parameters.use_voronoi_grid = false;
   all_parameters.start_setup = full;
+  all_parameters.distance_infection_upon_death = 1.0;
+  all_parameters.prob_infection_upon_death = 100.f;
 
   simulation Simulation(all_parameters);
 
@@ -252,7 +254,7 @@ BOOST_AUTO_TEST_CASE( ask_infect_neighbours)
   size_t initial_pos = 50 * 100 + 50;
   Simulation.test_change_cell_type(initial_pos, infected);
   size_t dist = 3;
-  Simulation.test_ask_infect_neighbours(dist, 1.f, initial_pos);
+  Simulation.test_ask_infect_neighbours(dist, initial_pos);
   for(size_t x = 40; x < 61; ++x) {
     size_t pos = 50 * row_size + x;
     int dist_x = static_cast<int>(x) - static_cast<int>(50);
@@ -675,7 +677,7 @@ BOOST_AUTO_TEST_CASE( add_infected )
 // update_one_step
 BOOST_AUTO_TEST_CASE( update_one_step)
 {
-  std::cout << "test add infected\n";
+  std::cout << "test update one step\n";
 
   Param all_parameters;
   all_parameters.sq_num_cells = 100;
@@ -711,17 +713,51 @@ BOOST_AUTO_TEST_CASE( update_one_step)
 
 // infect_long_distance
 BOOST_AUTO_TEST_CASE( infect_long_distance ) {
+  std::cout << "test infect long distance\n";
 
+  Param all_parameters;
+  all_parameters.sq_num_cells = 100;
+  all_parameters.use_voronoi_grid = false;
+  all_parameters.start_setup = empty_grid;
+  all_parameters.distance_infection_upon_death = 1.0;
+  all_parameters.prob_infection_upon_death = 100.f;
 
+  simulation Simulation(all_parameters);
+  std::vector< std::vector< voronoi_point > > filler;
 
+  Simulation.initialize_network(filler);
 
+  // create a square
+  for (size_t x = 40; x < 60; ++x) {
+      for (size_t y = 40; y < 60; ++y) {
+          size_t pos = x + y * 100;
+          Simulation.test_change_cell_type(pos, cancer);
+      }
+  }
+
+  size_t x = 50;
+  size_t y = 50;
+  size_t central_pos = y * 100 + x;
+  //Simulation.test_change_cell_type(central_pos, infected);
+  Simulation.test_infect_long_distance(central_pos);
+
+  static int relative_points[4][2] = { {-1, 0},
+                                      {1, 0},
+                                      {0, 1},
+                                      {0, -1} };
+
+  for (size_t i = 0; i < 4; ++i) {
+     int x2 = x + relative_points[i][0];
+     int y2 = y + relative_points[i][1];
+     size_t pos = y2 * 100 + x2;
+     BOOST_CHECK_EQUAL(Simulation.world[pos].get_cell_type(),
+                       infected);
+  }
 }
 
-// death of resistant, do_event(7)
+
 // obtain_equilibrium
 // do_analysis (but see below)
-
-
 
 /*
 BOOST_AUTO_TEST_CASE( t_cells )

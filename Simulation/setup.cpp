@@ -42,7 +42,7 @@ world(param.sq_num_cells * param.sq_num_cells)
       double local_prob = static_cast<double>(parameters.prob_infection_upon_death) *
                           lambda * exp(-lambda * d);
       long_distance_infection_probability.push_back(local_prob);
-      if(local_prob < 1e-3) break;
+    //  if(local_prob < 1e-5) break;
   }
 }
 
