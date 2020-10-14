@@ -589,7 +589,7 @@ BOOST_AUTO_TEST_CASE( voronoi )
 BOOST_AUTO_TEST_CASE( infect_all_cancer )
 {
   // infect_all_cancer
-  std::cout << "test infect center\n";
+  std::cout << "test infect all cancer\n";
 
   Param all_parameters;
   all_parameters.sq_num_cells = 100;
@@ -632,8 +632,7 @@ BOOST_AUTO_TEST_CASE( infect_all_cancer )
 // add_infected
 BOOST_AUTO_TEST_CASE( add_infected )
 {
-  // infect_all_cancer
-  std::cout << "test infect center\n";
+  std::cout << "test add infected\n";
 
   Param all_parameters;
   all_parameters.sq_num_cells = 100;
@@ -661,7 +660,7 @@ BOOST_AUTO_TEST_CASE( add_infected )
   Simulation.add_infected(random_infection, 0.1f);
   std::array<size_t, 5> cell_counts_after = Simulation.count_cell_types();
 
-  BOOST_CHECK_EQUAL(cell_counts_after[cancer],
+  BOOST_CHECK_LT(cell_counts_after[cancer],
                     cell_counts_before[cancer]); // after < before
 
 
@@ -673,11 +672,52 @@ BOOST_AUTO_TEST_CASE( add_infected )
 }
 
 
-
-
 // update_one_step
-// death of resistant, do_event(7)
+BOOST_AUTO_TEST_CASE( update_one_step)
+{
+  std::cout << "test add infected\n";
+
+  Param all_parameters;
+  all_parameters.sq_num_cells = 100;
+  all_parameters.death_cancer = 0.0;
+  all_parameters.use_voronoi_grid = false;
+  all_parameters.start_setup = empty_grid;
+
+  simulation Simulation(all_parameters);
+  std::vector< std::vector< voronoi_point > > filler;
+
+  Simulation.initialize_network(filler);
+
+  // create a square
+  for (size_t x = 40; x < 60; ++x) {
+      for (size_t y = 40; y < 60; ++y) {
+          size_t pos = x + y * 100;
+          Simulation.test_change_cell_type(pos, cancer);
+      }
+  }
+
+  std::array<size_t, 5> cell_counts_before = Simulation.count_cell_types();
+  BOOST_CHECK_EQUAL(cell_counts_before[cancer],
+                    400);
+
+  Simulation.update_one_step();
+
+  std::array<size_t, 5> cell_counts_after = Simulation.count_cell_types();
+  BOOST_CHECK_EQUAL(cell_counts_after[cancer],
+                    401);
+}
+
+
+
 // infect_long_distance
+BOOST_AUTO_TEST_CASE( infect_long_distance ) {
+
+
+
+
+}
+
+// death of resistant, do_event(7)
 // obtain_equilibrium
 // do_analysis (but see below)
 
