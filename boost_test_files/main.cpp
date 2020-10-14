@@ -897,7 +897,7 @@ BOOST_AUTO_TEST_CASE( set_infection )
 }
 
 
-BOOST_AUTO_TEST_CASE( infect_random )
+BOOST_AUTO_TEST_CASE( infect_random2 )
 {
   std::cout << "simulation allowing growth from the start\n";
   std::cout << "using random infection\n";
@@ -923,7 +923,7 @@ BOOST_AUTO_TEST_CASE( infect_random )
   BOOST_CHECK_EQUAL(outcome, outcome2);
 }
 
-BOOST_AUTO_TEST_CASE( infect_periphery )
+BOOST_AUTO_TEST_CASE( infect_periphery2 )
 {
   std::cout << "simulation allowing growth from the start\n";
   std::cout << "using random infection\n";
@@ -983,7 +983,7 @@ BOOST_AUTO_TEST_CASE( infect_all )
   BOOST_CHECK_EQUAL(outcome, "A");
 }
 
-BOOST_AUTO_TEST_CASE( infect_center )
+BOOST_AUTO_TEST_CASE( infect_center2 )
 {
   std::cout << "simulation with growth\n";
   std::cout << "testing INFECT CENTER\n";
