@@ -147,40 +147,35 @@ void simulation::implement_growth(const cell_type& parent) {
   change_cell_type(position_of_grown_cell, new_type);
 }
 
-void simulation::ask_infect_neighbours(size_t depth, float p, size_t pos) {
+void simulation::ask_infect_neighbours(size_t depth, size_t pos) {
+
+    float p = long_distance_infection_probability[depth];
     if(p < 1e-6f) return;
     if(std::isnan(p)) return;
 
-    if(depth > 1) {
-        depth--;
-        for(const auto& n : world[pos].neighbors) {
-            ask_infect_neighbours(depth, p, n->pos);
-        }
+    if (depth == 0) return;
 
-    } else {
-        for(auto& n : world[pos].neighbors) {
-            if(n->get_cell_type() == cancer) {
-                if(rndgen.uniform() < p) {
-                    change_cell_type(n->pos, infected);
-                }
-            }
-            if(n->get_cell_type() == normal) {
-                 if(rndgen.uniform() < p) {
-                     if(rndgen.uniform() < n->prob_normal_infected) {
-                         change_cell_type(n->pos, infected);
-                     }
-                 }
+    depth--;
+    for(auto& n : world[pos].neighbors) {
+        if(n->get_cell_type() == cancer) {
+            if(rndgen.uniform() < p) {
+                change_cell_type(n->pos, infected);
             }
         }
+        if(n->get_cell_type() == normal) {
+             if(rndgen.uniform() < p) {
+                 if(rndgen.uniform() < n->prob_normal_infected) {
+                     change_cell_type(n->pos, infected);
+                 }
+             }
+        }
+        ask_infect_neighbours(depth, n->pos);
     }
 }
 
 void simulation::infect_long_distance(size_t pos) {
-   for(size_t i = 1; i < long_distance_infection_probability.size(); ++i) {
-       ask_infect_neighbours(i,
-                             static_cast<float>(long_distance_infection_probability[i]),
-                             pos);
-   }
+  ask_infect_neighbours(parameters.distance_infection_upon_death,
+                        pos);
 }
 
 
@@ -360,7 +355,7 @@ void simulation::diffuse() {
   std::vector<float> new_concentration(world.size(), 0.f);
   for(size_t i = 0; i < world.size(); ++i) {
     if(world[i].t_cell_concentration > 0.f) {
-       float current_conc = world[i].t_cell_concentration *
+       /*float current_conc = world[i].t_cell_concentration *
                               (1 - parameters.evaporation);
        float total_diffuse_loss = (parameters.diffusion * current_conc);
        float diffuse_per_neighbor = total_diffuse_loss *
@@ -371,6 +366,27 @@ void simulation::diffuse() {
           new_concentration[other_pos] += diffuse_per_neighbor;
        }
        new_concentration[i] += current_conc - total_diffuse_loss;
+       */
+
+      float current_conc = world[i].t_cell_concentration;
+      new_concentration[i] += current_conc;
+
+      for(const auto& j : world[i].neighbors) {
+         size_t other_pos = j->pos;
+         float other_conc = world[other_pos].t_cell_concentration;
+         float delta_conc = current_conc - other_conc;
+
+         float diffusion_amount = delta_conc *
+             parameters.diffusion * world[i].inv_num_neighbors;
+
+         if (diffusion_amount > 0) { // otherwise we track the same flow twice.
+           new_concentration[i] -= diffusion_amount;
+
+           new_concentration[other_pos] += diffusion_amount;
+         }
+      }
+      //new_concentration[i] = current_conc;
+
     }
   }
 
@@ -396,11 +412,64 @@ void simulation::increase_t_cell_concentration(size_t pos) {
   total_t_cell_concentration += parameters.t_cell_increase;
 }
 
-float simulation::calc_max_t_cell_rate() {
-  return expf(parameters.t_cell_increase *
-                            parameters.t_cell_rate);
-
+void simulation::test_change_cell_type(const size_t& pos,
+                                 const cell_type& new_cell_type) {
+  change_cell_type(pos, new_cell_type);
 }
+
+void simulation::test_event(size_t event) {
+  do_event(event);
+}
+
+void simulation::test_update_rates() {
+  update_rates();
+}
+
+float simulation::get_rates(size_t event) {
+  return rates[event];
+}
+
+size_t simulation::test_pick_event(const std::array<float, 8>& v, float s) {
+  return pick_event(v, s);
+}
+
+void simulation::test_ask_infect_neighbours(size_t depth, size_t pos) {
+  ask_infect_neighbours(depth, pos);
+}
+
+void simulation::test_increase_t_cell_concentration(size_t pos) {
+  increase_t_cell_concentration(pos);
+}
+
+void simulation::test_diffuse() {
+  diffuse();
+}
+
+void simulation::test_infect_periphery(float frac) {
+  infect_periphery(frac);
+}
+
+void simulation::test_infect_random(float frac) {
+  infect_random(frac);
+}
+
+void simulation::test_infect_center(float frac) {
+  infect_center(frac);
+}
+
+void simulation::test_infect_center_largest(float frac) {
+  infect_center_largest(frac);
+}
+
+void simulation::test_infect_all_cancer() {
+  infect_all_cancer();
+}
+
+void simulation::test_infect_long_distance(size_t pos) {
+  infect_long_distance(pos);
+}
+
+
 
 
 

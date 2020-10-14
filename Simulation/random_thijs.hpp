@@ -1,7 +1,7 @@
 #ifndef RANDOM_THIJS_H
 #define RANDOM_THIJS_H
 
-  // Copyright 2019 Thijs Janzen
+// Copyright 2019 Thijs Janzen
 
 #include <random>
 #include <map>
@@ -158,13 +158,6 @@ public:
     if(total_sum < 0.f) total_sum = 0.f;
 
     if(row_sum[row] < 0.f) row_sum[row] = 0.f;
-    // the entries below go wrong, once the last cell in the simulation is dead?
-   // assert(row_sum[row] >= 0.f);
-  //  assert(total_sum >= 0.f);
-    if (std::isinf(total_sum)) {
-        int a = 5;
-      }
-
   }
 
   float get_total_sum() const {

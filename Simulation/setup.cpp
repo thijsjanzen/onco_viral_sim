@@ -41,12 +41,12 @@ world(param.sq_num_cells * param.sq_num_cells * param.sq_num_cells)
       double local_prob = static_cast<double>(parameters.prob_infection_upon_death) *
                           lambda * exp(-lambda * d);
       long_distance_infection_probability.push_back(local_prob);
-      if(local_prob < 1e-3) break;
+    //  if(local_prob < 1e-5) break;
   }
 }
 
 
-size_t simulation::find_central_cell(const cell_type& focal_cell_type) {
+size_t simulation::find_central_cell(const cell_type& focal_cell_type) const {
     // first calculate average x and y of cell type:
     float x = 0.f;
     float y = 0.f;
@@ -77,7 +77,7 @@ size_t simulation::find_central_cell(const cell_type& focal_cell_type) {
     return(std::distance(dist.begin(), min));
 }
 
-size_t simulation::find_central_cell(const std::vector< size_t >& positions) {
+size_t simulation::find_central_cell(const std::vector< size_t >& positions) const {
     // first calculate average x and y of cell type:
     float x = 0.f;
     float y = 0.f;
@@ -106,7 +106,7 @@ size_t simulation::find_central_cell(const std::vector< size_t >& positions) {
 
 void simulation::initialize_network(std::vector< std::vector< voronoi_point > >& all_polys) {
    // initialize default.
-  std::cout << "Initializing network\n";
+//   std::cout << "Initializing network\n";
   for(size_t i = 0; i < 4; ++i) {
        growth_prob[i] = binned_distribution(sq_size, num_cells);
        death_prob[i] = binned_distribution(sq_size, num_cells);
@@ -402,6 +402,7 @@ void simulation::infect_periphery(float fraction) {
 
   struct peri_cell {
     size_t pos;
+    float freq_cancer;
     float dist_to_center;
   };
 
@@ -410,11 +411,15 @@ void simulation::infect_periphery(float fraction) {
   for (size_t i = 0; i < clusters[largest_cluster].size(); ++i) {
      size_t pos = clusters[largest_cluster][i];
 
-     if(world[pos].freq_type_neighbours(normal) > 0.f) {
+     float freq_cancer = world[pos].freq_type_neighbours(cancer);
+
+     if(freq_cancer < 1.0f &&
+        world[pos].get_cell_type() == cancer) {
        peri_cell add;
        add.dist_to_center = (world[pos].x_ - x) * (world[pos].x_ - x) +
                             (world[pos].y_ - y) * (world[pos].y_ - y);
        add.pos = pos;
+       add.freq_cancer = freq_cancer;
        periphery.push_back(add);
       }
     }
@@ -423,14 +428,20 @@ void simulation::infect_periphery(float fraction) {
   if(to_be_infected == 0) return;
 
   std::sort(periphery.begin(), periphery.end(),
-            [](auto const& a, auto const& b) {return a.dist_to_center > b.dist_to_center;});
+            [](auto const& a, auto const& b) {
+              if (a.dist_to_center == b.dist_to_center) {
+                 return a.freq_cancer < b.freq_cancer;
+              }
+              return a.dist_to_center > b.dist_to_center;});
 
 
   std::vector< size_t > cells_turned;
   for (size_t i = 0; i < to_be_infected; ++i) {
      size_t focal_pos = periphery[i].pos;
-     change_cell_type(focal_pos, infected);
-     cells_turned.push_back(focal_pos);
+     if (world[focal_pos].get_cell_type() == cancer) {
+       change_cell_type(focal_pos, infected);
+       cells_turned.push_back(focal_pos);
+     }
   }
 
   for(const auto& i : cells_turned) {
@@ -581,9 +592,10 @@ void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_
            voronoi_point end(  focal_edge.p1.x, focal_edge.p1.y, 0);
 
            voronoi_edge local_edge(start, end, focal_edge.leftSite, focal_edge.rightSite);
-           if(!local_edge.check()) {
-            std::cout << site_index << "\n";
-           }
+           // uncomment to debug:
+           // if(!local_edge.check()) {
+           //  std::cout << site_index << "\n";
+           // }
 
            if(local_edge.calc_dist() > 1e-2) {
              all_edges[site_index].push_back(local_edge);
