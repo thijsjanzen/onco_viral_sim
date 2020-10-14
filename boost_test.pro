@@ -37,6 +37,7 @@ TARGET=BOOST_TEST.app
 QMAKE_CXXFLAGS += --coverage
 QMAKE_LFLAGS += --coverage
 
+QMAKE_POST_LINK = rm -f "*.gcda"
 
 CONFIG(debug, debug|release) {
   # gcov
