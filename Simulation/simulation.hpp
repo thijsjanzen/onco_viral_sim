@@ -71,6 +71,7 @@ public:
   void test_infect_random(float frac);
   void test_infect_center(float frac);
   void test_infect_center_largest(float frac);
+  void test_infect_all_cancer();
 
   float get_rates(size_t event);
   size_t test_pick_event(const std::array<float, 8>& v, float s);

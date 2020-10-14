@@ -456,6 +456,10 @@ void simulation::test_infect_center_largest(float frac) {
   infect_center_largest(frac);
 }
 
+void simulation::test_infect_all_cancer() {
+  infect_all_cancer();
+}
+
 
 
 
