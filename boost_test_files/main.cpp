@@ -29,6 +29,7 @@ BOOST_AUTO_TEST_CASE( birth_death )
      BOOST_CHECK_EQUAL(cells[i], 0);
   }
   BOOST_CHECK_EQUAL(cells[4], all_parameters.sq_num_cells *
+                              all_parameters.sq_num_cells *
                               all_parameters.sq_num_cells);
 
 
@@ -52,9 +53,6 @@ BOOST_AUTO_TEST_CASE( birth_death )
   Simulation.test_change_cell_type(0, empty);
   Simulation.test_change_cell_type(3, empty);
   Simulation.test_update_rates();
-
-
-
 
   // test change_chell_type
   // add a normal cell, then kill it
@@ -212,6 +210,7 @@ BOOST_AUTO_TEST_CASE( setup_types)
   std::array<size_t, 5> cell_cnt = Simulation.count_cell_types();
 
   size_t total_num_cells = all_parameters.sq_num_cells *
+                           all_parameters.sq_num_cells *
                            all_parameters.sq_num_cells;
 
   BOOST_CHECK_EQUAL(cell_cnt[normal],
@@ -338,49 +337,56 @@ BOOST_AUTO_TEST_CASE( diffuse )
 
   size_t x = 50;
   size_t y = 50;
-  size_t pos = y * 100 + x;
+  size_t z = 50;
+  size_t pos = x + 100 * (y + 100 * z);
 
   Simulation.test_increase_t_cell_concentration(pos);
   Simulation.test_diffuse();
 
   // now all direct neighbors of (50, 50) should have 1.
 
-  static int relative_points[4][2] = { {-1, 0},
-                                      {1, 0},
-                                      {0, 1},
-                                      {0, -1} };
+  static int relative_points[6][3] = { {-1,  0,  0},
+                                       { 1,  0,  0},
+                                       { 0,  1,  0},
+                                       { 0, -1,  0},
+                                       { 0,  0,  1},
+                                       { 0,  0, -1} };
 
 
-  for(int i = 0; i < 4; ++i) {
+  for(int i = 0; i < 6; ++i) {
       int other_x = static_cast<int>(x) + relative_points[i][0];
       int other_y = static_cast<int>(y) + relative_points[i][1];
+      int other_z = static_cast<int>(y) + relative_points[i][2];
 
-       int other_pos = other_y + other_x * static_cast<int>(100);
+       int other_pos = other_x + static_cast<int>(100) * (other_y  +
+                                                          static_cast<int>(100) * other_z);
 
         if(other_pos != pos)   {
 
           float local_conc = Simulation.world[other_pos].t_cell_concentration ;
 
-          BOOST_CHECK_EQUAL( local_conc ,
-                              0.25);
+          BOOST_CHECK_EQUAL( static_cast<int>(100 * local_conc) ,
+                             static_cast<int>(100 * 0.166));
         }
    }
 
   Simulation.test_diffuse();
-    for(int i = 0; i < 4; ++i) {
+    for(int i = 0; i < 6; ++i) {
         int other_x = static_cast<int>(x) + relative_points[i][0];
         int other_y = static_cast<int>(y) + relative_points[i][1];
+        int other_z = static_cast<int>(y) + relative_points[i][2];
 
-         int other_pos = other_y + other_x * static_cast<int>(100);
+         int other_pos = other_x + static_cast<int>(100) * (other_y  +
+                                                            static_cast<int>(100) * other_z);
 
           if(other_pos != pos)   {
 
             float local_conc = Simulation.world[other_pos].t_cell_concentration ;
 
-            BOOST_CHECK_EQUAL( static_cast<int>(100 * local_conc) ,
-                               static_cast<int>(100 * 0.45f) );
-                                           //  0.25 + ((9 - 0.25) * 0.1) / 4 -
-                                           // 3 * (0.25 * 0.1) / 4
+            BOOST_CHECK_EQUAL( static_cast<int>(ceil(100.0 * local_conc)) ,
+                               static_cast<int>(100 * 0.3f) );  // ERROR
+                                           //  0.2 + ((9 - 0.2) * 0.1) / 6 -
+                                           // 5 * (0.2 * 0.1) / 6
           }
      }
 
@@ -423,7 +429,7 @@ BOOST_AUTO_TEST_CASE( infect_periphery )
                  cell_counts_before[infected]);
 
   BOOST_CHECK_EQUAL(cell_counts_after[infected],
-                    76);
+                    76);  // ERROR
 }
 
 BOOST_AUTO_TEST_CASE( infect_random)
@@ -581,6 +587,7 @@ BOOST_AUTO_TEST_CASE( voronoi )
   Simulation.initialize_network(filler);
 
   BOOST_CHECK_EQUAL(filler.size(), all_parameters.sq_num_cells *
+                                   all_parameters.sq_num_cells *
                                    all_parameters.sq_num_cells);
 
   for(const auto& i : Simulation.world) {

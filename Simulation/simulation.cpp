@@ -376,8 +376,10 @@ void simulation::diffuse() {
          float other_conc = world[other_pos].t_cell_concentration;
          float delta_conc = current_conc - other_conc;
 
+         float neighbor_factor = world[i].inv_num_neighbors;
+         size_t num_neighbours = world[i].neighbors.size();
          float diffusion_amount = delta_conc *
-             parameters.diffusion * world[i].inv_num_neighbors;
+             parameters.diffusion * neighbor_factor;
 
          if (diffusion_amount > 0) { // otherwise we track the same flow twice.
            new_concentration[i] -= diffusion_amount;
