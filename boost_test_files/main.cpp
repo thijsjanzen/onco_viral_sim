@@ -755,11 +755,32 @@ BOOST_AUTO_TEST_CASE( infect_long_distance ) {
   }
 }
 
+BOOST_AUTO_TEST_CASE( obtain_equilibrium )
+{
+  std::cout << "test obtain equilibrium\n";
 
-// obtain_equilibrium
-// do_analysis (but see below)
+  Param all_parameters;
+  all_parameters.sq_num_cells = 100;
+  all_parameters.use_voronoi_grid = false;
+  all_parameters.start_setup = grow;
+  all_parameters.initial_number_normal_cells = 5000;
 
-/*
+  simulation Simulation(all_parameters);
+  std::vector< std::vector< voronoi_point > > filler;
+
+  Simulation.initialize_network(filler);
+
+  Simulation.obtain_equilibrium();
+
+  std::array<size_t, 5> ctypes = Simulation.count_cell_types();
+
+  BOOST_CHECK_GT(ctypes[normal], 0.0);
+  BOOST_CHECK_GT(ctypes[normal], 4000);
+  BOOST_CHECK_LT(ctypes[normal], 10000);
+  BOOST_CHECK_LT(ctypes[normal], 6000);
+}
+
+
 BOOST_AUTO_TEST_CASE( t_cells )
 {
   std::cout << "simulation with growth\n";
@@ -1094,14 +1115,3 @@ BOOST_AUTO_TEST_CASE( check_full_2 )
   outcome = get_outcome(result);
   BOOST_CHECK_EQUAL(outcome, "B");
 }
-*/
-
-
-// TODO:
-
-
-
-
-
-
-
