@@ -12,7 +12,7 @@
 #include <random>
 
 enum infection_routine {random_infection, center_infection, periphery_infection};
-enum start_type {full, grow, converge};
+enum start_type {full, grow, converge, empty_grid};
 
 struct Param {
 

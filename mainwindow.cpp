@@ -109,7 +109,7 @@ void MainWindow::set_pixel(int x, int y, const QColor& col) {
 }
 
 QColor get_t_cell_color(float concentration) {
-  if(concentration < 1e-6f) {
+  if(concentration < 1e-5f) {
       QColor col = {0, 0, 0, 255};
       return col;
   }
