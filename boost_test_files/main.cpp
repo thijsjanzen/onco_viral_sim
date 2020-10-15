@@ -408,8 +408,10 @@ BOOST_AUTO_TEST_CASE( infect_periphery )
   // create a square
   for (size_t x = 40; x < 60; ++x) {
       for (size_t y = 40; y < 60; ++y) {
-          size_t pos = x + y * 100;
-          Simulation.test_change_cell_type(pos, cancer);
+          for (size_t z = 40; z < 60; ++z) {
+            size_t pos = x + 100 * (y + z * 100);
+            Simulation.test_change_cell_type(pos, cancer);
+          }
       }
   }
 
@@ -429,7 +431,7 @@ BOOST_AUTO_TEST_CASE( infect_periphery )
                  cell_counts_before[infected]);
 
   BOOST_CHECK_EQUAL(cell_counts_after[infected],
-                    224);  // (4 * 20 - 4 ) * 2 + 4 * (20 - 2)
+                    2168);  // 18 * 18 * 6 + 4 * 18 + 2 * 76
 }
 
 BOOST_AUTO_TEST_CASE( infect_random)
