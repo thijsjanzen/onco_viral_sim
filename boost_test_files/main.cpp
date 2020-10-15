@@ -429,7 +429,7 @@ BOOST_AUTO_TEST_CASE( infect_periphery )
                  cell_counts_before[infected]);
 
   BOOST_CHECK_EQUAL(cell_counts_after[infected],
-                    76);  // ERROR
+                    224);  // (4 * 20 - 4 ) * 2 + 4 * (20 - 2)
 }
 
 BOOST_AUTO_TEST_CASE( infect_random)
