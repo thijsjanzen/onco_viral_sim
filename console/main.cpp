@@ -20,11 +20,30 @@ int main(int argc, char *argv[]) {
     std::cout << "All files are to be found in this folder: \n";
     std::cout << argv[0] << "\n";
 
+
+    InputParser input(argc, argv);
+
     std::string file_name = "config.ini";
+
+    const std::string &filename = input.getCmdOption("-f");
+    if (!filename.empty()){
+            file_name = filename;
+    }
 
     Param all_parameters;
 
     read_parameters_from_ini(all_parameters, file_name);
+
+    // now we over write found parameters in the command line
+    const std::string &virus_birth = input.getCmdOption("-vb");
+    const std::string &virus_death = input.getCmdOption("-vd");
+    if (!virus_birth.empty()) {
+      all_parameters.birth_infected = std::stof(virus_birth);
+    }
+    if (!virus_death.empty()) {
+      all_parameters.death_infected = std::stof(virus_death);
+    }
+
     // Berg et al. varied two parameters:
     // lambda: speed of virus replication
     // varied in [0, 100]
@@ -179,3 +198,5 @@ bool file_exists (const std::string& name) {
     std::ifstream f(name.c_str());
     return f.good();
 }
+
+
