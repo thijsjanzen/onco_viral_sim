@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
 
     std::cout << "Welcome to this In Silico Simulation of oncolytic tumor virotherapy\n";
     std::cout << "Copyright 2019 - 2020, D. Bhatt, T. Janzen & F.J. Weissing\n";
-    std::cout << "This is version: 0.5\n";
+    std::cout << "This is version: 0.6\n";
 
     std::cout << "All files are to be found in this folder: \n";
     std::cout << argv[0] << "\n";
@@ -37,11 +37,15 @@ int main(int argc, char *argv[]) {
     // now we over write found parameters in the command line
     const std::string &virus_birth = input.getCmdOption("-vb");
     const std::string &virus_death = input.getCmdOption("-vd");
+    const std::string &rand_seed = input.getCmdOption("-s");
     if (!virus_birth.empty()) {
       all_parameters.birth_infected = std::stof(virus_birth);
     }
     if (!virus_death.empty()) {
       all_parameters.death_infected = std::stof(virus_death);
+    }
+    if (!rand_seed.empty()) {
+      all_parameters.seed = std::stof(rand_seed);
     }
 
     // Berg et al. varied two parameters:
