@@ -117,7 +117,7 @@ public:
        return index;
      }
      cnt++;
-     if (cnt > max_index * 10) {
+     if (cnt > static_cast<size_t>(max_index * 10)) {
        return draw_cdf(first, last, r);
      }
    }
