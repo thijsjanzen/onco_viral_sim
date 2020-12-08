@@ -794,20 +794,20 @@ BOOST_AUTO_TEST_CASE( t_cells )
   // GROW SETUP
   all_parameters.start_setup = grow;
   all_parameters.maximum_time = 1000;
-  all_parameters.time_adding_cancer = 500;
-  all_parameters.time_adding_virus = 100;
+  all_parameters.time_adding_cancer = 100;
+  all_parameters.time_adding_virus = 200;
 
   all_parameters.t_cell_increase = 1.f;
-  all_parameters.prob_infection_upon_death = 0.1f;
+  all_parameters.prob_infection_upon_death = 0.0f;
 
   std::array<size_t, 5> result = do_analysis(all_parameters);
   std::string outcome = get_outcome(result);
-  BOOST_CHECK_EQUAL(outcome, "A");
+  BOOST_CHECK_LT(result[cancer], 1000);
 
   all_parameters.use_voronoi_grid = true;
   result = do_analysis(all_parameters);
-  outcome = get_outcome(result);
-  BOOST_CHECK_EQUAL(outcome, "A");
+  std::string outcome2 = get_outcome(result);
+  BOOST_CHECK_LT(result[cancer], 1000);
 }
 
 BOOST_AUTO_TEST_CASE( infect_second_time )
@@ -823,7 +823,7 @@ BOOST_AUTO_TEST_CASE( infect_second_time )
   // GROW SETUP
   all_parameters.start_setup = grow;
   all_parameters.maximum_time = 1000;
-  all_parameters.time_adding_cancer = 500;
+  all_parameters.time_adding_cancer = 100;
   all_parameters.time_adding_virus = 100;
   all_parameters.time_adding_virus_2 = 100;
 
@@ -865,12 +865,11 @@ BOOST_AUTO_TEST_CASE( check_grow_2 )
 
   std::array<size_t, 5> result = do_analysis(all_parameters);
   std::string outcome = get_outcome(result);
-  BOOST_CHECK_EQUAL(outcome, "B");
+  BOOST_CHECK_EQUAL(result[infected], 0); // FAIL
 
   all_parameters.use_voronoi_grid = true;
   result = do_analysis(all_parameters);
-  outcome = get_outcome(result);
-  BOOST_CHECK_EQUAL(outcome, "B");
+  BOOST_CHECK_EQUAL(result[infected], 0); // FAIL
 }
 
 
@@ -979,8 +978,8 @@ BOOST_AUTO_TEST_CASE( infect_all )
 
   all_parameters.use_voronoi_grid = true;
   result = do_analysis(all_parameters);
-  outcome = get_outcome(result);
-  BOOST_CHECK_EQUAL(outcome, "A");
+  std::string outcome2 = get_outcome(result);
+  BOOST_CHECK_EQUAL(outcome, outcome2);
 }
 
 BOOST_AUTO_TEST_CASE( infect_center2 )
@@ -1005,8 +1004,8 @@ BOOST_AUTO_TEST_CASE( infect_center2 )
 
   all_parameters.use_voronoi_grid = true;
   result = do_analysis(all_parameters);
-  outcome = get_outcome(result);
-  BOOST_CHECK_EQUAL(outcome, "C");
+  std::string outcome2 = get_outcome(result);
+  BOOST_CHECK_EQUAL(outcome, outcome2);
 }
 
 
@@ -1036,8 +1035,8 @@ BOOST_AUTO_TEST_CASE( test_converge )
 
   all_parameters.use_voronoi_grid = false;
   result = do_analysis(all_parameters);
-  outcome = get_outcome(result);
-  BOOST_CHECK_EQUAL(outcome, "B");
+  std::string outcome2 = get_outcome(result);
+  BOOST_CHECK_EQUAL(outcome, outcome2);
 }
 
 // TODO: add tests with long distance infection
@@ -1063,8 +1062,8 @@ BOOST_AUTO_TEST_CASE( long_distance_infection )
 
   all_parameters.use_voronoi_grid = true;
   result = do_analysis(all_parameters);
-  outcome = get_outcome(result);
-   BOOST_CHECK_EQUAL(outcome, "C");
+  std::string outcome2 = get_outcome(result);
+  BOOST_CHECK_EQUAL(outcome, outcome2);
 }
 
 // TODO: add tests with resistant cells
@@ -1086,8 +1085,8 @@ BOOST_AUTO_TEST_CASE( resistance )
 
   all_parameters.use_voronoi_grid = true;
   result = do_analysis(all_parameters);
-  outcome = get_outcome(result);
-  BOOST_CHECK_EQUAL(outcome, "D");
+  std::string outcome2 = get_outcome(result);
+  BOOST_CHECK_EQUAL(outcome, outcome2);
 }
 
 
