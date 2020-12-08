@@ -105,18 +105,15 @@ std::array<size_t, 5> do_analysis(Param all_parameters) {
               if(all_parameters.start_setup == grow ||
                  all_parameters.start_setup == converge) {
 
-                if(cell_counts[cancer] < 1 && virus_added == true) {
-                    std::cout << "cancer eradicated\n";
-                    break;
-                }
-                if(cell_counts[normal] < 1 && virus_added == true) {
-                    std::cout << "normal tissue gone\n";
-                    break;
-                }
-                if(cell_counts[infected] < 1 && virus_added == true &&
-                   cell_counts[normal] < 1) {
-                    std::cout << "virus wiped out\n";
-                    break;
+                if (virus_added == true) {
+                  if (cell_counts[cancer] < 1) {
+                      std::cout << "cancer eradicated\n";
+                      break;
+                  }
+                  if(cell_counts[infected] < 1) {
+                      std::cout << "virus wiped out\n";
+                      break;
+                  }
                 }
               }
               if(all_parameters.start_setup == full) {
