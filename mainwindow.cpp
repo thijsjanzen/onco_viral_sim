@@ -63,6 +63,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->box_start_setup->addItem("Full");
     ui->box_start_setup->addItem("Grow");
+    ui->box_start_setup->addItem("Converge");
 
 
     ui->drpdwnbox_display->addItem("Cell types");
@@ -459,6 +460,8 @@ void MainWindow::update_parameters(Param& p) {
         p.start_setup = grow;
     if(start_string == "Full")
         p.start_setup = full;
+    if(start_string == "Converge")
+        p.start_setup = converge;
 
    auto display_string = ui->drpdwnbox_display->currentText();
    if(display_string == "Cell types")
@@ -578,6 +581,75 @@ void MainWindow::setup_simulation() {
     QApplication::processEvents();
 }
 
+void MainWindow::update_display() {
+  if(focal_display_type == cells) {
+      update_image(all_parameters.sq_num_cells, false);
+  } else if (focal_display_type == t_cells) {
+      update_image(all_parameters.sq_num_cells, true);
+  } else if (focal_display_type == cancer_death_rate) {
+      update_image(all_parameters.sq_num_cells, sim->death_prob);
+  } else if (focal_display_type == normal_death_rate) {
+      update_image(all_parameters.sq_num_cells, sim->death_prob);
+  } else {
+      update_image(all_parameters.sq_num_cells, sim->growth_prob);
+  }
+
+  update_plot(static_cast<double>(sim->t),
+              sim->get_count_cell_types());
+  QApplication::processEvents();
+}
+
+
+
+void MainWindow::obtain_equilibrium() {
+
+  std::vector< float > densities(10, 0);
+  float prev_t = sim->t;
+  std::array<size_t, 5> cell_counts = sim->num_cell_types;
+  int count = 0;
+  const int total_num_cells = all_parameters.sq_num_cells *
+                              all_parameters.sq_num_cells;
+
+  const static size_t range = 1 * sim->world.size();
+
+  int update_step = 1 + static_cast<int>((update_speed - 1) * 0.01f * range);
+  int counter = 0;
+
+  while(true) {
+      sim->update_one_step();
+      counter++;
+
+      if(static_cast<int>(sim->t) - static_cast<int>(prev_t) == 10) {
+           cell_counts = sim->num_cell_types;
+           float density_normal = 1.f * cell_counts[normal] / total_num_cells;
+           densities[count % 10] = cell_counts[normal];
+           count++;
+           if(count / 10 > 1) {
+               float sum_first_half = 0.f;
+               float sum_second_half = 0.f;
+               for(size_t i = 0; i < 5; ++i) {
+                   sum_first_half  += densities[i ];
+                   sum_second_half += densities[i + 5];
+               }
+
+               std::stringstream st;
+               st << sim->t << "\t" << sum_first_half * 0.2f
+                            << "\t"      << sum_second_half * 0.2f << "\n";
+               ui->text->appendPlainText(QString::fromStdString(st.str()));
+
+               if(sum_first_half >= sum_second_half && density_normal > 0.4f) {
+                   break;
+               }
+           }
+           prev_t = sim->t;
+      }
+      if(counter % update_step == 0) {
+        update_display();
+      }
+  }
+  return;
+}
+
 
 
 void MainWindow::on_btn_start_clicked()
@@ -593,6 +665,16 @@ void MainWindow::on_btn_start_clicked()
 
     is_running = true;
     int counter = 0;
+
+    if (all_parameters.start_setup == converge) {
+        obtain_equilibrium();
+        sim->t = 0.f;
+        sim->set_start_setup(grow);
+    }
+
+
+
+
     while(sim->t < all_parameters.maximum_time) {
         sim->update_one_step();
         counter++;
@@ -606,21 +688,7 @@ void MainWindow::on_btn_start_clicked()
         int update_step = 1 + static_cast<int>((update_speed - 1) * 0.01f * range);
 
         if(counter % update_step == 0) {
-            if(focal_display_type == cells) {
-                update_image(all_parameters.sq_num_cells, false);
-            } else if (focal_display_type == t_cells) {
-                update_image(all_parameters.sq_num_cells, true);
-            } else if (focal_display_type == cancer_death_rate) {
-                update_image(all_parameters.sq_num_cells, sim->death_prob);
-            } else if (focal_display_type == normal_death_rate) {
-                update_image(all_parameters.sq_num_cells, sim->death_prob);
-            } else {
-                update_image(all_parameters.sq_num_cells, sim->growth_prob);
-            }
-
-            update_plot(static_cast<double>(sim->t),
-                        sim->get_count_cell_types());
-            QApplication::processEvents();
+            update_display();
         }
         if(!is_running) break;
     }

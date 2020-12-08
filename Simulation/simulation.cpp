@@ -463,7 +463,13 @@ void simulation::test_infect_long_distance(size_t pos) {
   infect_long_distance(pos);
 }
 
+float simulation::calc_max_t_cell_rate() {
+  return expf(parameters.t_cell_rate * parameters.t_cell_increase * 2);
+}
 
+void simulation::set_start_setup(start_type new_type) {
+  parameters.start_setup = new_type;
+}
 
 
 

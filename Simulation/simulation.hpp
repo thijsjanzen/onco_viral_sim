@@ -56,6 +56,7 @@ public:
   Param get_parameters();
   infection_routine get_infection_type() const;
   float get_percent_infected() const;
+  void set_start_setup(start_type new_type);
 
  // size_t find_center(const cell_type& focal_cell_type) const;
   size_t find_central_cell(const cell_type& focal_cell_type) const;
@@ -76,6 +77,9 @@ public:
 
   float get_rates(size_t event);
   size_t test_pick_event(const std::array<float, 8>& v, float s);
+
+  float calc_max_t_cell_rate();
+
 private:
   Param parameters;
 
@@ -128,7 +132,6 @@ private:
 
   void update_count(cell_type old_type, cell_type new_type);
   // float calc_t_cell_death_rate(float concentration);
-
 };
 
 
