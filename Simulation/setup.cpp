@@ -167,8 +167,8 @@ void simulation::add_cells(const cell_type& focal_cell_type) {
 
   if (max_number_of_cells > world.size()) max_number_of_cells = world.size();
 
-  if(parameters.start_setup == converge) {
-      max_number_of_cells = world.size() * 0.9f;
+  if(parameters.start_setup == converge && focal_cell_type == normal) {
+      max_number_of_cells = world.size() * 0.95f;
   }
 
   size_t counter = 0;
