@@ -677,9 +677,6 @@ void MainWindow::on_btn_start_clicked()
         y_r.clear();
     }
 
-
-
-
     while(sim->t < all_parameters.maximum_time) {
         sim->update_one_step();
         counter++;
