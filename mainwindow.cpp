@@ -670,6 +670,11 @@ void MainWindow::on_btn_start_clicked()
         obtain_equilibrium();
         sim->t = 0.f;
         sim->set_start_setup(grow);
+        x_t.clear();
+        y_n.clear();
+        y_c.clear();
+        y_i.clear();
+        y_r.clear();
     }
 
 
