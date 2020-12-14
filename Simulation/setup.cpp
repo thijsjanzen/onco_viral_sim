@@ -100,7 +100,8 @@ size_t simulation::find_central_cell(const std::vector< size_t >& positions) con
 
 
 
-void simulation::initialize_network(std::vector< std::vector< voronoi_point > >& all_polys) {
+void simulation::initialize_network(std::vector< std::vector< voronoi_point > >& all_polys,
+                                    grid_type used_grid_type) {
    // initialize default.
 //   std::cout << "Initializing network\n";
   for(size_t i = 0; i < 4; ++i) {
@@ -120,7 +121,7 @@ void simulation::initialize_network(std::vector< std::vector< voronoi_point > >&
   }
   if(parameters.use_voronoi_grid == true) {
       std::cout << "setting up Voronoi grid\n";
-      setup_voronoi(all_polys);
+      setup_voronoi(all_polys, used_grid_type);
       std::cout << "Done setting up Voronoi grid\n";
   }
 
@@ -544,7 +545,8 @@ void simulation::initialize_full() {
     }
 }
 
-void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_polys) {
+void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_polys,
+                               grid_type used_grid_type) {
    using namespace cinekine;
 
    voronoi::Sites sites;
@@ -552,9 +554,23 @@ void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_
    std::cout << "Generating centre points\n";
    std::vector< voronoi_point > v(num_cells);
 
+
+   // we make regular grid
+
    for(size_t i = 0; i < num_cells; ++i) {
-      float x = rndgen.uniform() * sq_size;
-      float y = rndgen.uniform() * sq_size;
+
+      float x, y;
+
+      if (used_grid_type == grid_type::voronoi) {
+       x = rndgen.uniform() * sq_size;
+       y = rndgen.uniform() * sq_size;
+      }
+      if (used_grid_type == grid_type::hexagonal) {
+          x = i % sq_size;
+          y = i / sq_size;
+          if ((i / sq_size) % 2 == 0) x += 0.5f;
+
+      }
 
       v[i] = voronoi_point(x, y);
    }

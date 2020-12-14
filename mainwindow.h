@@ -18,7 +18,7 @@ enum display_color {cells, t_cells,
                     infected_rate, resistant_rate,
                     dominant_rate};
 
-enum grid_type {regular, voronoi};
+
 
 class MainWindow : public QMainWindow
 {

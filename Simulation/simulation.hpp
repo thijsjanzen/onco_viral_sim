@@ -23,7 +23,8 @@ class simulation {
 public:
   simulation(const Param& param);
   void run();
-  void initialize_network(std::vector< std::vector< voronoi_point > >& all_polys);
+  void initialize_network(std::vector< std::vector< voronoi_point > >& all_polys,
+                          grid_type used_grid_type);
 
   float t;
   size_t num_cells;
@@ -124,7 +125,8 @@ private:
 
   void infect_long_distance(size_t pos);
 
-  void setup_voronoi(std::vector< std::vector< voronoi_point > >& all_polys);
+  void setup_voronoi(std::vector< std::vector< voronoi_point > >& all_polys,
+                     grid_type used_grid_type);
 
   void change_cell_type(const size_t& pos, const cell_type& new_cell_type);
 

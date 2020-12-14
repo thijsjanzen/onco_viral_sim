@@ -78,6 +78,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->box_grid_type->addItem("regular");
     ui->box_grid_type->addItem("voronoi");
+    ui->box_grid_type->addItem("hexagonal");
 
     is_paused = false;
     is_running = false;
@@ -169,8 +170,7 @@ void MainWindow::update_image(size_t sq_size,
                               bool display_t_cells) {
     if(grid_type == regular) {
         display_regular(display_t_cells);
-    }
-    if(grid_type == voronoi) {
+    } else {
         display_voronoi(sq_size, display_t_cells);
     }
 
@@ -358,7 +358,7 @@ void MainWindow::update_image(size_t sq_size,
       }
     }
 
-    if(grid_type == voronoi) {
+    if(grid_type == voronoi || grid_type == hexagonal) {
         if(focal_display_type != dominant_rate) {
           display_voronoi(growth_rate[focal_cell_type], focal_cell_type, sq_size);
         } else {
@@ -484,14 +484,19 @@ void MainWindow::update_parameters(Param& p) {
        focal_display_type = t_cells;
 
    auto grid_string = ui->box_grid_type->currentText();
-   if(grid_string == "regular") {
+   if (grid_string == "regular") {
        grid_type = regular;        // plotting flag
        p.use_voronoi_grid = false; // simulation flag
    }
-   if(grid_string == "voronoi") {
+   if (grid_string == "voronoi") {
        grid_type = voronoi;       // plotting flag
        p.use_voronoi_grid = true; // simulation flag
    }
+
+   if (grid_string == "hexagonal") {
+       grid_type = hexagonal; // plotting flag
+       p.use_voronoi_grid = true; // simulation flag
+     }
 
    p.sq_num_pixels = static_cast<size_t>(ui->box_sq_num_pixels->value());
 
@@ -545,7 +550,7 @@ void MainWindow::setup_simulation() {
 
     //Simulation.initialize_network();
     std::vector< std::vector< voronoi_point > > all_polys;
-    sim->initialize_network(all_polys);
+    sim->initialize_network(all_polys, grid_type);
 
     if(all_parameters.use_voronoi_grid == true) {
       update_polygons(all_polys);
