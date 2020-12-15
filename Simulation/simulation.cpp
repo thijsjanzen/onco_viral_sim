@@ -393,7 +393,7 @@ void simulation::diffuse() {
   }
 
   for(size_t i = 0; i < new_concentration.size(); ++i) {
-      float new_conc =  new_concentration[i];
+      float new_conc =  new_concentration[i] * (1 - parameters.evaporation);
       if(new_conc < 1e-5f) new_conc = 0.f;
       world[i].t_cell_concentration = new_conc;  // swap of the vectors
       if(new_conc > 0.f) {
