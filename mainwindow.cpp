@@ -148,11 +148,6 @@ void MainWindow::display_voronoi(size_t sq_size,
       QBrush brush;
       if(display_t_cells) {
           QColor t_col = get_t_cell_color(sim->world[i].t_cell_concentration);
-       /*   float conc = sim->world[i].t_cell_concentration;
-          if(conc > 0.01f) {
-            t_col.setAlpha(
-                static_cast<int>(sim->world[i].t_cell_concentration * 255));
-          }*/
           brush = QBrush(t_col);
       } else {
           brush = QBrush(colorz[sim->world[i].get_cell_type()]); // Qt::SolidPattern by default.

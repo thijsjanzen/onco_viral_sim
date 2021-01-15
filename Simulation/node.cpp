@@ -91,10 +91,10 @@ std::array<float, 4> node::calc_prob_of_growth() const {
 }
 
 float node::freq_type_neighbours(const cell_type& ref_type) const {
-  int count = 0;
-  for(auto i : neighbors) {
-    if(i->get_cell_type() == ref_type) count++;
-  }
+
+  auto count = std::count_if(neighbors.begin(), neighbors.end(),
+                [&ref_type](auto i){return ref_type == i->get_cell_type(); });
+
   return static_cast<float>(count * inv_num_neighbors);
 }
 
