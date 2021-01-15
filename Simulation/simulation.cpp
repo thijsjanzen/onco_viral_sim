@@ -150,8 +150,6 @@ void simulation::implement_growth(const cell_type& parent) {
 void simulation::ask_infect_neighbours(size_t depth, size_t pos) {
 
     float p = long_distance_infection_probability[depth];
-    if(p < 1e-6f) return;
-    if(std::isnan(p)) return;
 
     if (depth == 0) return;
 

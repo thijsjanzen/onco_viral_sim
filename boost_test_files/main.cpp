@@ -260,7 +260,7 @@ BOOST_AUTO_TEST_CASE( ask_infect_neighbours)
     if (dist_x < 0) dist_x *= -1;
 
     auto ct = Simulation.world[pos].get_cell_type();
-    if (dist_x > static_cast<int>(dist)) {
+    if (dist_x > static_cast<int>(all_parameters.distance_infection_upon_death)) {
       BOOST_CHECK_EQUAL(ct, cancer);
     } else {
       BOOST_CHECK_EQUAL(ct, infected);
@@ -1068,12 +1068,12 @@ BOOST_AUTO_TEST_CASE( long_distance_infection )
 
   std::array<size_t, 5> result = do_analysis(all_parameters);
   std::string outcome = get_outcome(result);
-  BOOST_CHECK_EQUAL(outcome, "C");
+  BOOST_CHECK_EQUAL(outcome, "A");
 
   all_parameters.use_voronoi_grid = true;
   result = do_analysis(all_parameters);
   outcome = get_outcome(result);
-   BOOST_CHECK_EQUAL(outcome, "C");
+   BOOST_CHECK_EQUAL(outcome, "A");
 }
 
 // TODO: add tests with resistant cells
