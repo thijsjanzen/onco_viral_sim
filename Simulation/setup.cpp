@@ -34,14 +34,13 @@ world(param.sq_num_cells * param.sq_num_cells * param.sq_num_cells)
       death_prob[i] = temp;
   }
 
-  long_distance_infection_probability = std::vector<double>(1, 0);
   total_t_cell_concentration = 0.f;
-  double lambda = static_cast<double>(1.0 / parameters.distance_infection_upon_death);
-  for(size_t d = 1; d < sq_size; ++d) {
-      double local_prob = static_cast<double>(parameters.prob_infection_upon_death) *
-                          lambda * exp(-lambda * d);
-      long_distance_infection_probability.push_back(local_prob);
-    //  if(local_prob < 1e-5) break;
+
+
+  long_distance_infection_probability = std::vector<double>(sq_size, 0.0);
+  for(size_t d = 1; d <= parameters.distance_infection_upon_death; ++d) {
+      long_distance_infection_probability[d] =
+          parameters.prob_infection_upon_death;
   }
 }
 
