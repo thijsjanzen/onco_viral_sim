@@ -155,16 +155,20 @@ std::string get_outcome(const std::array<size_t, 5>& cell_counts) {
   // D: tumor & resistant cells remain, no virus or normal cells.
   for(size_t i = 0; i < 4; ++i) freq[i] *= 1.0f / total_num_cells;
 
-  if(freq[resistant] < 1e-6f) {
+  if (freq[resistant] < 1e-6f) {
 
    /* if(freq[normal] >= (1-1e-6f) && freq[cancer] <= 1e-6f && freq[infected] <= 1e-6f) {
         return "A";
     }*/
-    if(freq[cancer] <= 1e-6f) {
+    if (freq[cancer] <= 1e-6f) {
         return "A";
     }
 
-    if(freq[normal] <= 1e-6f     && freq[cancer] >= (1-1e-6f) && freq[infected] <= 1e-6f) {
+    if (freq[normal] <= 1e-6f     && freq[cancer] >= (1-1e-6f) && freq[infected] <= 1e-6f) {
+        return "B";
+    }
+
+    if (freq[normal] > 1e-6f && freq[cancer] > (1e-6f) && freq[infected] <= 1e-6f) {
         return "B";
     }
 
