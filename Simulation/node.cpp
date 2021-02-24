@@ -196,7 +196,8 @@ float node::calc_t_cell_added_death_rate(float t_cell_rate,
       return 0.f;
    }
 
-  float added_t_cell_death_rate = expf(t_cell_rate * t_cell_concentration);
+  float added_t_cell_death_rate = t_cell_rate *
+      expf(t_cell_rate * t_cell_concentration);
 
   float mult = 1.0f - t_cell_density_scaler *
                       freq_type_neighbours(cancer);
