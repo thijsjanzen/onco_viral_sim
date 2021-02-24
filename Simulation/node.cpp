@@ -179,12 +179,14 @@ float node::calc_t_cell_added_death_rate(float t_cell_rate,
                                          float t_cell_density_scaler) const {
   if (t_cell_concentration < 1e-5f) {
       return 0.f;
-   }
+  }
 
-  float added_t_cell_death_rate = expf(t_cell_rate * t_cell_concentration);
+  float added_t_cell_death_rate = t_cell_rate *
+                            expf(t_cell_rate * t_cell_concentration);
 
   float mult = 1.0f - t_cell_density_scaler *
                       freq_type_neighbours(cancer);
+
   if(mult < 0.f) mult = 0.f;
   float output = mult * added_t_cell_death_rate;
   if (std::isinf(output)) {
