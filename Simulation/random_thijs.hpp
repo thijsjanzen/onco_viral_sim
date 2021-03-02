@@ -110,6 +110,11 @@ public:
   size_t draw_from_dist(It first, It last, float max_val, rnd_t& r) const {
    auto max_index = std::distance(first, last);
    size_t cnt = 0;
+
+   if (max_val == 0.0) {
+      return r.random_number(static_cast<size_t>(max_index));
+   }
+
    while (true) {
      size_t index = r.random_number(static_cast<size_t>(max_index));
      float val = *(first + index);
@@ -150,14 +155,28 @@ public:
 
   void update_entry(size_t pos, float new_val) {
     float old_val = values[pos];
+
     if(old_val == new_val) return;
     values[pos] = new_val;
     size_t row = pos / bin_size;
-    row_sum[row] += new_val - old_val;
-    total_sum += new_val - old_val;
-    if(total_sum < 0.f) total_sum = 0.f;
+
+    if (new_val - old_val > 1e6f) {
+      double diff = static_cast<double>(new_val) - static_cast<double>(old_val);
+      row_sum[row] += diff;
+      total_sum += diff;
+    } else {
+        float diff = new_val - old_val;
+        row_sum[row] += diff;
+        total_sum += diff;
+     }
+
+
+    if (total_sum < 0.f) total_sum = 0.f;
+    if (total_sum > 1e9f) total_sum = 1e9f;
 
     if(row_sum[row] < 0.f) row_sum[row] = 0.f;
+    if (row_sum[row] > 1e9f) row_sum[row] = 1e9f;
+
   }
 
   float get_total_sum() const {

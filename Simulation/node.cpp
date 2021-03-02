@@ -184,13 +184,21 @@ float node::calc_t_cell_added_death_rate(float t_cell_rate,
   float added_t_cell_death_rate = t_cell_rate *
                             expf(t_cell_rate * t_cell_concentration);
 
+  if (added_t_cell_death_rate >= std:: numeric_limits<float>::max()) {
+      added_t_cell_death_rate = 1e9;
+   }
+
   float mult = 1.0f - t_cell_density_scaler *
                       freq_type_neighbours(cancer);
 
   if(mult < 0.f) mult = 0.f;
   float output = mult * added_t_cell_death_rate;
   if (std::isinf(output)) {
-      output = 1e6;
+      output = 1e9;
   }
+  if (output >= std:: numeric_limits<float>::max()) {
+      output = 1e9;
+  }
+
   return output;
 }
