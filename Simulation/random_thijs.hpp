@@ -171,7 +171,6 @@ public:
 
     if(row_sum[row] < 0.f) row_sum[row] = 0.f;
     if (row_sum[row] > 1e9f) row_sum[row] = 1e9f;
-
   }
 
   float get_total_sum() const {
