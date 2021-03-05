@@ -375,7 +375,7 @@ void simulation::diffuse() {
          float delta_conc = current_conc - other_conc;
 
          float neighbor_factor = world[i].inv_num_neighbors;
-         size_t num_neighbours = world[i].neighbors.size();
+         // size_t num_neighbours = world[i].neighbors.size();
          float diffusion_amount = delta_conc *
              parameters.diffusion * neighbor_factor;
 
