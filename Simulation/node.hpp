@@ -134,6 +134,11 @@ std::vector< voronoi_point> clean_edges(const std::vector< voronoi_edge >& input
 void invert_edges(std::vector< voronoi_edge>& edges, size_t pos);
 
 struct node {
+private:
+    cell_type node_type;
+
+public:
+
   node(node&&) = delete;
   const node& operator=(node&&) = delete;
   node(const node&) = delete;
@@ -181,10 +186,9 @@ struct node {
   }
 
   float calc_t_cell_added_death_rate(float t_cell_rate,
-                                     float t_cell_density_scaler) const;
+                                     float t_cell_density_scaler,
+                                     float t_cell_inflection_point) const;
 
-private:
-    cell_type node_type;
 };
 
 #endif /* node_hpp */

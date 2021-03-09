@@ -152,8 +152,6 @@ void simulation::implement_growth(const cell_type& parent) {
 void simulation::ask_infect_neighbours(size_t depth, size_t pos) {
 
     float p = long_distance_infection_probability[depth];
-   // if(p < 1e-6f) return;
-   // if(std::isnan(p)) return;
 
     if (depth == 0) return;
 
@@ -207,7 +205,8 @@ void simulation::update_death_prob(size_t pos,
         if (new_type == cancer || new_type == resistant) {
            float additional_rate =
                world[pos].calc_t_cell_added_death_rate(parameters.t_cell_rate,
-                                                       parameters.t_cell_density_scaler);
+                                                       parameters.t_cell_density_scaler,
+                                                       parameters.t_cell_inflection_point);
            death_rate += additional_rate;
         }
         death_prob[new_type].update_entry(pos, death_rate);
@@ -399,7 +398,8 @@ void simulation::diffuse() {
       if(new_conc > 0.f) {
         float added_t_cell_death_rate =
             world[i].calc_t_cell_added_death_rate(parameters.t_cell_rate,
-                                                  parameters.t_cell_density_scaler);
+                                                  parameters.t_cell_density_scaler,
+                                                  parameters.t_cell_inflection_point);
 
         update_death_prob_cancer(added_t_cell_death_rate, i);
       }
@@ -471,7 +471,13 @@ void simulation::test_infect_long_distance(size_t pos) {
   infect_long_distance(pos);
 }
 
+float simulation::calc_max_t_cell_rate() {
+  return expf(parameters.t_cell_rate * parameters.t_cell_increase * 2);
+}
 
+void simulation::set_start_setup(start_type new_type) {
+  parameters.start_setup = new_type;
+}
 
 
 

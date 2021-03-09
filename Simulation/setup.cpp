@@ -34,8 +34,8 @@ world(param.sq_num_cells * param.sq_num_cells)
       growth_prob[i] = temp;
       death_prob[i] = temp;
   }
-
   total_t_cell_concentration = 0.f;
+
   long_distance_infection_probability = std::vector<double>(sq_size, 0.0);
   for(size_t d = 1; d <= parameters.distance_infection_upon_death; ++d) {
       long_distance_infection_probability[d] =
@@ -97,7 +97,8 @@ size_t simulation::find_central_cell(const std::vector< size_t >& positions) con
 
 
 
-void simulation::initialize_network(std::vector< std::vector< voronoi_point > >& all_polys) {
+void simulation::initialize_network(std::vector< std::vector< voronoi_point > >& all_polys,
+                                    grid_type used_grid_type) {
    // initialize default.
 //   std::cout << "Initializing network\n";
   for(size_t i = 0; i < 4; ++i) {
@@ -117,7 +118,7 @@ void simulation::initialize_network(std::vector< std::vector< voronoi_point > >&
   }
   if(parameters.use_voronoi_grid == true) {
       std::cout << "setting up Voronoi grid\n";
-      setup_voronoi(all_polys);
+      setup_voronoi(all_polys, used_grid_type);
       std::cout << "Done setting up Voronoi grid\n";
   }
 
@@ -541,21 +542,44 @@ void simulation::initialize_full() {
     }
 }
 
-void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_polys) {
+void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_polys,
+                               grid_type used_grid_type) {
    using namespace cinekine;
 
-   voronoi::Sites sites;
 
    std::cout << "Generating centre points\n";
    std::vector< voronoi_point > v(num_cells);
 
+
+   // we make regular grid
+
    for(size_t i = 0; i < num_cells; ++i) {
-      float x = rndgen.uniform() * sq_size;
-      float y = rndgen.uniform() * sq_size;
+
+      float x, y;
+
+      if (used_grid_type == grid_type::voronoi) {
+       x = rndgen.uniform() * sq_size;
+       y = rndgen.uniform() * sq_size;
+      }
+      if (used_grid_type == grid_type::hexagonal) {
+          x = i % sq_size;
+          y = i / sq_size;
+          if ((i / sq_size) % 2 == 0) x += 0.5f;
+
+          x += rndgen.normal(0.0, 0.002) * sq_size;
+          y += rndgen.normal(0.0, 0.002) * sq_size;
+
+        //  if ( x > sq_size) x = sq_size;
+        //  if ( y > sq_size) y = sq_size;
+        //  if ( x < 0) x = 0;
+        //  if ( y < 0) y = 0;
+
+      }
 
       v[i] = voronoi_point(x, y);
    }
 
+   voronoi::Sites sites;
    std::cout << "convering centre points to vertices\n";
    for(auto i : v) {
       voronoi::Vertex temp_vertex(i.x_, i.y_);
@@ -584,10 +608,6 @@ void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_
            voronoi_point end(  focal_edge.p1.x, focal_edge.p1.y);
 
            voronoi_edge local_edge(start, end, focal_edge.leftSite, focal_edge.rightSite);
-           // uncomment to debug:
-           // if(!local_edge.check()) {
-           //  std::cout << site_index << "\n";
-           // }
 
            if(local_edge.calc_dist() > 1e-2) {
              all_edges[site_index].push_back(local_edge);
