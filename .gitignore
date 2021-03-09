@@ -20,3 +20,4 @@ Makefile.Debug
 *.gcda
 *.gcno
 *.tmp
+build-console-Desktop_Qt_5_14_1_clang_64bit-Debug/console
