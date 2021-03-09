@@ -110,6 +110,11 @@ public:
   size_t draw_from_dist(It first, It last, float max_val, rnd_t& r) const {
    auto max_index = std::distance(first, last);
    size_t cnt = 0;
+
+   if (max_val == 0.0) {
+      return r.random_number(static_cast<size_t>(max_index));
+   }
+
    while (true) {
      size_t index = r.random_number(static_cast<size_t>(max_index));
      float val = *(first + index);

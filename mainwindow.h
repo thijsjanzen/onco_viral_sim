@@ -18,7 +18,7 @@ enum display_color {cells, t_cells,
                     infected_rate, resistant_rate,
                     dominant_rate};
 
-enum grid_type {regular, voronoi};
+
 
 class MainWindow : public QMainWindow
 {
@@ -61,6 +61,8 @@ public:
 
     void update_plot(double t, const std::array<size_t, 5>& cell_numbers);
     void setup_simulation();
+    void obtain_equilibrium();
+    void update_display();
 
 private slots:
     void on_btn_start_clicked();
