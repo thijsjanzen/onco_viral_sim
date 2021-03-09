@@ -342,12 +342,6 @@ float simulation::get_percent_infected() const {
   return(parameters.percent_infected);
 }
 
-float simulation::calc_t_cell_death_rate(float concentration) {
-//  return 1.0 / (1 + expf(-parameters.t_cell_rate * (concentration -
-//                                                    parameters.t_cell_threshold)));
-  return expf(parameters.t_cell_rate * concentration);
-}
-
 
 void simulation::diffuse() {
   // do something
