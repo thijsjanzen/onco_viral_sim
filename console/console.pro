@@ -28,5 +28,5 @@ DISTFILES += \
 
 # Boost.Test
 LIBS += -lboost_unit_test_framework
-LIBS += -L"/usr/local/Cellar/boost/1.70.0/lib"
-INCLUDEPATH += "/usr/local/Cellar/boost/1.70.0/include"
+LIBS += -L"/usr/local/Cellar/boost/1.75.0_2/lib"
+INCLUDEPATH += "/usr/local/Cellar/boost/1.75.0_2/include"
