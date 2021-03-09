@@ -103,7 +103,8 @@ size_t simulation::find_central_cell(const std::vector< size_t >& positions) con
 
 
 
-void simulation::initialize_network(std::vector< std::vector< voronoi_point > >& all_polys) {
+void simulation::initialize_network(std::vector< std::vector< voronoi_point > >& all_polys,
+                                    grid_type used_grid_type) {
    // initialize default.
 //   std::cout << "Initializing network\n";
   for(size_t i = 0; i < 4; ++i) {
@@ -123,7 +124,7 @@ void simulation::initialize_network(std::vector< std::vector< voronoi_point > >&
   }
   if(parameters.use_voronoi_grid == true) {
       std::cout << "setting up Voronoi grid\n";
-      setup_voronoi(all_polys);
+      setup_voronoi(all_polys, used_grid_type);
       std::cout << "Done setting up Voronoi grid\n";
   }
 
@@ -170,8 +171,8 @@ void simulation::add_cells(const cell_type& focal_cell_type) {
 
   if (max_number_of_cells > world.size()) max_number_of_cells = world.size();
 
-  if(parameters.start_setup == converge) {
-      max_number_of_cells = world.size() * 0.9f;
+  if(parameters.start_setup == converge && focal_cell_type == normal) {
+      max_number_of_cells = world.size() * 0.95f;
   }
 
   size_t counter = 0;
@@ -547,22 +548,28 @@ void simulation::initialize_full() {
     }
 }
 
-void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_polys) {
+void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_polys,
+                               grid_type used_grid_type) {
    using namespace cinekine;
 
-   voronoi::Sites sites;
 
    std::cout << "Generating centre points\n";
    std::vector< voronoi_point > v(num_cells);
 
+
+   // we make regular grid
+
    for(size_t i = 0; i < num_cells; ++i) {
+
       float x = rndgen.uniform() * sq_size;
       float y = rndgen.uniform() * sq_size;
       float z = rndgen.uniform() * sq_size;
 
+
       v[i] = voronoi_point(x, y, z);
    }
 
+   voronoi::Sites sites;
    std::cout << "convering centre points to vertices\n";
    for(auto i : v) {
       voronoi::Vertex temp_vertex(i.x_, i.y_);
@@ -591,10 +598,6 @@ void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_
            voronoi_point end(  focal_edge.p1.x, focal_edge.p1.y, 0);
 
            voronoi_edge local_edge(start, end, focal_edge.leftSite, focal_edge.rightSite);
-           // uncomment to debug:
-           // if(!local_edge.check()) {
-           //  std::cout << site_index << "\n";
-           // }
 
            if(local_edge.calc_dist() > 1e-2) {
              all_edges[site_index].push_back(local_edge);

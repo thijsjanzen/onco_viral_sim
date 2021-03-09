@@ -63,6 +63,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->box_start_setup->addItem("Full");
     ui->box_start_setup->addItem("Grow");
+    ui->box_start_setup->addItem("Converge");
 
 
     ui->drpdwnbox_display->addItem("Cell types");
@@ -77,6 +78,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->box_grid_type->addItem("regular");
     ui->box_grid_type->addItem("voronoi");
+    ui->box_grid_type->addItem("hexagonal");
 
     is_paused = false;
     is_running = false;
@@ -141,11 +143,6 @@ void MainWindow::display_voronoi(size_t sq_size,
       QBrush brush;
       if(display_t_cells) {
           QColor t_col = get_t_cell_color(sim->world[i].t_cell_concentration);
-       /*   float conc = sim->world[i].t_cell_concentration;
-          if(conc > 0.01f) {
-            t_col.setAlpha(
-                static_cast<int>(sim->world[i].t_cell_concentration * 255));
-          }*/
           brush = QBrush(t_col);
       } else {
           brush = QBrush(colorz[sim->world[i].get_cell_type()]); // Qt::SolidPattern by default.
@@ -163,8 +160,7 @@ void MainWindow::update_image(size_t sq_size,
                               bool display_t_cells) {
     if(grid_type == regular) {
         display_regular(display_t_cells);
-    }
-    if(grid_type == voronoi) {
+    } else {
         display_voronoi(sq_size, display_t_cells);
     }
 
@@ -352,7 +348,7 @@ void MainWindow::update_image(size_t sq_size,
       }
     }
 
-    if(grid_type == voronoi) {
+    if(grid_type == voronoi || grid_type == hexagonal) {
         if(focal_display_type != dominant_rate) {
           display_voronoi(growth_rate[focal_cell_type], focal_cell_type, sq_size);
         } else {
@@ -435,6 +431,7 @@ void MainWindow::update_parameters(Param& p) {
    p.t_cell_increase = static_cast<float>(ui->box_inflammation->value());
    p.t_cell_rate = static_cast<float>(ui->box_t_cell_rate->value());
    p.t_cell_density_scaler = static_cast<float>(ui->box_density_scaler->value());
+   p.t_cell_inflection_point = static_cast<float>(ui->box_inflection_point->value());
 
    p.sq_num_cells = static_cast<size_t>(ui->box_sq_num_cells->value());
 
@@ -454,6 +451,8 @@ void MainWindow::update_parameters(Param& p) {
         p.start_setup = grow;
     if(start_string == "Full")
         p.start_setup = full;
+    if(start_string == "Converge")
+        p.start_setup = converge;
 
    auto display_string = ui->drpdwnbox_display->currentText();
    if(display_string == "Cell types")
@@ -476,14 +475,19 @@ void MainWindow::update_parameters(Param& p) {
        focal_display_type = t_cells;
 
    auto grid_string = ui->box_grid_type->currentText();
-   if(grid_string == "regular") {
+   if (grid_string == "regular") {
        grid_type = regular;        // plotting flag
        p.use_voronoi_grid = false; // simulation flag
    }
-   if(grid_string == "voronoi") {
+   if (grid_string == "voronoi") {
        grid_type = voronoi;       // plotting flag
        p.use_voronoi_grid = true; // simulation flag
    }
+
+   if (grid_string == "hexagonal") {
+       grid_type = hexagonal; // plotting flag
+       p.use_voronoi_grid = true; // simulation flag
+     }
 
    p.sq_num_pixels = static_cast<size_t>(ui->box_sq_num_pixels->value());
 
@@ -546,7 +550,7 @@ void MainWindow::setup_simulation() {
 
     //Simulation.initialize_network();
     std::vector< std::vector< voronoi_point > > all_polys;
-    sim->initialize_network(all_polys);
+    sim->initialize_network(all_polys, grid_type);
 
     if(all_parameters.use_voronoi_grid == true) {
       update_polygons(all_polys);
@@ -582,6 +586,75 @@ void MainWindow::setup_simulation() {
     QApplication::processEvents();
 }
 
+void MainWindow::update_display() {
+  if(focal_display_type == cells) {
+      update_image(all_parameters.sq_num_cells, false);
+  } else if (focal_display_type == t_cells) {
+      update_image(all_parameters.sq_num_cells, true);
+  } else if (focal_display_type == cancer_death_rate) {
+      update_image(all_parameters.sq_num_cells, sim->death_prob);
+  } else if (focal_display_type == normal_death_rate) {
+      update_image(all_parameters.sq_num_cells, sim->death_prob);
+  } else {
+      update_image(all_parameters.sq_num_cells, sim->growth_prob);
+  }
+
+  update_plot(static_cast<double>(sim->t),
+              sim->get_count_cell_types());
+  QApplication::processEvents();
+}
+
+
+
+void MainWindow::obtain_equilibrium() {
+
+  std::vector< float > densities(10, 0);
+  float prev_t = sim->t;
+  std::array<size_t, 5> cell_counts = sim->num_cell_types;
+  int count = 0;
+  const int total_num_cells = all_parameters.sq_num_cells *
+                              all_parameters.sq_num_cells;
+
+  const static size_t range = 1 * sim->world.size();
+
+  int update_step = 1 + static_cast<int>((update_speed - 1) * 0.01f * range);
+  int counter = 0;
+
+  while(true) {
+      sim->update_one_step();
+      counter++;
+
+      if(static_cast<int>(sim->t) - static_cast<int>(prev_t) == 10) {
+           cell_counts = sim->num_cell_types;
+           float density_normal = 1.f * cell_counts[normal] / total_num_cells;
+           densities[count % 10] = cell_counts[normal];
+           count++;
+           if(count / 10 > 1) {
+               float sum_first_half = 0.f;
+               float sum_second_half = 0.f;
+               for(size_t i = 0; i < 5; ++i) {
+                   sum_first_half  += densities[i ];
+                   sum_second_half += densities[i + 5];
+               }
+
+               std::stringstream st;
+               st << sim->t << "\t" << sum_first_half * 0.2f
+                            << "\t"      << sum_second_half * 0.2f << "\n";
+               ui->text->appendPlainText(QString::fromStdString(st.str()));
+
+               if(sum_first_half >= sum_second_half && density_normal > 0.4f) {
+                   break;
+               }
+           }
+           prev_t = sim->t;
+      }
+      if(counter % update_step == 0) {
+        update_display();
+      }
+  }
+  return;
+}
+
 
 
 void MainWindow::on_btn_start_clicked()
@@ -597,6 +670,18 @@ void MainWindow::on_btn_start_clicked()
 
     is_running = true;
     int counter = 0;
+
+    if (all_parameters.start_setup == converge) {
+        obtain_equilibrium();
+        sim->t = 0.f;
+        sim->set_start_setup(grow);
+        x_t.clear();
+        y_n.clear();
+        y_c.clear();
+        y_i.clear();
+        y_r.clear();
+    }
+
     while(sim->t < all_parameters.maximum_time) {
         sim->update_one_step();
         counter++;
@@ -610,21 +695,7 @@ void MainWindow::on_btn_start_clicked()
         int update_step = 1 + static_cast<int>((update_speed - 1) * 0.01f * range);
 
         if(counter % update_step == 0) {
-            if(focal_display_type == cells) {
-                update_image(all_parameters.sq_num_cells, false);
-            } else if (focal_display_type == t_cells) {
-                update_image(all_parameters.sq_num_cells, true);
-            } else if (focal_display_type == cancer_death_rate) {
-                update_image(all_parameters.sq_num_cells, sim->death_prob);
-            } else if (focal_display_type == normal_death_rate) {
-                update_image(all_parameters.sq_num_cells, sim->death_prob);
-            } else {
-                update_image(all_parameters.sq_num_cells, sim->growth_prob);
-            }
-
-            update_plot(static_cast<double>(sim->t),
-                        sim->get_count_cell_types());
-            QApplication::processEvents();
+            update_display();
         }
         if(!is_running) break;
     }
