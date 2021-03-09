@@ -62,6 +62,7 @@ struct Param {
   float t_cell_rate;
   float t_cell_threshold;
   float t_cell_density_scaler;
+  float t_cell_inflection_point;
 
 
   Param() {

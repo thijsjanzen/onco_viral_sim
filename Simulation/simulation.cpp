@@ -203,7 +203,8 @@ void simulation::update_death_prob(size_t pos,
         if (new_type == cancer || new_type == resistant) {
            float additional_rate =
                world[pos].calc_t_cell_added_death_rate(parameters.t_cell_rate,
-                                                       parameters.t_cell_density_scaler);
+                                                       parameters.t_cell_density_scaler,
+                                                       parameters.t_cell_inflection_point);
            death_rate += additional_rate;
         }
         death_prob[new_type].update_entry(pos, death_rate);
@@ -389,7 +390,8 @@ void simulation::diffuse() {
       if(new_conc > 0.f) {
         float added_t_cell_death_rate =
             world[i].calc_t_cell_added_death_rate(parameters.t_cell_rate,
-                                                  parameters.t_cell_density_scaler);
+                                                  parameters.t_cell_density_scaler,
+                                                  parameters.t_cell_inflection_point);
 
         update_death_prob_cancer(added_t_cell_death_rate, i);
       }

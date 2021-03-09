@@ -44,7 +44,6 @@ void node::add_neighbor(std::vector< node >& world,
 void node::update_neighbors(std::vector< node >& world,
                             size_t world_size) {
 
-
     static int relative_points[4][2] = { {-1, 0},
                                         {1, 0},
                                         {0, 1},
@@ -176,13 +175,14 @@ std::vector< size_t > node::get_cancer_neighbours() const {
 }
 
 float node::calc_t_cell_added_death_rate(float t_cell_rate,
-                                         float t_cell_density_scaler) const {
+                                         float t_cell_density_scaler,
+                                         float t_cell_inflection_point) const {
   if (t_cell_concentration < 1e-5f) {
       return 0.f;
   }
 
-  float added_t_cell_death_rate = t_cell_rate *
-                            expf(t_cell_rate * t_cell_concentration);
+  float denominator = 1.f + expf(t_cell_inflection_point - t_cell_concentration); // same as -1 * (b - mu)
+  float added_t_cell_death_rate = t_cell_rate * 1.f / denominator;
 
   if (added_t_cell_death_rate >= std:: numeric_limits<float>::max()) {
       added_t_cell_death_rate = 1e9;

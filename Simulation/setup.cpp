@@ -547,7 +547,6 @@ void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_
                                grid_type used_grid_type) {
    using namespace cinekine;
 
-   voronoi::Sites sites;
 
    std::cout << "Generating centre points\n";
    std::vector< voronoi_point > v(num_cells);
@@ -581,6 +580,7 @@ void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_
       v[i] = voronoi_point(x, y);
    }
 
+   voronoi::Sites sites;
    std::cout << "convering centre points to vertices\n";
    for(auto i : v) {
       voronoi::Vertex temp_vertex(i.x_, i.y_);
@@ -609,10 +609,6 @@ void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_
            voronoi_point end(  focal_edge.p1.x, focal_edge.p1.y);
 
            voronoi_edge local_edge(start, end, focal_edge.leftSite, focal_edge.rightSite);
-           // uncomment to debug:
-           // if(!local_edge.check()) {
-           //  std::cout << site_index << "\n";
-           // }
 
            if(local_edge.calc_dist() > 1e-2) {
              all_edges[site_index].push_back(local_edge);

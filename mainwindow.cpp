@@ -436,6 +436,7 @@ void MainWindow::update_parameters(Param& p) {
    p.t_cell_increase = static_cast<float>(ui->box_inflammation->value());
    p.t_cell_rate = static_cast<float>(ui->box_t_cell_rate->value());
    p.t_cell_density_scaler = static_cast<float>(ui->box_density_scaler->value());
+   p.t_cell_inflection_point = static_cast<float>(ui->box_inflection_point->value());
 
    p.sq_num_cells = static_cast<size_t>(ui->box_sq_num_cells->value());
 
