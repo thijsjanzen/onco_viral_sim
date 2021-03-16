@@ -116,17 +116,24 @@ int main(int argc, char *argv[]) {
       outfile.close();
    }
 
-    std::ofstream outfile("output.txt", std::ios::app);
-    outfile << all_parameters.birth_infected << "\t"
-            << all_parameters.death_infected << "\t"
-            << all_parameters.birth_cancer   << "\t"
-            << all_parameters.death_cancer   << "\t"
-            << all_parameters.freq_resistant << "\t"
-            << outcome                       << "\t";
-      for(size_t i = 0; i < 5; ++i) {
-          outfile << cell_counts[i] << "\t";
-      }
-    outfile << "\n";
+  std::ofstream outfile("output.txt", std::ios::app);
+      outfile << all_parameters.birth_infected << "\t"
+              << all_parameters.death_infected << "\t"
+              << all_parameters.birth_cancer_resistant   << "\t"
+              << all_parameters.death_cancer_resistant   << "\t"
+              << all_parameters.freq_resistant << "\t"
+              << all_parameters.t_cell_increase << "\t"
+              << all_parameters.evaporation << "\t"
+              << all_parameters.diffusion << "\t"
+              << all_parameters.t_cell_rate << "\t"
+              << all_parameters.t_cell_inflection_point << "\t"
+              << all_parameters.infection_type << "\t"
+              << all_parameters.t_cell_density_scaler << "\t"
+              << outcome                       << "\t";
+        for(size_t i = 0; i < 5; ++i) {
+            outfile << cell_counts[i] << "\t";
+        }
+      outfile << "\n";
     outfile.close();
 
   return 0;
@@ -172,6 +179,7 @@ void read_parameters_from_ini(Param& p, const std::string file_name) {
   p.diffusion   = from_config.getValueOfKey<float>("diffusion");
   p.t_cell_rate = from_config.getValueOfKey<float>("t_cell_rate");
   p.t_cell_density_scaler = from_config.getValueOfKey<float>("t_cell_density_scaler");
+  p.t_cell_inflection_point = from_config.getValueOfKey<float>("inflection_point");
 
 
   p.infection_type = random_infection;
