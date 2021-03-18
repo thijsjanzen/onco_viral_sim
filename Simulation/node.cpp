@@ -197,7 +197,7 @@ float node::calc_t_cell_added_death_rate(float t_cell_rate,
       return 0.f;
   }
 
-  float denominator = 1.f + expf(t_cell_inflection_point - t_cell_concentration); // same as -1 * (b - mu)
+  float denominator = 1.f + expf(5 * (t_cell_inflection_point - t_cell_concentration)); // same as -1 * (b - mu)
   float added_t_cell_death_rate = t_cell_rate * 1.f / denominator;
 
 
