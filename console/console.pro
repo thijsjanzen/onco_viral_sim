@@ -14,6 +14,7 @@ SOURCES += \
 
 HEADERS += \
     ../Simulation/analysis.hpp \
+    ../Simulation/config_parser.h \
     ../Simulation/node.hpp \
     ../Simulation/parameters.hpp \
     ../Simulation/random_thijs.hpp \
