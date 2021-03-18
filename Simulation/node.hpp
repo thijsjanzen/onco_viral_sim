@@ -20,26 +20,24 @@ enum cell_type {normal, cancer, infected, resistant, empty, max_num};
 typedef struct node node;
 
 struct voronoi_point {
-    double x_, y_, z_;
+    double x_, y_;
 
     voronoi_point() {
-        x_ = 0.0; y_ = 0.0; z_ = 0.0;
+        x_ = 0.0; y_ = 0.0;
     }
 
     voronoi_point& operator=(const voronoi_point& other) {
       x_ = other.x_;
       y_ = other.y_;
-      z_ = other.z_;
       return *this;
     }
 
     voronoi_point(const voronoi_point& other) {
         x_ = other.x_;
         y_ = other.y_;
-        z_ = other.z_;
     }
 
-    voronoi_point(double x, double y, double z) : x_(x), y_(y), z_(z) {}
+    voronoi_point(double x, double y) : x_(x), y_(y) {}
 
     bool operator==(const voronoi_point& other) const {
         // explicitly, this doesn't keep track of left and right!
@@ -47,7 +45,6 @@ struct voronoi_point {
       //  if(y_ != other.y_) return false;
       if(abs(x_ - other.x_) > 1e-3) return false;
       if(abs(y_ - other.y_) > 1e-3) return false;
-      if(abs(z_ - other.z_) > 1e-3) return false;
 
       return true;
     }
@@ -152,7 +149,6 @@ public:
   size_t pos;
   float x_;
   float y_;
-  float z_;
 
   float inv_num_neighbors;
   float prob_normal_infected;

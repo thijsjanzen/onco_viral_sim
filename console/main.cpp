@@ -4,7 +4,7 @@
 #include "../Simulation/node.hpp"
 #include "../Simulation/simulation.hpp"
 #include "../Simulation/analysis.hpp"
-#include "config_parser.h"
+#include "../Simulation/config_parser.h"
 
 // forward declaration
 bool file_exists (const std::string& name);
@@ -34,19 +34,9 @@ int main(int argc, char *argv[]) {
 
     read_parameters_from_ini(all_parameters, file_name);
 
-    // now we over write found parameters in the command line
-    const std::string &virus_birth = input.getCmdOption("-vb");
-    const std::string &virus_death = input.getCmdOption("-vd");
-    const std::string &rand_seed = input.getCmdOption("-s");
-    if (!virus_birth.empty()) {
-      all_parameters.birth_infected = std::stof(virus_birth);
-    }
-    if (!virus_death.empty()) {
-      all_parameters.death_infected = std::stof(virus_death);
-    }
-    if (!rand_seed.empty()) {
-      all_parameters.seed = std::stof(rand_seed);
-    }
+
+    all_parameters.read_from_command_line(input);
+
 
     // Berg et al. varied two parameters:
     // lambda: speed of virus replication
@@ -126,7 +116,7 @@ int main(int argc, char *argv[]) {
               << all_parameters.evaporation << "\t"
               << all_parameters.diffusion << "\t"
               << all_parameters.t_cell_rate << "\t"
-              << all_parameters.inflection_point << "\t"
+              << all_parameters.t_cell_inflection_point << "\t"
               << all_parameters.infection_type << "\t"
               << all_parameters.t_cell_density_scaler << "\t"
               << outcome                       << "\t";
@@ -210,3 +200,5 @@ bool file_exists (const std::string& name) {
     std::ifstream f(name.c_str());
     return f.good();
 }
+
+
