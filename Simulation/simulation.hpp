@@ -133,7 +133,7 @@ private:
   void ask_infect_neighbours(size_t depth, size_t pos);
 
   void update_count(cell_type old_type, cell_type new_type);
-
+};
 
 
 #endif /* simulation_hpp */
