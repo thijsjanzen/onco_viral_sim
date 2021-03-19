@@ -545,6 +545,10 @@ void simulation::initialize_full() {
 
 void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_polys,
                                grid_type used_grid_type) {
+
+  std::cout << "3D + VORONOI IS NOT SUPPORTED!!!!\n";
+
+
    using namespace cinekine;
 
 
@@ -558,7 +562,7 @@ void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_
 
       float x = rndgen.uniform() * sq_size;
       float y = rndgen.uniform() * sq_size;
-      float z = rndgen.uniform() * sq_size;
+  //    float z = rndgen.uniform() * sq_size;
 
       v[i] = voronoi_point(x, y);
    }
