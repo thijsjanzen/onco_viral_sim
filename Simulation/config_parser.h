@@ -14,6 +14,7 @@
 #include <fstream>
 #include <utility>
 #include <vector>
+#include <algorithm>
 
 // class to parse command line, from https://stackoverflow.com/questions/865668/how-to-parse-command-line-arguments-in-c
 class InputParser{
