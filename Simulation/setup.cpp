@@ -555,7 +555,7 @@ void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_
 
    for(size_t i = 0; i < num_cells; ++i) {
 
-      float x, y;
+      float x = i, y = i;
 
       if (used_grid_type == grid_type::voronoi) {
        x = rndgen.uniform() * sq_size;
