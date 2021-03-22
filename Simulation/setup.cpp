@@ -8,7 +8,7 @@
 #include "simulation.hpp"
 
 simulation::simulation(const Param& param) :
-world(param.sq_num_cells * param.sq_num_cells)
+world(param.sq_num_cells * param.sq_num_cells * param.sq_num_cells)
 {
   parameters = param;
 
@@ -19,7 +19,7 @@ world(param.sq_num_cells * param.sq_num_cells)
 
 
   sq_size = parameters.sq_num_cells;
-  num_cells = sq_size * sq_size;
+  num_cells = sq_size * sq_size * sq_size;
 
   num_cell_types = {0, 0, 0, 0, num_cells}; // all cells are empty
 
@@ -547,85 +547,5 @@ void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_
                                grid_type used_grid_type) {
 
   std::cout << "3D + VORONOI IS NOT SUPPORTED!!!!\n";
-
-
-   using namespace cinekine;
-
-
-   std::cout << "Generating centre points\n";
-   std::vector< voronoi_point > v(num_cells);
-
-
-   // we make regular grid
-
-   for(size_t i = 0; i < num_cells; ++i) {
-
-      float x = rndgen.uniform() * sq_size;
-      float y = rndgen.uniform() * sq_size;
-  //    float z = rndgen.uniform() * sq_size;
-
-      v[i] = voronoi_point(x, y);
-   }
-
-   voronoi::Sites sites;
-   std::cout << "convering centre points to vertices\n";
-   for(auto i : v) {
-      voronoi::Vertex temp_vertex(i.x_, i.y_);
-      sites.push_back(temp_vertex);
-   }
-
-   std::cout << "creating voronoi graph\n";
-   voronoi::Graph graph = voronoi::build(std::move(sites), sq_size, sq_size);
-
-   std::vector< std::vector< voronoi_edge > > all_edges(world.size());
-
-   std::cout << "Ready to build world\n";
-   std::cout << "collecting all edges\n";
-   for(const auto& cell : graph.cells()) {
-
-       size_t site_index = static_cast<size_t>(cell.site);
-
-       voronoi::Site focal_site = graph.sites()[site_index];
-
-       world[site_index].x_ = focal_site.x;
-       world[site_index].y_ = focal_site.y;
-
-       for(const auto& edge : cell.halfEdges) {
-           voronoi::Edge focal_edge = graph.edges()[edge.edge];
-           voronoi_point start(focal_edge.p0.x, focal_edge.p0.y);
-           voronoi_point end(  focal_edge.p1.x, focal_edge.p1.y);
-
-           voronoi_edge local_edge(start, end, focal_edge.leftSite, focal_edge.rightSite);
-
-           if(local_edge.calc_dist() > 1e-2) {
-             all_edges[site_index].push_back(local_edge);
-           }
-       }
-   }
-
-   std::cout << "implementing all edges\n";
-   for(auto i : all_edges) {
-       for(auto edge : i) {
-           size_t left  = edge.left;
-           size_t right = edge.right;
-
-           if(left < world.size() && right < world.size()) {
-               world[left].add_neighbor(world, right);
-               world[right].add_neighbor(world, left);
-           }
-       }
-   }
-
-   std::cout << "clean edges and add polies for plotting\n";
-   for(size_t i = 0; i < num_cells; ++i) {
-       std::vector< voronoi_point > poly = clean_edges(all_edges[i], i);
-       all_polys.push_back(poly);
-   }
-
-   std::cout << "update neighbor information\n";
-   for(size_t i = 0; i < num_cells; ++i) {
-       world[i].inv_num_neighbors = 1.f / world[i].neighbors.size();
-       update_growth_prob(i);
-       update_death_prob(i);
-   }
+  return;
 }

@@ -40,6 +40,16 @@ void node::add_neighbor(std::vector< node >& world,
     neighbors.push_back(neighbor);
 }
 
+bool within_limits(int x, int y, int z, int limit) {
+  if(x < 0) return false;
+  if(y < 0) return false;
+  if(z < 0) return false;
+  if(x >= limit) return false;
+  if(y >= limit) return false;
+  if(z >= limit) return false;
+
+  return true;
+}
 
 void node::update_neighbors(std::vector< node >& world,
                             size_t world_size) {
@@ -52,23 +62,23 @@ void node::update_neighbors(std::vector< node >& world,
                                          { 0,  0, -1} };
 
     for(int i = 0; i < 6; ++i) {
+            int other_x = static_cast<int>(x_) + relative_points[i][0];
+            int other_y = static_cast<int>(y_) + relative_points[i][1];
+            int other_z = static_cast<int>(z_) + relative_points[i][2];
+            if(within_limits(other_x, other_y, other_z, world_size)) {
+                int other_pos = other_y + (other_x + other_z * static_cast<int>(world_size))
+                                    * static_cast<int>(world_size);
 
-        int other_x = static_cast<int>(x_) + relative_points[i][0];
-        int other_y = static_cast<int>(y_) + relative_points[i][1];
-        if(other_x >= 0 &&
-           other_y >= 0 &&
-           other_x < static_cast<int>(world_size) &&
-           other_y < static_cast<int>(world_size)) {
-            int other_pos = other_y + other_x * static_cast<int>(world_size);
-            if(other_pos >= 0 && other_pos < static_cast<int>(world.size())) {
-                node* neighbor = &world[static_cast<size_t>(other_pos)];
+                if(other_pos >= 0 && other_pos < static_cast<int>(world.size())) {
+                    node* neighbor = &world[static_cast<size_t>(other_pos)];
 
-                assert(static_cast<int>(neighbor->x_) == other_x);
-                assert(static_cast<int>(neighbor->y_) == other_y);
-                neighbors.push_back(neighbor);
+                    assert(static_cast<int>(neighbor->x_) == other_x);
+                    assert(static_cast<int>(neighbor->y_) == other_y);
+                    assert(static_cast<int>(neighbor->z_) == other_z);
+                    neighbors.push_back(neighbor);
+                }
             }
-        }
-    }
+      }
     inv_num_neighbors = 1.f / neighbors.size();
 }
 
@@ -101,8 +111,10 @@ float node::freq_type_neighbours(const cell_type& ref_type) const {
 }
 
 void node::set_coordinates(size_t row_size) {
-    x_ = pos / row_size;
-    y_ = pos % row_size;
+  z_ = pos / (row_size * row_size);
+  size_t pos2 = pos - z_ * row_size * row_size;
+  x_ = pos2 / row_size;
+  y_ = pos2 % row_size;
 }
 
 void node::add_t_cell(float amount) {
