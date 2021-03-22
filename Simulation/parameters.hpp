@@ -10,6 +10,7 @@
 #include <cstdio>
 #include <cmath>
 #include <random>
+#include "config_parser.h"
 
 enum infection_routine {random_infection, center_infection, periphery_infection};
 enum start_type {full, grow, converge, empty_grid};
@@ -112,7 +113,39 @@ struct Param {
     t_cell_rate = 10;
     t_cell_threshold = 0.2f;
     t_cell_density_scaler = 1.0f;
+    t_cell_inflection_point = 1.0f;
   }
+
+  void parse_param(const InputParser& input,
+                   std::string flag,
+                   float& param) {
+    const std::string &temp = input.getCmdOption(flag);
+    if (!temp.empty()) {
+      param = std::stof(temp);
+    }
+  }
+
+
+  void read_from_command_line(const InputParser& input) {
+    parse_param(input, "-vb", birth_infected);
+    parse_param(input, "-vd", death_infected);
+  //  parse_param(input, "-s", seed);
+    parse_param(input, "-ev", evaporation);
+    parse_param(input, "-di", diffusion);
+    parse_param(input, "-tu", t_cell_increase);
+    parse_param(input, "-td", t_cell_rate);
+    parse_param(input, "-if", t_cell_inflection_point);
+
+    // parse_param is only for floats.
+    const std::string &temp = input.getCmdOption("-s");
+    if (!temp.empty()) {
+      seed = static_cast<size_t>(std::stoi(temp));
+    }
+
+    return;
+  }
+
+
 };
 
 #endif /* parameters_h */

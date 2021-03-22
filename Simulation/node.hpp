@@ -20,116 +20,120 @@ enum cell_type {normal, cancer, infected, resistant, empty, max_num};
 typedef struct node node;
 
 struct voronoi_point {
-    double x_, y_, z_;
+  double x_, y_, z_;
 
-    voronoi_point() {
-        x_ = 0.0; y_ = 0.0; z_ = 0.0;
-    }
+  voronoi_point() {
+    x_ = 0.0; y_ = 0.0, z_ = 0.0;
+  }
 
-    voronoi_point& operator=(const voronoi_point& other) {
-      x_ = other.x_;
-      y_ = other.y_;
-      z_ = other.z_;
-      return *this;
-    }
+  voronoi_point& operator=(const voronoi_point& other) {
+    x_ = other.x_;
+    y_ = other.y_;
+    z_ = other.z_;
+    return *this;
+  }
 
-    voronoi_point(const voronoi_point& other) {
-        x_ = other.x_;
-        y_ = other.y_;
-        z_ = other.z_;
-    }
+  voronoi_point(const voronoi_point& other) {
+    x_ = other.x_;
+    y_ = other.y_;
+    z_ = other.z_;
+  }
 
-    voronoi_point(double x, double y, double z) : x_(x), y_(y), z_(z) {}
+  voronoi_point(double x, double y, double z) : x_(x), y_(y), z_(z) {}
 
-    bool operator==(const voronoi_point& other) const {
-        // explicitly, this doesn't keep track of left and right!
-      //  if(x_ != other.x_) return false;
-      //  if(y_ != other.y_) return false;
-      if(abs(x_ - other.x_) > 1e-3) return false;
-      if(abs(y_ - other.y_) > 1e-3) return false;
-      if(abs(z_ - other.z_) > 1e-3) return false;
+  bool operator==(const voronoi_point& other) const {
+    // explicitly, this doesn't keep track of left and right!
+    //  if(x_ != other.x_) return false;
+    //  if(y_ != other.y_) return false;
+    if(abs(x_ - other.x_) > 1e-3) return false;
+    if(abs(y_ - other.y_) > 1e-3) return false;
+    if(abs(z_ - other.z_) > 1e-3) return false;
 
-      return true;
-    }
+    return true;
+  }
 
-    bool operator<(const voronoi_point& other) const {
-       // if(fabs(x_ - other.x_) < 1e-4f) return y_ < other.y_;
-       // return x_ < other.x_;
-       if(x_ == other.x_) return y_ < other.y_;
-       return x_ < other.x_;
-    }
+  bool operator<(const voronoi_point& other) const {
+    // if(fabs(x_ - other.x_) < 1e-4f) return y_ < other.y_;
+    // return x_ < other.x_;
+    if(x_ == other.x_) {
+        if (z_ == other.z_) {
+            return y_ < other.y_;
+          }
+      }
+    return x_ < other.x_;
+  }
 
-    bool operator!=(const voronoi_point& other) const {
-        return !(*this == other);
-    }
+  bool operator!=(const voronoi_point& other) const {
+    return !(*this == other);
+  }
 };
 
 struct voronoi_edge {
   voronoi_edge() {
   }
 
-    voronoi_edge(voronoi_point s, voronoi_point e,
-                 size_t l, size_t r) : start(s), end(e), left(l), right(r) {}
+  voronoi_edge(voronoi_point s, voronoi_point e,
+               size_t l, size_t r) : start(s), end(e), left(l), right(r) {}
 
-    voronoi_point start;
-    voronoi_point end;
-    size_t left;
-    size_t right;
+  voronoi_point start;
+  voronoi_point end;
+  size_t left;
+  size_t right;
 
-    voronoi_edge& operator=(const voronoi_edge& other) {
-      left  = other.left;
-      right = other.right;
-      start = other.start;
-      end   = other.end;
-      return *this;
-    }
+  voronoi_edge& operator=(const voronoi_edge& other) {
+    left  = other.left;
+    right = other.right;
+    start = other.start;
+    end   = other.end;
+    return *this;
+  }
 
-    voronoi_edge(const voronoi_edge& other) {
-      left  = other.left;
-      right = other.right;
-      start = other.start;
-      end   = other.end;
-    }
+  voronoi_edge(const voronoi_edge& other) {
+    left  = other.left;
+    right = other.right;
+    start = other.start;
+    end   = other.end;
+  }
 
-    bool operator<(const voronoi_edge& other) const {
-      return start < other.start;
-    }
+  bool operator<(const voronoi_edge& other) const {
+    return start < other.start;
+  }
 
-    bool operator==(const voronoi_edge& other) const {
-     if(start != other.start) return false;
-     if(end   != other.end)   return false;
-     return true;
-    }
+  bool operator==(const voronoi_edge& other) const {
+    if(start != other.start) return false;
+    if(end   != other.end)   return false;
+    return true;
+  }
 
-    bool operator!=(const voronoi_edge& other) const {
-        return !(*this == other);
-    }
+  bool operator!=(const voronoi_edge& other) const {
+    return !(*this == other);
+  }
 
-    bool check() const {
-      if(std::isnan(start.x_)) {
-          std::cout << "start.x_ isnan\n";
-          return false;
+  bool check() const {
+    if(std::isnan(start.x_)) {
+        std::cout << "start.x_ isnan\n";
+        return false;
       }
-      if(std::isnan(start.y_)) {
-          std::cout << "start.y_ isnan\n";
-          return false;
+    if(std::isnan(start.y_)) {
+        std::cout << "start.y_ isnan\n";
+        return false;
       }
-      if(std::isnan(end.x_)) {
-          std::cout << "end.x_ isnan\n";
-          return false;
+    if(std::isnan(end.x_)) {
+        std::cout << "end.x_ isnan\n";
+        return false;
       }
-      if(std::isnan(end.y_)) {
-          std::cout << "end.y_ isnan\n";
-          return false;
+    if(std::isnan(end.y_)) {
+        std::cout << "end.y_ isnan\n";
+        return false;
       }
-      return true;
-    }
+    return true;
+  }
 
-    double calc_dist() {
-      double x_x = (start.x_ - end.x_) * (start.x_ - end.x_);
-      double y_y = (start.y_ - end.y_) * (start.y_ - end.y_);
-      return(std::sqrt(x_x + y_y));
-    }
+  double calc_dist() {
+    double x_x = (start.x_ - end.x_) * (start.x_ - end.x_);
+    double y_y = (start.y_ - end.y_) * (start.y_ - end.y_);
+    return(std::sqrt(x_x + y_y));
+  }
 };
 
 std::vector< voronoi_point> clean_edges(const std::vector< voronoi_edge >& input_edges,
@@ -138,7 +142,7 @@ void invert_edges(std::vector< voronoi_edge>& edges, size_t pos);
 
 struct node {
 private:
-    cell_type node_type;
+  cell_type node_type;
 
 public:
 

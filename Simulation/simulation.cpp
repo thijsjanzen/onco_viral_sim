@@ -126,9 +126,12 @@ void simulation::implement_death(const cell_type& parent) {
   if (parent == infected && parameters.prob_infection_upon_death > 0.f) {
       infect_long_distance(position_of_dying_cell);
   }
-  if (parent == infected && parameters.t_cell_increase > 0) {
-      increase_t_cell_concentration(position_of_dying_cell);
-  }
+
+  if (parent == infected) {
+      if (parameters.t_cell_increase > 0) {
+        increase_t_cell_concentration(position_of_dying_cell);
+        }
+    }
 }
 
 void simulation::implement_growth(const cell_type& parent) {
@@ -342,7 +345,6 @@ float simulation::get_percent_infected() const {
   return(parameters.percent_infected);
 }
 
-
 void simulation::diffuse() {
   // do something
   std::vector<float> new_concentration(world.size(), 0.f);
@@ -370,7 +372,7 @@ void simulation::diffuse() {
          float delta_conc = current_conc - other_conc;
 
          float neighbor_factor = world[i].inv_num_neighbors;
-         size_t num_neighbours = world[i].neighbors.size();
+         // size_t num_neighbours = world[i].neighbors.size();
          float diffusion_amount = delta_conc *
              parameters.diffusion * neighbor_factor;
 

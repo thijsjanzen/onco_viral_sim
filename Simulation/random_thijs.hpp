@@ -122,7 +122,7 @@ public:
        return index;
      }
      cnt++;
-     if (cnt > max_index * 10) {
+     if (cnt > static_cast<size_t>(max_index * 10)) {
        return draw_cdf(first, last, r);
      }
    }
@@ -176,7 +176,6 @@ public:
 
     if(row_sum[row] < 0.f) row_sum[row] = 0.f;
     if (row_sum[row] > 1e9f) row_sum[row] = 1e9f;
-
   }
 
   float get_total_sum() const {

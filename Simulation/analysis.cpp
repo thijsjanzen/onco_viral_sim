@@ -14,7 +14,8 @@ std::array<size_t, 5> do_analysis(Param all_parameters) {
 
   std::vector< std::vector< voronoi_point > > filler;
 
-  Simulation.initialize_network(filler);
+  Simulation.initialize_network(filler, regular);
+
   std::cout << "starting simulation\n";
 
   Simulation.t = 0.f;
@@ -105,18 +106,15 @@ std::array<size_t, 5> do_analysis(Param all_parameters) {
               if(all_parameters.start_setup == grow ||
                  all_parameters.start_setup == converge) {
 
-                if(cell_counts[cancer] < 1 && virus_added == true) {
-                    std::cout << "cancer eradicated\n";
-                    break;
-                }
-                if(cell_counts[normal] < 1 && virus_added == true) {
-                    std::cout << "normal tissue gone\n";
-                    break;
-                }
-                if(cell_counts[infected] < 1 && virus_added == true &&
-                   cell_counts[normal] < 1) {
-                    std::cout << "virus wiped out\n";
-                    break;
+                if (virus_added == true) {
+                  if (cell_counts[cancer] < 1) {
+                      std::cout << "cancer eradicated\n";
+                      break;
+                  }
+                  if(cell_counts[infected] < 1) {
+                      std::cout << "virus wiped out\n";
+                      break;
+                  }
                 }
               }
               if(all_parameters.start_setup == full) {
@@ -158,16 +156,20 @@ std::string get_outcome(const std::array<size_t, 5>& cell_counts) {
   // D: tumor & resistant cells remain, no virus or normal cells.
   for(size_t i = 0; i < 4; ++i) freq[i] *= 1.0f / total_num_cells;
 
-  if(freq[resistant] < 1e-6f) {
+  if (freq[resistant] < 1e-6f) {
 
    /* if(freq[normal] >= (1-1e-6f) && freq[cancer] <= 1e-6f && freq[infected] <= 1e-6f) {
         return "A";
     }*/
-    if(freq[cancer] <= 1e-6f) {
+    if (freq[cancer] <= 1e-6f) {
         return "A";
     }
 
-    if(freq[normal] <= 1e-6f     && freq[cancer] >= (1-1e-6f) && freq[infected] <= 1e-6f) {
+    if (freq[normal] <= 1e-6f     && freq[cancer] >= (1-1e-6f) && freq[infected] <= 1e-6f) {
+        return "B";
+    }
+
+    if (freq[normal] > 1e-6f && freq[cancer] > (1e-6f) && freq[infected] <= 1e-6f) {
         return "B";
     }
 
