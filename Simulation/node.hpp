@@ -153,6 +153,7 @@ public:
   float inv_num_neighbors;
   float prob_normal_infected;
   float t_cell_concentration;
+  float added_death_rate;
 
   std::vector< node* > neighbors;
 
@@ -187,7 +188,7 @@ public:
 
   float calc_t_cell_added_death_rate(float t_cell_rate,
                                      float t_cell_density_scaler,
-                                     float t_cell_inflection_point) const;
+                                     float t_cell_inflection_point);
 
 };
 

@@ -86,7 +86,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>165</x>
@@ -511,6 +511,9 @@
        </item>
        <item row="8" column="3">
         <widget class="QDoubleSpinBox" name="box_inflammation">
+         <property name="maximum">
+          <double>200.000000000000000</double>
+         </property>
          <property name="singleStep">
           <double>0.010000000000000</double>
          </property>
@@ -553,8 +556,11 @@
          <property name="decimals">
           <number>3</number>
          </property>
+         <property name="minimum">
+          <double>-10.000000000000000</double>
+         </property>
          <property name="maximum">
-          <double>2.000000000000000</double>
+          <double>10.000000000000000</double>
          </property>
          <property name="singleStep">
           <double>0.010000000000000</double>
@@ -568,7 +574,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>6</x>
@@ -714,7 +720,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>377</x>
@@ -798,7 +804,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -863,31 +869,11 @@
    </widget>
    <zorder>layoutWidget</zorder>
    <zorder>layoutWidget</zorder>
+   <zorder>layoutWidget</zorder>
+   <zorder>layoutWidget</zorder>
    <zorder>q_label</zorder>
-   <zorder>btn_start</zorder>
    <zorder>text</zorder>
    <zorder>line_plot</zorder>
-   <zorder>btn_stop</zorder>
-   <zorder>progressBar</zorder>
-   <zorder>speed_slider</zorder>
-   <zorder>label_11</zorder>
-   <zorder>label_15</zorder>
-   <zorder>box_start_setup</zorder>
-   <zorder>btn_setup</zorder>
-   <zorder>btn_add_virus</zorder>
-   <zorder>label_23</zorder>
-   <zorder>box_grid_type</zorder>
-   <zorder>box_sq_num_cells</zorder>
-   <zorder>label_24</zorder>
-   <zorder>label_25</zorder>
-   <zorder>box_sq_num_pixels</zorder>
-   <zorder>label_52</zorder>
-   <zorder>box_density_scaler</zorder>
-   <zorder>label_53</zorder>
-   <zorder>box_inflection_point</zorder>
-   <zorder>label_22</zorder>
-   <zorder>drpdwnbox_display</zorder>
-   <zorder>label_26</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>

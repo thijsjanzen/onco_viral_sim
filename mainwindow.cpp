@@ -67,7 +67,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     ui->drpdwnbox_display->addItem("Cell types");
-    ui->drpdwnbox_display->addItem("T-cells");
+    ui->drpdwnbox_display->addItem("Inflammation Factor");
+    ui->drpdwnbox_display->addItem("T Cell Added Death Rate");
     ui->drpdwnbox_display->addItem("Normal Growth Rate");
     ui->drpdwnbox_display->addItem("Normal Death Rate");
     ui->drpdwnbox_display->addItem("Cancer Growth Rate");
@@ -120,7 +121,7 @@ QColor get_t_cell_color(float concentration) {
   return col;
 }
 
-void MainWindow::display_regular(bool display_t_cells) {
+void MainWindow::display_regular(int display_t_cells) {
   size_t line_size = row_size;
   size_t num_lines = col_size;
 
@@ -132,25 +133,31 @@ void MainWindow::display_regular(bool display_t_cells) {
 
       for(size_t index = start; index < end; ++index) {
           size_t local_index = index - start;
-          if(!display_t_cells) row[local_index] = colorz[ sim->world[index].get_cell_type() ].rgb();
-          if(display_t_cells) row[local_index] = get_t_cell_color(sim->world[index].t_cell_concentration).rgba();
+          if(display_t_cells == 0) row[local_index] = colorz[ sim->world[index].get_cell_type() ].rgb();
+          if(display_t_cells == 1) row[local_index] = get_t_cell_color(sim->world[index].t_cell_concentration).rgba();
+          if(display_t_cells == 2) { // added death rate
+             row[local_index] = get_t_cell_color(sim->world[index].added_death_rate ).rgba();
+          }
       }
   }
 }
 
 void MainWindow::display_voronoi(size_t sq_size,
-                                 bool display_t_cells) {
+                                 int display_t_cells) {
   image_.fill(Qt::gray);
 
   QPainter painter(&image_);
 
   for(size_t i = 0; i < sim->num_cells; ++i) {
       QBrush brush;
-      if(display_t_cells) {
+      if(display_t_cells == 1) {
           QColor t_col = get_t_cell_color(sim->world[i].t_cell_concentration);
           brush = QBrush(t_col);
-      } else {
+      } else if (display_t_cells == 0) {
           brush = QBrush(colorz[sim->world[i].get_cell_type()]); // Qt::SolidPattern by default.
+      } else if (display_t_cells == 2) {
+          QColor t_col = get_t_cell_color(sim->world[i].added_death_rate);
+          brush = QBrush(t_col);
       }
 
       QPainterPath path;
@@ -162,7 +169,7 @@ void MainWindow::display_voronoi(size_t sq_size,
 }
 
 void MainWindow::update_image(size_t sq_size,
-                              bool display_t_cells) {
+                              int display_t_cells) {
     if(grid_type == regular) {
         display_regular(display_t_cells);
     } else {
@@ -476,8 +483,10 @@ void MainWindow::update_parameters(Param& p) {
        focal_display_type = resistant_rate;
    if(display_string == "Dominant Growth Rate")
        focal_display_type = dominant_rate;
-   if(display_string == "T-cells")
-       focal_display_type = t_cells;
+   if(display_string == "Inflammation Factor")
+       focal_display_type = inflammation_factor;
+   if(display_string == "T Cell Added Death Rate")
+      focal_display_type = added_death_rate;
 
    auto grid_string = ui->box_grid_type->currentText();
    if (grid_string == "regular") {
@@ -562,31 +571,19 @@ void MainWindow::setup_simulation() {
 
     ui->btn_start->setText("Start");
 
-    if(focal_display_type == cells) {
-        update_image(all_parameters.sq_num_cells, false);
-    } else if (focal_display_type == t_cells) {
-        update_image(all_parameters.sq_num_cells, true);
-    } else if (focal_display_type == cancer_death_rate) {
-        update_image(all_parameters.sq_num_cells, sim->death_prob);
-    } else if (focal_display_type == normal_death_rate) {
-        update_image(all_parameters.sq_num_cells, sim->death_prob);
-    } else {
-        update_image(all_parameters.sq_num_cells, sim->growth_prob);
-    }
-
-    update_plot(static_cast<double>(sim->t),
-                sim->get_count_cell_types());
+    update_display();
 
     is_paused = true;
-
-    QApplication::processEvents();
 }
 
 void MainWindow::update_display() {
-  if(focal_display_type == cells) {
-      update_image(all_parameters.sq_num_cells, false);
-  } else if (focal_display_type == t_cells) {
-      update_image(all_parameters.sq_num_cells, true);
+
+  if (focal_display_type == added_death_rate) {
+    update_image(all_parameters.sq_num_cells, 2);
+  } else if(focal_display_type == cells) {
+      update_image(all_parameters.sq_num_cells, 0);
+  } else if (focal_display_type == inflammation_factor) {
+      update_image(all_parameters.sq_num_cells, 1);
   } else if (focal_display_type == cancer_death_rate) {
       update_image(all_parameters.sq_num_cells, sim->death_prob);
   } else if (focal_display_type == normal_death_rate) {
@@ -765,22 +762,14 @@ void MainWindow::on_drpdwnbox_display_activated(int index)
         focal_display_type = resistant_rate;
     if(display_string == "Dominant Growth Rate")
         focal_display_type = dominant_rate;
-    if(display_string == "T-cells")
-        focal_display_type = t_cells;
+    if(display_string == "Inflammation Factor")
+        focal_display_type = inflammation_factor;
+    if(display_string == "T Cell Added Death Rate")
+       focal_display_type = added_death_rate;
 
     if (!is_running) {
-        if(focal_display_type == cells) {
-            update_image(all_parameters.sq_num_cells, false);
-        } else if (focal_display_type == t_cells) {
-            update_image(all_parameters.sq_num_cells, true);
-        } else if (focal_display_type == cancer_death_rate) {
-            update_image(all_parameters.sq_num_cells, sim->death_prob);
-        } else if (focal_display_type == normal_death_rate) {
-            update_image(all_parameters.sq_num_cells, sim->death_prob);
-        } else {
-            update_image(all_parameters.sq_num_cells, sim->growth_prob);
-        }
-          QApplication::processEvents();
+       update_display();
+       QApplication::processEvents();
     }
 }
 

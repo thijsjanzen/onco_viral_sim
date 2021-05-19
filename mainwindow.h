@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QPaintEvent>
 #include <QPainter>
+
 #include "qcustomplot.h"
 #include "Simulation/parameters.hpp"
 #include "Simulation/simulation.hpp"
@@ -12,7 +13,7 @@
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
-enum display_color {cells, t_cells,
+enum display_color {cells, inflammation_factor, added_death_rate,
                     normal_rate, normal_death_rate,
                     cancer_rate, cancer_death_rate,
                     infected_rate, resistant_rate,
@@ -29,21 +30,21 @@ public:
      ~MainWindow();
 
     void update_image(size_t sq_size,
-                      bool display_t_cells);
+                      int display_t_cells);
 
     void update_image(size_t sq_size,
                       const std::array< binned_distribution, 4 > & growth_rate);
 
 
     void display_voronoi(size_t sq_size,
-                         bool display_t_cells); // cell coloring
+                         int display_t_cells); // cell coloring
     void display_voronoi(const binned_distribution& growth_rate,
                          cell_type focal_cell_type,
                          size_t sq_size); // growth rate coloring
     void display_voronoi(const std::array< binned_distribution, 4 > & growth_rate,
                          size_t sq_size); // dominant growth rate coloring
 
-    void display_regular(bool display_t_cells); // cell type coloring
+    void display_regular(int display_t_cells); // cell type coloring
     void display_regular(const binned_distribution& growth_rate,
                          cell_type focal_cell_type); // growth rate coloring
     void display_regular(const std::array< binned_distribution, 4 > & growth_rate); // dominant growth rate coloring
@@ -103,7 +104,7 @@ private:
     grid_type grid_type;
 
     Param all_parameters;
-   // simulation Simulation;
+
     std::unique_ptr<simulation> sim;
 
     std::vector< QColor > colorz;

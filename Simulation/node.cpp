@@ -23,6 +23,7 @@ node::node() {
   inv_num_neighbors = 0.f;
   prob_normal_infected = 0.f;
   t_cell_concentration = 0.f;
+  added_death_rate = 0.f;
 }
 
 void node::add_neighbor(std::vector< node >& world,
@@ -176,8 +177,10 @@ std::vector< size_t > node::get_cancer_neighbours() const {
 
 float node::calc_t_cell_added_death_rate(float t_cell_rate,
                                          float t_cell_density_scaler,
-                                         float t_cell_inflection_point) const {
-  if (t_cell_concentration < 1e-5f) {
+                                         float t_cell_inflection_point) {
+  if (t_cell_concentration < 1e-5f ||
+      node_type != cancer) {
+      added_death_rate = 0.f;
       return 0.f;
   }
 
@@ -199,6 +202,6 @@ float node::calc_t_cell_added_death_rate(float t_cell_rate,
   if (output >= std:: numeric_limits<float>::max()) {
       output = 1e9;
   }
-
+  added_death_rate = output;
   return output;
 }
