@@ -673,6 +673,8 @@ void MainWindow::on_btn_start_clicked()
         y_c.clear();
         y_i.clear();
         y_r.clear();
+        sim->update_grow_params();
+
     }
 
     while(sim->t < all_parameters.maximum_time) {
