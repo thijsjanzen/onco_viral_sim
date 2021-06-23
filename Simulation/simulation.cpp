@@ -475,6 +475,10 @@ void simulation::set_start_setup(start_type new_type) {
   parameters.start_setup = new_type;
 }
 
+void simulation::update_grow_params() {
+  parameters.time_adding_virus += parameters.time_adding_cancer;
+  parameters.time_adding_virus_2 += parameters.time_adding_virus;
+}
 
 
 /*

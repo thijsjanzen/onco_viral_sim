@@ -81,6 +81,8 @@ public:
 
   float calc_max_t_cell_rate();
 
+  void update_grow_params();
+
 private:
   Param parameters;
 

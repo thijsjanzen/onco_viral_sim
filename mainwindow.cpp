@@ -121,7 +121,9 @@ QColor get_t_cell_color(float concentration) {
 }
 
 void MainWindow::display_regular(bool display_t_cells) {
-  int z = ui->depth_slider->value();
+  double frac = ui->depth_slider->value() / 100.0;
+  int z = static_cast<int>(frac * row_size);
+
   for(int x = 0; x < row_size; ++x) {
       QRgb* row = (QRgb*) image_.scanLine(x);
       for(int y = 0; y < row_size; ++y) {
@@ -158,11 +160,7 @@ void MainWindow::display_voronoi(size_t sq_size,
 
 void MainWindow::update_image(size_t sq_size,
                               bool display_t_cells) {
-    if(grid_type == regular) {
-        display_regular(display_t_cells);
-    } else {
-        display_voronoi(sq_size, display_t_cells);
-    }
+    display_regular(display_t_cells);
 
     int w = ui->q_label->width();
     int h = ui->q_label->height();
@@ -545,22 +543,14 @@ void MainWindow::setup_simulation() {
     }
 
 
-
     sim = std::make_unique<simulation>(all_parameters);   //simulation(all_parameters);
 
     //Simulation.initialize_network();
     std::vector< std::vector< voronoi_point > > all_polys;
     sim->initialize_network(all_polys, grid_type);
 
-    if(all_parameters.use_voronoi_grid == true) {
-      update_polygons(all_polys);
-      set_resolution(static_cast<int>(all_parameters.sq_num_pixels),
-                   static_cast<int>(all_parameters.sq_num_pixels));
-    }
-    if(all_parameters.use_voronoi_grid == false) {
-        set_resolution(static_cast<int>(all_parameters.sq_num_cells),
+    set_resolution(static_cast<int>(all_parameters.sq_num_cells),
                      static_cast<int>(all_parameters.sq_num_cells));
-    }
 
     sim->t = 0.0;
 
@@ -680,6 +670,7 @@ void MainWindow::on_btn_start_clicked()
         y_c.clear();
         y_i.clear();
         y_r.clear();
+        sim->update_grow_params();
     }
 
     while(sim->t < all_parameters.maximum_time) {
@@ -734,7 +725,6 @@ void MainWindow::update_plot(double t,
 
     ui->line_plot->graph(3)->clearData();
     ui->line_plot->graph(3)->setData(x_t, y_r);
-
 
     ui->line_plot->rescaleAxes();
     ui->line_plot->replot();

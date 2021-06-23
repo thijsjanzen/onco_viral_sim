@@ -49,21 +49,26 @@ size_t simulation::find_central_cell(const cell_type& focal_cell_type) const {
     // first calculate average x and y of cell type:
     float x = 0.f;
     float y = 0.f;
+    float z = 0.f;
     int counter = 0;
     for(const auto& i : world) {
         if(i.get_cell_type() == focal_cell_type) {
             x += i.x_;
             y += i.y_;
+            z += i.z_;
             counter++;
         }
     }
     x *= 1.0f / counter;
     y *= 1.0f / counter;
+    z *= 1.0f / counter;
 
     std::vector< float > dist(world.size(), 1e9);
     for(size_t i = 0; i < world.size(); ++i) {
         if(world[i].get_cell_type() == focal_cell_type) {
-            dist[i] = (world[i].x_ - x) * (world[i].x_ - x) + (world[i].y_ - y) * (world[i].y_ - y);
+            dist[i] = (world[i].x_ - x) * (world[i].x_ - x) +
+                      (world[i].y_ - y) * (world[i].y_ - y) +
+                      (world[i].z_ - z) * (world[i].z_ - z);
         }
     }
 
@@ -75,21 +80,25 @@ size_t simulation::find_central_cell(const std::vector< size_t >& positions) con
     // first calculate average x and y of cell type:
     float x = 0.f;
     float y = 0.f;
+    float z = 0.f;
     int counter = 0;
     for(const auto& i : positions) {
             x += world[i].x_;
             y += world[i].y_;
+            z += world[i].z_;
             counter++;
     }
 
     x *= 1.0f / counter;
     y *= 1.0f / counter;
+    z *= 1.0f / counter;
 
     std::vector< float > dist(positions.size(), 1e9);
     for (size_t i = 0; i < positions.size(); ++i) {
       size_t pos = positions[i];
       dist[i] = (world[pos].x_ - x) * (world[pos].x_ - x) +
-                 (world[pos].y_ - y) * (world[pos].y_ - y);
+                (world[pos].y_ - y) * (world[pos].y_ - y) +
+                (world[pos].z_ - z) * (world[pos].z_ - z);
     }
 
     auto min = std::min_element(dist.begin(), dist.end());
@@ -116,11 +125,6 @@ void simulation::initialize_network(std::vector< std::vector< voronoi_point > >&
       i.update_neighbors(world, sq_size);
       change_cell_type(i.pos, empty);
     }
-  }
-  if(parameters.use_voronoi_grid == true) {
-      std::cout << "setting up Voronoi grid\n";
-      setup_voronoi(all_polys, used_grid_type);
-      std::cout << "Done setting up Voronoi grid\n";
   }
 
   if(parameters.start_setup == grow || parameters.start_setup == converge) {
