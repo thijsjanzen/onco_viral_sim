@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->line_plot->graph(0)->setPen(QPen(Qt::blue));
     ui->line_plot->graph(1)->setPen(QPen(Qt::red));
     ui->line_plot->graph(2)->setPen(QPen(Qt::green));
-    ui->line_plot->graph(3)->setPen(QPen(Qt::magenta));
+    ui->line_plot->graph(3)->setPen(QPen(Qt::darkYellow));
 
     ui->line_plot->graph(0)->setName("Normal");
     ui->line_plot->graph(1)->setName("Cancer");
@@ -83,11 +83,11 @@ MainWindow::MainWindow(QWidget *parent)
     is_paused = false;
     is_running = false;
 
-    colorz.push_back(QColor(0, 0, 255));
-    colorz.push_back(QColor(255, 0, 0));
-    colorz.push_back(QColor(0, 255, 0));
-    colorz.push_back(QColor(128, 0, 128));
-    colorz.push_back(QColor(0, 0, 0));
+    colorz.push_back(QColor(0, 0, 255));  // normal cells
+    colorz.push_back(QColor(255, 0, 0));  // cancer cells
+    colorz.push_back(QColor(0, 255, 0));  // infected cells
+    colorz.push_back(QColor(255, 102, 102));  // resistant cells
+    colorz.push_back(QColor(0, 0, 0));      // empty cells
 
     factor_x = 1.f;
     factor_y = 1.f;

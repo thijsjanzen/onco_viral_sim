@@ -37,11 +37,7 @@ world(param.sq_num_cells * param.sq_num_cells * param.sq_num_cells)
 
   total_t_cell_concentration = 0.f;
 
-  long_distance_infection_probability = std::vector<double>(sq_size, 0.0);
-  for(size_t d = 1; d <= parameters.distance_infection_upon_death; ++d) {
-      long_distance_infection_probability[d] =
-          parameters.prob_infection_upon_death;
-  }
+  long_distance_infection_probability = std::vector<double>(sq_size, parameters.prob_infection_upon_death);
 }
 
 
