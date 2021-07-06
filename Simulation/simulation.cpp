@@ -224,7 +224,7 @@ void simulation::update_death_prob_cancer(float t_cell_rate,
 void simulation::update_rates() {
   rates[0] = parameters.birth_normal   * growth_prob[normal].get_total_sum();
   rates[1] = parameters.death_normal   * death_prob[normal].get_total_sum();
-  assert(rates[1] == num_cell_types[normal] * parameters.death_normal);
+ // assert(rates[1] == num_cell_types[normal] * parameters.death_normal);
 
   rates[2] = parameters.birth_cancer   * growth_prob[cancer].get_total_sum();
   rates[3] = parameters.death_cancer   * death_prob[cancer].get_total_sum();
@@ -233,7 +233,7 @@ void simulation::update_rates() {
 
   rates[4] = parameters.birth_infected * growth_prob[infected].get_total_sum();
   rates[5] = parameters.death_infected * death_prob[infected].get_total_sum();
-  assert(rates[5] == num_cell_types[infected] * parameters.death_infected);
+//  assert(rates[5] == num_cell_types[infected] * parameters.death_infected);
 
 
   rates[6] = parameters.birth_cancer_resistant * growth_prob[resistant].get_total_sum();
