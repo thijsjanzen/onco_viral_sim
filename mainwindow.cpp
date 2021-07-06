@@ -84,11 +84,28 @@ MainWindow::MainWindow(QWidget *parent)
     is_paused = false;
     is_running = false;
 
+
     colorz.push_back(QColor(0, 0, 255));     // normal cells
     colorz.push_back(QColor(255, 0, 0));     // cancer cells
     colorz.push_back(QColor(0, 255, 0));     // infected cells
-    colorz.push_back(QColor(255, 102, 51)); // resistant cells
+    // orange colorz.push_back(QColor(255, 102, 51)); // resistant cells
+     colorz.push_back(QColor(255, 100, 255)); // pink
     colorz.push_back(QColor(0, 0, 0));       // empty cells
+
+
+  /*  QColor norm_blue(13, 8, 135);
+    QColor cancer_red(255, 0, 15);
+    QColor virus_co(0, 205, 0);
+    QColor resist(237, 100, 100);
+
+    colorz.push_back(norm_blue);
+    colorz.push_back(cancer_red);
+    colorz.push_back(virus_co);
+    colorz.push_back(resist);
+    colorz.push_back(QColor(0, 0, 0));
+
+*/
+
 
     factor_x = 1.f;
     factor_y = 1.f;
