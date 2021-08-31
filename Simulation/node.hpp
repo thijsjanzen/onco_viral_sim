@@ -149,6 +149,7 @@ public:
   size_t pos;
   float x_;
   float y_;
+  size_t check_identifier;
 
   float inv_num_neighbors;
   float prob_normal_infected;
@@ -189,6 +190,13 @@ public:
   float calc_t_cell_added_death_rate(float t_cell_rate,
                                      float t_cell_density_scaler,
                                      float t_cell_inflection_point);
+
+  size_t get_identifier() {
+    return check_identifier;
+  }
+  void set_identifier(size_t id) {
+    check_identifier = id;
+  }
 
 };
 

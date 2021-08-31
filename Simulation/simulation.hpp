@@ -132,7 +132,7 @@ private:
 
   void change_cell_type(const size_t& pos, const cell_type& new_cell_type);
 
-  void ask_infect_neighbours(size_t depth, size_t pos);
+  void ask_infect_neighbours(size_t depth, size_t pos, size_t identifier);
 
   void update_count(cell_type old_type, cell_type new_type);
   // float calc_t_cell_death_rate(float concentration);

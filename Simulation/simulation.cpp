@@ -147,7 +147,8 @@ void simulation::implement_growth(const cell_type& parent) {
   change_cell_type(position_of_grown_cell, new_type);
 }
 
-void simulation::ask_infect_neighbours(size_t depth, size_t pos) {
+void simulation::ask_infect_neighbours(size_t depth, size_t pos,
+                                       size_t identifier) {
 
     float p = long_distance_infection_probability[depth];
 
@@ -155,25 +156,30 @@ void simulation::ask_infect_neighbours(size_t depth, size_t pos) {
 
     depth--;
     for(auto& n : world[pos].neighbors) {
-        if(n->get_cell_type() == cancer) {
-            if(rndgen.uniform() < p) {
-                change_cell_type(n->pos, infected);
-            }
-        }
-        if(n->get_cell_type() == normal) {
-             if(rndgen.uniform() < p) {
-                 if(rndgen.uniform() < n->prob_normal_infected) {
-                     change_cell_type(n->pos, infected);
-                 }
-             }
-        }
-        ask_infect_neighbours(depth, n->pos);
+
+        if (n->get_identifier() != identifier) {
+          if(n->get_cell_type() == cancer) {
+              if(rndgen.uniform() < p) {
+                  change_cell_type(n->pos, infected);
+              }
+          }
+          if(n->get_cell_type() == normal) {
+               if(rndgen.uniform() < p) {
+                   if(rndgen.uniform() < n->prob_normal_infected) {
+                       change_cell_type(n->pos, infected);
+                   }
+               }
+          }
+          n->set_identifier(identifier);
+         }
+        ask_infect_neighbours(depth, n->pos, identifier);
     }
 }
 
 void simulation::infect_long_distance(size_t pos) {
+  int identifier = rndgen.random_number(1e10);
   ask_infect_neighbours(parameters.distance_infection_upon_death,
-                        pos);
+                        pos, identifier);
 }
 
 
@@ -428,7 +434,7 @@ size_t simulation::test_pick_event(const std::array<float, 8>& v, float s) {
 }
 
 void simulation::test_ask_infect_neighbours(size_t depth, size_t pos) {
-  ask_infect_neighbours(depth, pos);
+  ask_infect_neighbours(depth, pos, 1);
 }
 
 void simulation::test_increase_t_cell_concentration(size_t pos) {

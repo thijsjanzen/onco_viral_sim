@@ -9,6 +9,7 @@
 
 BOOST_AUTO_TEST_CASE( birth_death )
 {
+
   std::cout << "testing birth and death\n";
   Param all_parameters;
   all_parameters.sq_num_cells = 100;
@@ -19,7 +20,7 @@ BOOST_AUTO_TEST_CASE( birth_death )
 
   std::vector< std::vector< voronoi_point > > filler;
 
-  Simulation.initialize_network(filler);
+  Simulation.initialize_network(filler, regular);
 
   Simulation.t = 0.f;
 
@@ -134,7 +135,7 @@ BOOST_AUTO_TEST_CASE( find_central_cell )
 
   std::vector< std::vector< voronoi_point > > filler;
 
-  Simulation.initialize_network(filler);
+  Simulation.initialize_network(filler, regular);
 
   // first we try to find the central empty cell (50, 50), coordinate: 5000
   auto index = Simulation.find_central_cell(empty);
@@ -180,7 +181,7 @@ BOOST_AUTO_TEST_CASE( add_cells )
 
   std::vector< std::vector< voronoi_point > > filler;
 
-  Simulation.initialize_network(filler);
+  Simulation.initialize_network(filler, regular);
 
   std::array<size_t, 5> cell_cnt = Simulation.count_cell_types();
   BOOST_CHECK_EQUAL(cell_cnt[normal], 0);
@@ -208,7 +209,7 @@ BOOST_AUTO_TEST_CASE( setup_types)
 
   std::vector< std::vector< voronoi_point > > filler;
 
-  Simulation.initialize_network(filler);
+  Simulation.initialize_network(filler, regular);
   std::array<size_t, 5> cell_cnt = Simulation.count_cell_types();
 
   size_t total_num_cells = all_parameters.sq_num_cells *
@@ -236,7 +237,7 @@ BOOST_AUTO_TEST_CASE( ask_infect_neighbours)
 
   std::vector< std::vector< voronoi_point > > filler;
 
-  Simulation.initialize_network(filler);
+  Simulation.initialize_network(filler, regular);
 
   size_t row_size = all_parameters.sq_num_cells;
   size_t x = 50;
@@ -340,7 +341,7 @@ BOOST_AUTO_TEST_CASE( diffuse )
   simulation Simulation(all_parameters);
   std::vector< std::vector< voronoi_point > > filler;
 
-  Simulation.initialize_network(filler);
+  Simulation.initialize_network(filler, regular);
 
   size_t x = 50;
   size_t y = 50;
@@ -403,7 +404,7 @@ BOOST_AUTO_TEST_CASE( infect_periphery )
   simulation Simulation(all_parameters);
   std::vector< std::vector< voronoi_point > > filler;
 
-  Simulation.initialize_network(filler);
+  Simulation.initialize_network(filler, regular);
 
   // create a square
   for (size_t x = 40; x < 60; ++x) {
@@ -444,7 +445,7 @@ BOOST_AUTO_TEST_CASE( infect_random)
   simulation Simulation(all_parameters);
   std::vector< std::vector< voronoi_point > > filler;
 
-  Simulation.initialize_network(filler);
+  Simulation.initialize_network(filler, regular);
 
   // create a square
   for (size_t x = 40; x < 60; ++x) {
@@ -485,7 +486,7 @@ BOOST_AUTO_TEST_CASE( infect_center )
   simulation Simulation(all_parameters);
   std::vector< std::vector< voronoi_point > > filler;
 
-  Simulation.initialize_network(filler);
+  Simulation.initialize_network(filler, regular);
 
   // create a square
   for (size_t x = 40; x < 60; ++x) {
@@ -530,7 +531,7 @@ BOOST_AUTO_TEST_CASE( infect_center_largest)
   simulation Simulation(all_parameters);
   std::vector< std::vector< voronoi_point > > filler;
 
-  Simulation.initialize_network(filler);
+  Simulation.initialize_network(filler, regular);
 
   // create two squares
   for (size_t x = 40; x < 60; ++x) {
@@ -572,7 +573,7 @@ BOOST_AUTO_TEST_CASE( infect_center_largest)
 }
 
 
-BOOST_AUTO_TEST_CASE( voronoi )
+BOOST_AUTO_TEST_CASE( voronoi_case )
 {
   std::cout << "testing voronoi\n";
   Param all_parameters;
@@ -584,7 +585,7 @@ BOOST_AUTO_TEST_CASE( voronoi )
 
   std::vector< std::vector< voronoi_point > > filler;
 
-  Simulation.initialize_network(filler);
+  Simulation.initialize_network(filler, regular);
 
   BOOST_CHECK_EQUAL(filler.size(), all_parameters.sq_num_cells *
                                    all_parameters.sq_num_cells);
@@ -607,7 +608,7 @@ BOOST_AUTO_TEST_CASE( infect_all_cancer )
   simulation Simulation(all_parameters);
   std::vector< std::vector< voronoi_point > > filler;
 
-  Simulation.initialize_network(filler);
+  Simulation.initialize_network(filler, regular);
 
   // create a square
   for (size_t x = 40; x < 60; ++x) {
@@ -650,7 +651,7 @@ BOOST_AUTO_TEST_CASE( add_infected )
   simulation Simulation(all_parameters);
   std::vector< std::vector< voronoi_point > > filler;
 
-  Simulation.initialize_network(filler);
+  Simulation.initialize_network(filler, regular);
 
   // create a square
   for (size_t x = 40; x < 60; ++x) {
@@ -694,7 +695,7 @@ BOOST_AUTO_TEST_CASE( update_one_step)
   simulation Simulation(all_parameters);
   std::vector< std::vector< voronoi_point > > filler;
 
-  Simulation.initialize_network(filler);
+  Simulation.initialize_network(filler, regular);
 
   // create a square
   for (size_t x = 40; x < 60; ++x) {
@@ -731,7 +732,7 @@ BOOST_AUTO_TEST_CASE( infect_long_distance ) {
   simulation Simulation(all_parameters);
   std::vector< std::vector< voronoi_point > > filler;
 
-  Simulation.initialize_network(filler);
+  Simulation.initialize_network(filler, regular);
 
   // create a square
   for (size_t x = 40; x < 60; ++x) {
@@ -774,7 +775,7 @@ BOOST_AUTO_TEST_CASE( obtain_equilibrium )
   simulation Simulation(all_parameters);
   std::vector< std::vector< voronoi_point > > filler;
 
-  Simulation.initialize_network(filler);
+  Simulation.initialize_network(filler, regular);
 
   Simulation.obtain_equilibrium();
 
@@ -888,7 +889,7 @@ BOOST_AUTO_TEST_CASE( set_infection )
 
   std::vector< std::vector< voronoi_point > > filler;
 
-  Simulation.initialize_network(filler);
+  Simulation.initialize_network(filler, regular);
 
   float target = 0.1f;
   Simulation.set_percent_infected(target);

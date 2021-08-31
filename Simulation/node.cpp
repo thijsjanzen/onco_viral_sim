@@ -24,6 +24,7 @@ node::node() {
   prob_normal_infected = 0.f;
   t_cell_concentration = 0.f;
   added_death_rate = 0.f;
+  check_identifier = 0;
 }
 
 void node::add_neighbor(std::vector< node >& world,

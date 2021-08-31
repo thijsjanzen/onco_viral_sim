@@ -7,7 +7,7 @@ CONFIG += c++17
 QMAKE_CXXFLAGS += -std=c++17
 # QMAKE_CXXFLAGS += "-Wno-old-style-cast"
 
-BOOST_INCLUDE_DIR="/usr/local/Cellar/boost/1.70.0/include"
+BOOST_INCLUDE_DIR="/usr/local/Cellar/boost/1.75.0_2/include"
 !isEmpty(BOOST_INCLUDE_DIR): INCLUDEPATH *= $${BOOST_INCLUDE_DIR}
 
 isEmpty(BOOST_INCLUDE_DIR): {
@@ -44,5 +44,4 @@ CONFIG(debug, debug|release) {
   QMAKE_CXXFLAGS += -fprofile-arcs -ftest-coverage
 }
 
-
-#  LIBS += -lboost_unit_test_framework
+# LIBS += -lboost_unit_test_framework
