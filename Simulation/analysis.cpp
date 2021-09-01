@@ -14,7 +14,12 @@ std::array<size_t, 5> do_analysis(Param all_parameters) {
 
   std::vector< std::vector< voronoi_point > > filler;
 
-  Simulation.initialize_network(filler, regular);
+
+  if (all_parameters.use_voronoi_grid == false) {
+    Simulation.initialize_network(filler, regular);
+  } else {
+      Simulation.initialize_network(filler, voronoi);
+  }
   std::cout << "starting simulation\n";
 
   Simulation.t = 0.f;

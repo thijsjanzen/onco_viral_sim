@@ -554,10 +554,6 @@ void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_
 
       float x, y;
 
-      if (used_grid_type == grid_type::voronoi) {
-       x = rndgen.uniform() * sq_size;
-       y = rndgen.uniform() * sq_size;
-      }
       if (used_grid_type == grid_type::hexagonal) {
           x = i % sq_size;
           y = i / sq_size;
@@ -565,12 +561,9 @@ void simulation::setup_voronoi(std::vector< std::vector< voronoi_point > >& all_
 
           x += rndgen.normal(0.0, 0.002) * sq_size;
           y += rndgen.normal(0.0, 0.002) * sq_size;
-
-        //  if ( x > sq_size) x = sq_size;
-        //  if ( y > sq_size) y = sq_size;
-        //  if ( x < 0) x = 0;
-        //  if ( y < 0) y = 0;
-
+      } else {
+          x = rndgen.uniform() * sq_size;
+          y = rndgen.uniform() * sq_size;
       }
 
       v[i] = voronoi_point(x, y);

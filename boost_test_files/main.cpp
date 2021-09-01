@@ -231,7 +231,7 @@ BOOST_AUTO_TEST_CASE( ask_infect_neighbours)
   all_parameters.use_voronoi_grid = false;
   all_parameters.start_setup = full;
   all_parameters.distance_infection_upon_death = 1.0;
-  all_parameters.prob_infection_upon_death = 100.f;
+  all_parameters.prob_infection_upon_death = 1.f;
 
   simulation Simulation(all_parameters);
 
@@ -274,6 +274,78 @@ BOOST_AUTO_TEST_CASE( ask_infect_neighbours)
     }
 
   }
+}
+
+BOOST_AUTO_TEST_CASE( ask_infect_neighbours_two)
+{
+  std::cout << "testing ask infect neighbours\n";
+  Param all_parameters;
+  all_parameters.sq_num_cells = 100;
+  all_parameters.use_voronoi_grid = false;
+  all_parameters.start_setup = full;
+  all_parameters.distance_infection_upon_death = 2.0;
+  all_parameters.prob_infection_upon_death = 1.f;
+
+  simulation Simulation(all_parameters);
+
+  std::vector< std::vector< voronoi_point > > filler;
+
+  Simulation.initialize_network(filler, regular);
+
+  size_t row_size = all_parameters.sq_num_cells;
+  size_t x = 50;
+  for(size_t y = 40; y < 61; ++y) {
+      size_t pos = y * row_size + x;
+      Simulation.test_change_cell_type(pos, cancer);
+  }
+  size_t y2 = 50;
+  for(size_t x2 = 40; x2 < 61; ++x2) {
+      size_t pos = y2 * row_size + x2;
+      Simulation.test_change_cell_type(pos, cancer);
+  }
+
+  // now we have a cross of individuals
+  size_t initial_pos = 50 * 100 + 50;
+  Simulation.test_change_cell_type(initial_pos, infected);
+  Simulation.test_ask_infect_neighbours(all_parameters.distance_infection_upon_death,
+                                        initial_pos);
+  for(size_t x = 40; x < 61; ++x) {
+    size_t pos = 50 * row_size + x;
+    int dist_x = static_cast<int>(x) - static_cast<int>(50);
+    if (dist_x < 0) dist_x *= -1;
+    if (dist_x == 0) {
+        continue;
+    }
+
+    auto ct = Simulation.world[pos].get_cell_type();
+    std::cout << x << " " << dist_x << " " << ct << "\n";
+
+    if (dist_x <= static_cast<int>(all_parameters.distance_infection_upon_death)) {
+      BOOST_CHECK_EQUAL(ct, infected);
+    } else {
+      BOOST_CHECK_EQUAL(ct, cancer);
+    }
+  }
+
+  for(size_t y = 40; y < 61; ++y) {
+    size_t pos = 50 * row_size + y;
+    int dist_y = static_cast<int>(y) - static_cast<int>(50);
+    if (dist_y < 0) dist_y *= -1;
+    if (dist_y == 0) {
+        continue;
+    }
+
+    auto ct = Simulation.world[pos].get_cell_type();
+    std::cout << y << " " << dist_y << " " << ct << "\n";
+
+    if (dist_y <= static_cast<int>(all_parameters.distance_infection_upon_death)) {
+      BOOST_CHECK_EQUAL(ct, infected);
+    } else {
+      BOOST_CHECK_EQUAL(ct, cancer);
+    }
+  }
+
+
 }
 
 BOOST_AUTO_TEST_CASE( random_stuff )
@@ -585,7 +657,8 @@ BOOST_AUTO_TEST_CASE( voronoi_case )
 
   std::vector< std::vector< voronoi_point > > filler;
 
-  Simulation.initialize_network(filler, regular);
+  Simulation.initialize_network(filler, voronoi
+                                );
 
   BOOST_CHECK_EQUAL(filler.size(), all_parameters.sq_num_cells *
                                    all_parameters.sq_num_cells);
@@ -762,6 +835,78 @@ BOOST_AUTO_TEST_CASE( infect_long_distance ) {
   }
 }
 
+
+// infect_long_distance
+BOOST_AUTO_TEST_CASE( infect_long_distance2 ) {
+  std::cout << "test infect long distance\n";
+
+  Param all_parameters;
+  all_parameters.sq_num_cells = 100;
+  all_parameters.use_voronoi_grid = false;
+  all_parameters.start_setup = empty_grid;
+  all_parameters.distance_infection_upon_death = 2.0;
+  all_parameters.prob_infection_upon_death = 1.f;
+
+  simulation Simulation(all_parameters);
+  std::vector< std::vector< voronoi_point > > filler;
+
+  Simulation.initialize_network(filler, regular);
+
+  // create a square
+  for (size_t x = 40; x < 60; ++x) {
+      for (size_t y = 40; y < 60; ++y) {
+          size_t pos = x + y * 100;
+          Simulation.test_change_cell_type(pos, cancer);
+      }
+  }
+
+  int x = 50;
+  int y = 50;
+  int central_pos = y * 100 + x;
+  //Simulation.test_change_cell_type(central_pos, infected);
+  Simulation.test_infect_long_distance(central_pos);
+
+  int relative_points[12][2] = { {-1, 0},
+                                      {1, 0},
+                                      {0, 1},
+                                      {0, -1},
+                                      {-2, 0},
+                                      {2, 0},
+                                      {0, -2},
+                                      {0, 2},
+                                      {1, 1},
+                                      { 1, -1},
+                                      {-1, 1},
+                                      {-1, -1}};
+
+  for (size_t i = 0; i < 12; ++i) {
+     int x2 = x + relative_points[i][0];
+     int y2 = y + relative_points[i][1];
+     size_t pos = y2 * 100 + x2;
+     BOOST_CHECK_EQUAL(Simulation.world[pos].get_cell_type(),
+                       infected);
+  }
+
+  int rel_points_cancer[8][2] = { {2, 1},
+                                    {2, 2},
+                                    {-2, 1},
+                                    {-2, 2},
+                                    {2, -1},
+                                    {2, -2},
+                                    {-2, -1},
+                                    {-2, -2}};
+  for (size_t i = 0; i < 8; ++i) {
+     int x2 = x + rel_points_cancer[i][0];
+     int y2 = y + rel_points_cancer[i][1];
+     size_t pos = y2 * 100 + x2;
+     BOOST_CHECK_EQUAL(Simulation.world[pos].get_cell_type(),
+                       cancer);
+  }
+
+
+
+}
+
 BOOST_AUTO_TEST_CASE( obtain_equilibrium )
 {
   std::cout << "test obtain equilibrium\n";
@@ -809,12 +954,12 @@ BOOST_AUTO_TEST_CASE( t_cells )
 
   std::array<size_t, 5> result = do_analysis(all_parameters);
   std::string outcome = get_outcome(result);
-  BOOST_CHECK_LT(result[cancer], 2000); // ERROR
 
   all_parameters.use_voronoi_grid = true;
   result = do_analysis(all_parameters);
   std::string outcome2 = get_outcome(result);
-  BOOST_CHECK_LT(result[cancer], 2000); // ERROR
+
+  BOOST_CHECK_EQUAL(outcome, outcome2); // ERROR
 }
 
 BOOST_AUTO_TEST_CASE( infect_second_time )
@@ -1057,8 +1202,8 @@ BOOST_AUTO_TEST_CASE( long_distance_infection )
   Param all_parameters;
   all_parameters.sq_num_cells = 100;
   all_parameters.use_voronoi_grid = false;
-  all_parameters.prob_infection_upon_death = 0.5f;
-  all_parameters.distance_infection_upon_death = 1.0f;
+  all_parameters.prob_infection_upon_death = 1.f;
+  all_parameters.distance_infection_upon_death = 2.0f;
 
   // GROW SETUP
   all_parameters.start_setup = full;
